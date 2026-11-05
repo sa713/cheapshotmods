@@ -39,8 +39,11 @@ export function miniIdentity(raw: unknown, token: string, now = Math.floor(Date.
   catch { throw new DomainError('INVALID_INIT_DATA',401); }
 }
 export async function oidcIdentity(token: string, nonce: string, c: Config, t: Transport, now = new Date()) {
-  const {payload}=await jwtVerify(token,t.jwks,{issuer,audience:c.clientId,algorithms:['RS256','ES256','EdDSA'],requiredClaims:['exp','iat','sub','nonce','id'],maxTokenAge:'1h',clockTolerance:0,currentDate:now});
-  requireThat(payload.nonce===nonce && typeof payload.iat==='number' && payload.iat<=now.getTime()/1000+30 && typeof payload.exp==='number' && payload.exp>payload.iat,'LOGIN_FAILED',401);
+  // Keep exp/nbf strict. jose maxTokenAge also forbids future iat, so enforce
+  // our separate [-3600,+30] issued-at policy after cryptographic validation.
+  const {payload}=await jwtVerify(token,t.jwks,{issuer,audience:c.clientId,algorithms:['RS256','ES256','EdDSA'],requiredClaims:['exp','iat','sub','nonce','id'],clockTolerance:0,currentDate:now});
+  const seconds=Math.floor(now.getTime()/1000);
+  requireThat(payload.nonce===nonce && typeof payload.iat==='number' && Number.isFinite(payload.iat) && payload.iat>=seconds-3600 && payload.iat<=seconds+30 && typeof payload.exp==='number' && payload.exp>seconds && payload.exp>payload.iat,'LOGIN_FAILED',401);
   return telegramId(payload.id);
 }
 interface Flow { state: string; nonce: string; verifier: string; expires: number }

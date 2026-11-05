@@ -55,7 +55,7 @@ test('failed commands and injected write failure roll back every part of craft',
     assert.equal((s.db.prepare('SELECT count(*) AS n FROM history').get() as {n:number}).n,0);
   }finally{s.close();}
 });
-test('competing connections use exactly one revision; quantities stay aggregated and ownership scopes keys',async()=>{
+test('sequential stale revisions across connections conflict; quantities stay aggregated and keys are scoped',async()=>{
   const dir=mkdtempSync(join(tmpdir(),'chm-'));const a=new Store(join(dir,'db')),b=new Store(join(dir,'db'));
   try {
     const id=add(a,'1000000'),initial=a.summary('111'),key=randomUUID();
@@ -65,4 +65,18 @@ test('competing connections use exactly one revision; quantities stay aggregated
     for (const owner of ['111','222']) {const s=a.summary(owner);a.command(owner,{key,revision:s.revision,experiment:s.experiment,action:{type:'level',value:owner}});}
     assert.equal(a.summary('111').level,'111');assert.equal(a.summary('222').level,'222');assert.throws(()=>b.group('222','work',id));
   }finally{a.close();b.close();rmSync(dir,{recursive:true,force:true});}
+});
+test('derived 129-digit mods remain exact, equippable, craftable and reversible',()=>{
+  const s=new Store(':memory:');try {
+    const id=add(s,'9','💚',2,'9'.repeat(128)),outputs:string[]=[];
+    for(let i=0;i<3;i++)outputs.push(command(s,{type:'craft',items:[choice(id)]}).createdId!);
+    const expected='14'+'9'.repeat(127);
+    for(const output of outputs)assert.equal(s.group('111','work',output).value,expected);
+    command(s,{type:'equip',items:[{id:outputs[0],quantity:'1'}]});
+    const result=command(s,{type:'craft',items:outputs.map((id,i)=>choice(id,'1',i===0?'1':'0'))});
+    assert.equal(s.group('111','work',result.createdId).value,'224'+'9'.repeat(126));assert.deepEqual(result.equipment,[]);
+    command(s,{type:'equip',items:[{id:result.createdId,quantity:'1'}]});command(s,{type:'level',value:'200'});
+    const undone=command(s,{type:'undo'});assert.equal(undone.level,'200');assert.deepEqual(undone.equipment,[{id:outputs[0],quantity:'1'}]);assert.equal(s.group('111','work',outputs[0]).value,expected);
+    const reset=command(s,{type:'reset'});assert.equal(reset.spent,'0');assert.equal(reset.level,'200');assert.deepEqual(reset.equipment,[]);assert.equal(s.group('111','work',id).value,'9'.repeat(128));
+  }finally{s.close();}
 });

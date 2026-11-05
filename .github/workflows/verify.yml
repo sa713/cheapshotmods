@@ -5,6 +5,9 @@ on:
     branches: [main]
 permissions:
   contents: read
+defaults:
+  run:
+    shell: bash
 jobs:
   verify:
     runs-on: ubuntu-24.04
@@ -20,6 +23,7 @@ jobs:
       - run: bash scripts/verify.sh
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: bash scripts/check-measure-pipeline.sh
       - run: npm run measure | tee capacity.txt
       - uses: actions/upload-artifact@v4
         with:

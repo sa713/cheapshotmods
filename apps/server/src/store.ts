@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { craft, integer, keys, mod, record, requireThat, stats, type Equipped, type Group } from '@chm/rules';
+import { craft, integer, inputInteger, keys, mod, record, requireThat, stats, type Equipped, type Group } from '@chm/rules';
 
 interface Player { owner: string; revision: string; level: string; experiment: string; started: number; spent: string; equipment: string }
 interface Undo { consumed: Group[]; output: Group; equipment: Equipped[]; price: string }
@@ -72,8 +72,15 @@ export class Store {
   command(owner: string, raw: unknown) {
     const c = record(raw); keys(c,['key','revision','experiment','action']);
     requireThat(typeof c.key === 'string' && /^[A-Za-z0-9_-]{16,128}$/.test(c.key), 'INVALID_KEY');
-    integer(c.revision,true); requireThat(typeof c.experiment === 'string');
+    inputInteger(c.revision,true); requireThat(typeof c.experiment === 'string');
     const a = record(c.action); requireThat(typeof a.type === 'string');
+    // Reject resource-heavy numeric fields before canonicalization or writes.
+    if (a.type==='level') inputInteger(a.value);
+    if (a.type==='original.put') { inputInteger(a.value); inputInteger(a.quantity); }
+    if ((a.type==='equip'||a.type==='craft')&&Array.isArray(a.items)) for (const raw of a.items) {
+      const item=record(raw); inputInteger(item.quantity);
+      if (a.type==='craft') inputInteger(item.worn,true);
+    }
     const payload = canonical(c);
     return this.db.transaction(()=>{
       const p = this.player(owner);
@@ -85,7 +92,7 @@ export class Store {
       switch (a.type) {
         case 'original.put': {
           keys(a,['type','id','kind','tier','value','quantity']);
-          const m = mod(a); integer(a.quantity);
+          inputInteger(a.value); inputInteger(a.quantity); const m = mod(a);
           if (a.id !== undefined) this.group(owner,'original',a.id);
           const id = a.id as string | undefined ?? randomUUID();
           const group={...m,id,quantity:a.quantity as string};
@@ -98,7 +105,7 @@ export class Store {
           this.sql("DELETE FROM groups WHERE owner=? AND scope='original' AND id=?").run(owner,a.id as string);
           if (!p.started) this.sql("DELETE FROM groups WHERE owner=? AND scope='work' AND id=?").run(owner,a.id as string);
           break;
-        case 'level': keys(a,['type','value']); integer(a.value); p.level = a.value as string; break;
+        case 'level': keys(a,['type','value']); inputInteger(a.value); p.level = a.value as string; break;
         case 'reset':
           keys(a,['type']); this.copyOriginal(owner); equipment=[]; p.spent='0'; p.started=1; p.experiment=randomUUID();
           this.sql('DELETE FROM history WHERE owner=?').run(owner); break;
@@ -106,7 +113,7 @@ export class Store {
           keys(a,['type','items']); requireThat(Array.isArray(a.items) && a.items.length <= 100, 'EQUIPMENT_LIMIT');
           const seen = new Set<string>(); let total = 0n;
           equipment = a.items.map(raw=>{
-            const e = record(raw); keys(e,['id','quantity']); const g = this.group(owner,'work',e.id), count=integer(e.quantity);
+            const e = record(raw); keys(e,['id','quantity']); const g = this.group(owner,'work',e.id), count=inputInteger(e.quantity);
             requireThat(!seen.has(g.id) && count <= integer(g.quantity), 'INSUFFICIENT_MODS');
             seen.add(g.id); total += count; return {id:g.id,quantity:count.toString()};
           });
@@ -118,7 +125,7 @@ export class Store {
           const before = structuredClone(equipment);
           for (const raw of a.items) {
             const s = record(raw); keys(s,['id','quantity','worn']);
-            const g = this.group(owner,'work',s.id), n=integer(s.quantity), worn=integer(s.worn,true);
+            const g = this.group(owner,'work',s.id), n=inputInteger(s.quantity), worn=inputInteger(s.worn,true);
             requireThat(!seen.has(g.id) && n <= 3n && worn <= n, 'INVALID_SELECTION'); seen.add(g.id);
             const e = equipment.find(e=>e.id===g.id), equipped=BigInt(e?.quantity??'0');
             requireThat(worn <= equipped && n-worn <= integer(g.quantity)-equipped, 'INSUFFICIENT_MODS');

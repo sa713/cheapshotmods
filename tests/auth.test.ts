@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {generateKeyPair,exportJWK,createLocalJWKSet,SignJWT} from 'jose';
+import {generateKeyPair,exportJWK,createLocalJWKSet,SignJWT,jwtVerify} from 'jose';
 import {app} from '../apps/server/src/app.js';
 import {Auth,miniIdentity,oidcIdentity,issuer,sha256,type Transport} from '../apps/server/src/auth.js';
 import {Store} from '../apps/server/src/store.js';
@@ -25,6 +25,17 @@ test('Mini App signature, duplicate fields, missing identity and exact time boun
   const tampered=new URLSearchParams(initData(111,now));tampered.set('user',JSON.stringify({id:222}));assert.throws(()=>miniIdentity(tampered.toString(),config.botToken!,now));
   const missing=new URLSearchParams(initData(111,now));missing.delete('user');assert.throws(()=>miniIdentity(missing.toString(),config.botToken!,now));
   const badHash=new URLSearchParams(initData(111,now));badHash.set('hash','0'.repeat(64));assert.throws(()=>miniIdentity(badHash.toString(),config.botToken!,now));
+});
+test('issued-at skew is independent of strict expiry/not-before and one-hour age',async()=>{
+  const seconds=1900000000,now=new Date(seconds*1000),remote:Transport={jwks,exchange:async()=>{throw new Error('unused');}};
+  const future=await token('nonce',{iat:seconds+5,exp:seconds+600});
+  // Reproduce D1 with the actual pinned dependency before asserting our policy.
+  await assert.rejects(()=>jwtVerify(future,jwks,{issuer,audience:config.clientId,maxTokenAge:'1h',clockTolerance:0,currentDate:now}),/iat/);
+  for (const delta of [-3600,0,5,30]) assert.equal(await oidcIdentity(await token('nonce',{iat:seconds+delta,exp:seconds+600}),'nonce',config,remote,now),'111');
+  for (const claims of [{iat:seconds-3601,exp:seconds+600},{iat:seconds+31,exp:seconds+600},{iat:seconds-1,exp:seconds},{iat:seconds-2,exp:seconds-1},{iat:seconds+30,exp:seconds+20},{iat:seconds,exp:seconds+600,nbf:seconds+1}]) {
+    await assert.rejects(()=>token('nonce',claims).then(t=>oidcIdentity(t,'nonce',config,remote,now)));
+  }
+  assert.equal(await oidcIdentity(await token('nonce',{iat:seconds,exp:seconds+600,nbf:seconds}),'nonce',config,remote,now),'111');
 });
 test('OIDC callback binds session/state/nonce and PKCE; rotates session and shares Mini App aggregate',async()=>{
   const s=new Store(':memory:');let expectedChallenge='',nonce='',exchanges=0;

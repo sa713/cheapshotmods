@@ -16,8 +16,10 @@ export async function app(store: Store, config: Config, remote?: Transport) {
     return payload;
   });
   f.setErrorHandler((e,_req,reply)=>{
-    const status=e instanceof DomainError ? e.status : e && typeof e==='object' && 'statusCode' in e && e.statusCode===413 ? 413 : 500;
-    reply.code(status).send({error:e instanceof DomainError ? e.code : status===413?'REQUEST_TOO_LARGE':'SERVER_ERROR'});
+    const clientStatus=e && typeof e==='object' && 'statusCode' in e && typeof e.statusCode==='number' && Number.isInteger(e.statusCode) && e.statusCode>=400 && e.statusCode<500 ? e.statusCode : undefined;
+    const status=e instanceof DomainError ? e.status : clientStatus??500;
+    const publicCode=status===413?'REQUEST_TOO_LARGE':status===415?'UNSUPPORTED_MEDIA_TYPE':status<500?'INVALID_REQUEST':'SERVER_ERROR';
+    reply.code(status).send({error:e instanceof DomainError ? e.code : publicCode});
   });
   function setSession(reply: import('fastify').FastifyReply, raw: string) {
     reply.setCookie('chm_session',raw,{path:'/',httpOnly:true,secure,sameSite:'lax',maxAge:43200});

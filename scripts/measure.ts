@@ -13,7 +13,7 @@ const command=(action:Record<string,unknown>)=>{const s=store.summary('111');ret
 try {
   command({type:'reset'});const start=performance.now();
   store.db.transaction(()=>{for(let i=1;i<=10000;i++)command({type:'original.put',kind:'💚',tier:2,value:String(i),quantity:'1'});}).immediate();
-  const insertMs=performance.now()-start;
+  const batchSetupMs=performance.now()-start;
   const million=command({type:'original.put',kind:'🅾',tier:1,value:'10',quantity:'1000000'}).createdId!;
   const huge=command({type:'original.put',kind:'💚',tier:6,value:'9007199254740993',quantity:'9007199254740993'}).createdId!;
   const resetStart=performance.now();command({type:'reset'});const resetMs=performance.now()-resetStart;
@@ -25,6 +25,15 @@ try {
   const results=await Promise.all(Array.from({length:10},()=>server.inject({method:'POST',url:'/api/commands',headers:{origin:config.baseUrl,'x-csrf-token':session.csrf},cookies:{chm_session:session.raw},payload:{key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'craft',items:[{id:million,quantity:'3',worn:'0'}]}}})));
   const concurrentMs=performance.now()-concurrentStart;
   assert.equal(results.filter(r=>r.statusCode===200).length,1);assert.equal(results.filter(r=>r.statusCode===409).length,9);
+  const address=await server.listen({host:'127.0.0.1',port:0}),headers={origin:config.baseUrl,'x-csrf-token':session.csrf,cookie:'chm_session='+session.raw,'content-type':'application/json'};
+  const sampleSize=100,durations:number[]=[];let latest=store.summary('111');
+  for(let i=0;i<sampleSize;i++) {
+    const began=performance.now();
+    const r=await fetch(address+'/api/commands',{method:'POST',headers,body:JSON.stringify({key:randomUUID(),revision:latest.revision,experiment:latest.experiment,action:{type:'level',value:String(i+1)}})});
+    assert.equal(r.status,200);latest=await r.json() as ReturnType<Store['summary']>;durations.push(performance.now()-began);
+  }
+  const oversizedStart=performance.now(),oversized=await fetch(address+'/api/commands',{method:'POST',headers,body:JSON.stringify({key:randomUUID(),revision:latest.revision,experiment:latest.experiment,action:{type:'level',value:'9'.repeat(1000000)}})});
+  assert.equal(oversized.status,400);assert.equal((await oversized.json() as {error:string}).error,'INTEGER_TOO_LONG');const oversizedRejectMs=performance.now()-oversizedStart;
   const bytes=statSync(path).size+(existsSync(path+'-wal')?statSync(path+'-wal').size:0);
-  console.log(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,cpu:cpus()[0]?.model,logicalCpus:cpus().length,hostMemoryMiB:Math.round(totalmem()/1048576),dataset:{distinctGroups:10000,millionGroup:'1000000',exactQuantity:'9007199254740993'},insertMs,resetMs,paginatedLoadMs:loadMs,tenConcurrentHttpMs:concurrentMs,dbAndWalBytes:bytes,rssMiB:process.memoryUsage().rss/1048576,peakRssMiB:process.resourceUsage().maxRSS/1024},null,2));
+  console.log(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,cpu:cpus()[0]?.model,logicalCpus:cpus().length,hostMemoryMiB:Math.round(totalmem()/1048576),dataset:{distinctGroups:10000,millionGroup:'1000000',exactQuantity:'9007199254740993'},batchSetup:{groups:10000,outerTransaction:true,elapsedMs:batchSetupMs},sequentialHttp:{sampleSize,commitPerRequest:true,totalMs:durations.reduce((a,b)=>a+b,0),p95Ms:[...durations].sort((a,b)=>a-b)[Math.ceil(sampleSize*0.95)-1]},oversizedInteger:{digits:1000000,rejectMs:oversizedRejectMs},resetMs,paginatedLoadMs:loadMs,tenSameRevisionInjectedRequestsMs:concurrentMs,dbAndWalBytes:bytes,rssMiB:process.memoryUsage().rss/1048576,peakRssMiB:process.resourceUsage().maxRSS/1024},null,2));
 }finally{await server.close();store.close();rmSync(dir,{recursive:true,force:true});}

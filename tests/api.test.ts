@@ -86,3 +86,38 @@ test('missing configuration, safe errors, database failure and readiness',async(
     s.close();assert.equal((await f.inject('/health')).statusCode,503);
   }finally{await f.close();if(s.db.open)s.close();}
 });
+test('Fastify parser errors retain safe 4xx and never mutate saved state',async()=>{
+  const s=new Store(':memory:'),f=await app(s,config),session=new Auth(s,config).create('111');
+  const headers={origin:config.baseUrl,'x-csrf-token':session.csrf},cookies={chm_session:session.raw};
+  try {
+    const before=s.summary('111');
+    for (const [type,body,status,error] of [
+      ['application/json','{',400,'INVALID_REQUEST'],
+      ['application/xml','<command/>',415,'UNSUPPORTED_MEDIA_TYPE'],
+      ['text/plain','not-a-command',400,'INVALID_COMMAND']
+    ] as const) {
+      const r=await f.inject({method:'POST',url:'/api/commands',cookies,headers:{...headers,'content-type':type},payload:body});
+      assert.equal(r.statusCode,status);assert.deepEqual(r.json(),{error});assert.deepEqual(s.summary('111'),before);
+    }
+    assert.equal((s.db.prepare('SELECT count(*) AS n FROM commands').get() as {n:number}).n,0);
+  } finally {await f.close();s.close();}
+});
+test('untrusted numeric fields are bounded before conversion; oversized request leaves both players usable',async()=>{
+  const s=new Store(':memory:'),f=await app(s,config),session=new Auth(s,config).create('111');
+  const headers={origin:config.baseUrl,'x-csrf-token':session.csrf},cookies={chm_session:session.raw};
+  const envelope=(action:Record<string,unknown>,revision=s.summary('111').revision)=>({key:randomUUID(),revision,experiment:s.summary('111').experiment,action});
+  try {
+    const accepted=await f.inject({method:'POST',url:'/api/commands',cookies,headers,payload:envelope({type:'level',value:'9'.repeat(128)})});assert.equal(accepted.statusCode,200);
+    const created=await f.inject({method:'POST',url:'/api/commands',cookies,headers,payload:envelope({type:'original.put',kind:'💚',tier:2,value:'9'.repeat(128),quantity:'9'.repeat(128)})});assert.equal(created.statusCode,200);
+    const id=created.json().createdId,before=s.summary('111'),count=(s.db.prepare('SELECT count(*) AS n FROM commands').get() as {n:number}).n,over='9'.repeat(129);
+    const cases=[envelope({type:'level',value:over}),envelope({type:'level',value:'2'},over),envelope({type:'original.put',kind:'💚',tier:2,value:over,quantity:'1'}),envelope({type:'original.put',kind:'💚',tier:2,value:'1',quantity:over}),envelope({type:'equip',items:[{id,quantity:over}]}),envelope({type:'craft',items:[{id,quantity:'3',worn:over}]}),envelope({type:'level',value:'9'.repeat(1000000)})];
+    for (const payload of cases) {
+      assert.ok(Buffer.byteLength(JSON.stringify(payload))<1024*1024);
+      const r=await f.inject({method:'POST',url:'/api/commands',cookies,headers,payload});assert.equal(r.statusCode,400);assert.deepEqual(r.json(),{error:'INTEGER_TOO_LONG'});assert.deepEqual(s.summary('111'),before);
+      assert.equal((s.db.prepare('SELECT count(*) AS n FROM commands').get() as {n:number}).n,count);
+    }
+    const other=new Auth(s,config).create('222'),state=s.summary('222');
+    const r=await f.inject({method:'POST',url:'/api/commands',cookies:{chm_session:other.raw},headers:{origin:config.baseUrl,'x-csrf-token':other.csrf},payload:{key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'level',value:'200'}}});
+    assert.equal(r.statusCode,200);assert.equal(r.json().level,'200');
+  } finally {await f.close();s.close();}
+});

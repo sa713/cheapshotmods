@@ -10,6 +10,14 @@ export function integer(value: unknown, zero = false): bigint {
   requireThat(typeof value === 'string' && (zero ? /^(0|[1-9][0-9]*)$/ : /^[1-9][0-9]*$/).test(value), 'INVALID_INTEGER');
   return BigInt(value);
 }
+// Only untrusted command fields use this size bound. Derived valid game
+// values may grow past it and continue to use the exact integer() helper.
+export const MAX_INPUT_INTEGER_DIGITS = 128;
+export function inputInteger(value: unknown, zero = false): bigint {
+  requireThat(typeof value === 'string', 'INVALID_INTEGER');
+  requireThat(value.length <= MAX_INPUT_INTEGER_DIGITS, 'INTEGER_TOO_LONG');
+  return integer(value, zero);
+}
 export function record(value: unknown): Record<string, unknown> {
   requireThat(value && typeof value === 'object' && !Array.isArray(value));
   return value as Record<string, unknown>;
