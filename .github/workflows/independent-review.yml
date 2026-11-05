@@ -1,0 +1,102 @@
+name: TASK-001 independent review
+on:
+  pull_request:
+    paths:
+      - .review/**
+      - .github/workflows/independent-review.yml
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+env:
+  REVIEW_TARGET_SHA: 654f90cb6c7c4b0919112065fef084d5c5a0581a
+jobs:
+  independent-verify:
+    if: startsWith(github.head_ref, 'review/task001-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: diagnostic
+      - uses: actions/checkout@v4
+        with:
+          ref: 654f90cb6c7c4b0919112065fef084d5c5a0581a
+          path: target
+      - name: Check immutable source
+        working-directory: target
+        run: |
+          test "$(git rev-parse HEAD)" = "$REVIEW_TARGET_SHA"
+          git diff --exit-code
+          node --version
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: target/.nvmrc
+          cache: npm
+          cache-dependency-path: target/package-lock.json
+      - run: npm install --global npm@11.9.0
+      - name: Independent clean verify
+        working-directory: target
+        run: bash scripts/verify.sh | tee ../independent-verify.log
+      - name: Independent browser smoke
+        working-directory: target
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:browser | tee ../independent-browser.log
+      - name: Independent diagnostic scenarios
+        working-directory: target
+        run: |
+          cp ../diagnostic/.review/independent.test.ts.txt .reviewer-independent.test.ts
+          node --import tsx --test --test-timeout=60000 .reviewer-independent.test.ts | tee ../independent-scenarios.log
+          rm .reviewer-independent.test.ts
+          git diff --exit-code
+      - name: Independent capacity sample
+        working-directory: target
+        run: npm run measure | tee ../independent-capacity.log
+      - name: Verify deliberate failed assertion is not suppressed
+        run: |
+          cp -a target verify-negative
+          cd verify-negative
+          cat > tests/reviewer-negative.test.ts <<'TS'
+          import {test} from 'node:test';
+          import assert from 'node:assert/strict';
+          test('reviewer deliberate assertion failure',()=>{assert.equal(1,2);});
+          TS
+          set +e
+          bash scripts/verify.sh > ../independent-negative-verify.log 2>&1
+          status=$?
+          set -e
+          cat ../independent-negative-verify.log
+          test "$status" -ne 0
+          grep -q 'not ok.*reviewer deliberate assertion failure' ../independent-negative-verify.log
+          echo "deliberate assertion verified: exit=$status"
+      - name: Preserve checked source
+        working-directory: target
+        run: |
+          test "$(git rev-parse HEAD)" = "$REVIEW_TARGET_SHA"
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-review-logs
+          path: independent-*.log
+  independent-container:
+    if: startsWith(github.head_ref, 'review/task001-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 654f90cb6c7c4b0919112065fef084d5c5a0581a
+      - name: Independent original container smoke
+        run: |
+          test "$(git rev-parse HEAD)" = "$REVIEW_TARGET_SHA"
+          BUILD_SHA="$REVIEW_TARGET_SHA" bash scripts/container-smoke.sh | tee independent-container.log
+          git diff --exit-code
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-container-log
+          path: independent-container.log

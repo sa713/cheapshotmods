@@ -1,0 +1,176 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {createHmac,randomUUID} from 'node:crypto';
+import {mkdtempSync,mkdirSync,readFileSync,rmSync,statSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawn,spawnSync} from 'node:child_process';
+import {createServer} from 'node:net';
+import {once} from 'node:events';
+import {generateKeyPair,exportJWK,createLocalJWKSet,SignJWT} from 'jose';
+import {app} from './apps/server/src/app.js';
+import {Store} from './apps/server/src/store.js';
+import {oidcIdentity,issuer,type Config,type Transport} from './apps/server/src/auth.js';
+
+const cfg:Config={baseUrl:'http://reviewer.local',sessionSecret:'reviewer-isolated-session-secret-32-characters',botToken:'reviewer-synthetic-bot-token',clientId:'reviewer-client',clientSecret:'reviewer-synthetic-client-secret',version:process.env.REVIEW_TARGET_SHA??'b'.repeat(40)};
+function miniData(id='713001') {
+  const p=new URLSearchParams({auth_date:String(Math.floor(Date.now()/1000)),user:JSON.stringify({id,first_name:'Independent fixture'}),query_id:randomUUID()});
+  const text=[...p.entries()].sort(([a],[b])=>a<b?-1:a>b?1:0).map(([k,v])=>k+'='+v).join('\n');
+  const secret=createHmac('sha256','WebAppData').update(cfg.botToken!).digest();
+  p.set('hash',createHmac('sha256',secret).update(text).digest('hex'));return p.toString();
+}
+async function jsonRequest(address:string,path:string,headers:Record<string,string>={},body?:unknown) {
+  const r=await fetch(address+path,{headers,method:body===undefined?'GET':'POST',...(body===undefined?{}:{body:JSON.stringify(body)})});
+  const text=await r.text();return {status:r.status,text,data:JSON.parse(text),headers:r.headers};
+}
+async function login(address:string,id='713001') {
+  const r=await jsonRequest(address,'/auth/mini',{'content-type':'application/json',origin:cfg.baseUrl},{initData:miniData(id)});
+  assert.equal(r.status,200,r.text);return {cookie:r.headers.get('set-cookie')!.split(';')[0]!,origin:cfg.baseUrl,'x-csrf-token':r.data.csrf,'content-type':'application/json'};
+}
+async function command(address:string,headers:Record<string,string>,action:unknown) {
+  const s=await jsonRequest(address,'/api/state',headers);assert.equal(s.status,200);
+  const r=await jsonRequest(address,'/api/commands',headers,{key:randomUUID(),revision:s.data.revision,experiment:s.data.experiment,action});
+  assert.equal(r.status,200,r.text);return r.data;
+}
+function snapshot(s:Store) {
+  return ['players','groups','history','commands'].map(t=>s.db.prepare('SELECT * FROM '+t+' ORDER BY rowid').all());
+}
+
+test('independent OIDC cryptographic and time boundary matrix',async()=>{
+  const now=1900000000,pair=await generateKeyPair('RS256'),jwks=createLocalJWKSet({keys:[{...await exportJWK(pair.publicKey),alg:'RS256',kid:'reviewer'}]});
+  const remote:Transport={jwks,exchange:async()=>{throw new Error('not used');}};
+  const signed=(extra:Record<string,unknown>={})=>new SignJWT({iss:issuer,aud:cfg.clientId,sub:'distinct-sub',id:'713001',iat:now,exp:now+600,nonce:'n',...extra}).setProtectedHeader({alg:'RS256',kid:'reviewer'}).sign(pair.privateKey);
+  for(const delta of [-3600,0,5,30]) assert.equal(await oidcIdentity(await signed({iat:now+delta}),'n',cfg,remote,new Date(now*1000)),'713001');
+  for(const extra of [{iat:now+31},{iat:now-3601},{exp:now},{exp:now-1},{iat:now+5,exp:now+5},{nbf:now+1},{nonce:'other'},{iss:'https://evil.invalid'},{aud:'other'},{id:undefined},{nonce:undefined}]) {
+    await assert.rejects(()=>signed(extra).then(t=>oidcIdentity(t,'n',cfg,remote,new Date(now*1000))),JSON.stringify(extra));
+  }
+  assert.equal(await oidcIdentity(await signed({nbf:now}),'n',cfg,remote,new Date(now*1000)),'713001');
+  const badPair=await generateKeyPair('RS256');
+  const bad=await new SignJWT({iss:issuer,aud:cfg.clientId,sub:'s',id:'713001',iat:now,exp:now+600,nonce:'n'}).setProtectedHeader({alg:'RS256',kid:'reviewer'}).sign(badPair.privateKey);
+  await assert.rejects(()=>oidcIdentity(bad,'n',cfg,remote,new Date(now*1000)));
+});
+
+test('independent real HTTP parser/domain errors and database failure preserve all state',async()=>{
+  const s=new Store(':memory:'),f=await app(s,cfg);const address=await f.listen({host:'127.0.0.1',port:0});
+  try {
+    const h=await login(address),alien=await login(address,'713002');
+    const added=await command(address,h,{type:'original.put',kind:'🅾',tier:1,value:'10',quantity:'6'});
+    const state=(await jsonRequest(address,'/api/state',h)).data;
+    const envelope={key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'level',value:'200'}};
+    for(const [content,body,status] of [['application/json','{"fixture-secret":',400],['application/xml','<fixture-secret/>',415],['text/plain','fixture-secret',400]] as const) {
+      const before=snapshot(s);const r=await fetch(address+'/api/commands',{method:'POST',headers:{...h,'content-type':content},body});
+      assert.equal(r.status,status);const text=await r.text();assert.deepEqual(Object.keys(JSON.parse(text)),['error']);assert.ok(!text.includes('fixture-secret'));assert.deepEqual(snapshot(s),before);
+    }
+    const cases=[
+      {headers:{'content-type':'application/json'},body:envelope,status:401},
+      {headers:{...h,origin:'https://evil.invalid'},body:envelope,status:403},
+      {headers:{...h,'x-csrf-token':'wrong'},body:envelope,status:403},
+      {headers:alien,body:{...envelope,revision:'0',experiment:(await jsonRequest(address,'/api/state',alien)).data.experiment,action:{type:'original.delete',id:added.createdId}},status:404},
+      {headers:h,body:{...envelope,revision:'0'},status:409}
+    ];
+    for(const c of cases) {const before=snapshot(s);const r=await jsonRequest(address,'/api/commands',c.headers,c.body);assert.equal(r.status,c.status,r.text);assert.deepEqual(snapshot(s),before);}
+    const before=snapshot(s);const big=await jsonRequest(address,'/api/commands',h,{pad:'x'.repeat(1024*1024)});assert.equal(big.status,413);assert.equal(big.data.error,'REQUEST_TOO_LARGE');assert.deepEqual(snapshot(s),before);
+    s.db.exec("CREATE TRIGGER reviewer_fail BEFORE UPDATE ON players BEGIN SELECT RAISE(ABORT,'reviewer-secret'); END;");
+    const failed=await jsonRequest(address,'/api/commands',h,envelope);assert.equal(failed.status,500);assert.deepEqual(failed.data,{error:'SERVER_ERROR'});assert.deepEqual(snapshot(s),before);
+  } finally {await f.close();s.close();}
+});
+
+test('independent real HTTP 128 digit boundary, million digit rejection, exact 129 digit craft lifecycle',async()=>{
+  const s=new Store(':memory:'),f=await app(s,cfg),address=await f.listen({host:'127.0.0.1',port:0});
+  try {
+    const h=await login(address),other=await login(address,'713002'),huge='9'.repeat(128),tooLong='9'.repeat(129);
+    const initial=await command(address,h,{type:'original.put',kind:'💚',tier:1,value:huge,quantity:'9'});
+    const hugeQuantity=await command(address,h,{type:'original.put',kind:'🧿',tier:6,value:'9007199254740993',quantity:huge});
+    const normal=await command(address,h,{type:'level',value:'9007199254740993'});
+    const state=(await jsonRequest(address,'/api/state',h)).data;
+    const base={key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'level',value:'200'}};
+    const inputs=[
+      {...base,revision:tooLong},
+      {...base,action:{type:'level',value:tooLong}},
+      {...base,action:{type:'level',value:'9'.repeat(1000000)}},
+      {...base,action:{type:'original.put',kind:'💚',tier:1,value:tooLong,quantity:'1'}},
+      {...base,action:{type:'original.put',kind:'💚',tier:1,value:'1',quantity:tooLong}},
+      {...base,action:{type:'equip',items:[{id:initial.createdId,quantity:tooLong}]}},
+      {...base,action:{type:'craft',items:[{id:initial.createdId,quantity:tooLong,worn:'0'}]}},
+      {...base,action:{type:'craft',items:[{id:initial.createdId,quantity:'3',worn:tooLong}]}}
+    ];
+    for(const input of inputs) {
+      const before=snapshot(s);assert.ok(Buffer.byteLength(JSON.stringify(input))<1024*1024);
+      const r=await jsonRequest(address,'/api/commands',h,input);assert.equal(r.status,400,r.text);assert.equal(r.data.error,'INTEGER_TOO_LONG');assert.deepEqual(snapshot(s),before);
+    }
+    await command(address,other,{type:'level',value:'101'});
+    await command(address,h,{type:'level',value:huge});assert.equal((await jsonRequest(address,'/api/state',h)).data.level,huge);
+    await command(address,h,{type:'level',value:normal.level});
+    const crafted=[];
+    for(let i=0;i<3;i++) crafted.push(await command(address,h,{type:'craft',items:[{id:initial.createdId,quantity:'3',worn:'0'}]}));
+    const v=((BigInt(huge)*3n+1n)/2n).toString();assert.equal(v.length,129);
+    const work=(await jsonRequest(address,'/api/inventory?scope=work',h)).data.items;
+    for(const c of crafted) {assert.equal(work.find((g:{id:string})=>g.id===c.createdId).value,v);}
+    assert.equal(work.find((g:{id:string})=>g.id===hugeQuantity.createdId).quantity,huge);
+    const equipped=await command(address,h,{type:'equip',items:[{id:crafted[0].createdId,quantity:'1'}]});
+    assert.equal(equipped.stats.health,((BigInt(normal.level)*(100n+BigInt(v))+99n)/100n).toString());
+    const next=await command(address,h,{type:'craft',items:crafted.map((c,i)=>({id:c.createdId,quantity:'1',worn:i===0?'1':'0'}))});
+    const nextV=((BigInt(v)*3n+1n)/2n).toString();assert.deepEqual(next.equipment,[]);assert.equal(next.lastCraft.output.value,nextV);assert.equal(next.spent,'324');
+    await command(address,h,{type:'equip',items:[{id:next.createdId,quantity:'1'}]});
+    const undone=await command(address,h,{type:'undo'});assert.equal(undone.spent,'162');assert.deepEqual(undone.equipment,[{id:crafted[0].createdId,quantity:'1'}]);
+    assert.equal(undone.stats.health,equipped.stats.health);
+    const reset=await command(address,h,{type:'reset'});assert.equal(reset.spent,'0');assert.equal(reset.lastCraft,null);assert.deepEqual(reset.equipment,[]);assert.equal(reset.level,'9007199254740993');
+    const restored=(await jsonRequest(address,'/api/inventory?scope=work',h)).data.items;assert.equal(restored.find((g:{id:string})=>g.id===initial.createdId).quantity,'9');assert.equal(restored.find((g:{id:string})=>g.id===initial.createdId).value,huge);
+  } finally {await f.close();s.close();}
+});
+
+test('independent simultaneous OS processes use two real SQLite connections and one revision',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'reviewer-race-')),path=join(dir,'db.sqlite');let s=new Store(path);const children:ReturnType<typeof spawn>[]=[];
+  try {
+    const state=s.summary('713001');const put=s.command('713001',{key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'original.put',kind:'🅾',tier:1,value:'10',quantity:'6'}});
+    const initial=s.summary('713001');s.close();
+    const source="import {Store} from './apps/server/dist/store.js'; const s=new Store(process.argv[1]); process.stdout.write('READY\\n'); process.stdin.once('data',()=>{try {const r=s.command('713001',JSON.parse(process.argv[2])); console.log(JSON.stringify({ok:true,result:r}));} catch(e){console.log(JSON.stringify({ok:false,code:e.code,message:e.message}));} finally{s.close();process.stdin.destroy();}});";
+    const launches=Array.from({length:2},()=>new Promise<{child:ReturnType<typeof spawn>;result:Promise<unknown>}>((resolveReady,reject)=>{
+      const envelope={key:randomUUID(),revision:initial.revision,experiment:initial.experiment,action:{type:'craft',items:[{id:put.createdId,quantity:'3',worn:'0'}]}};
+      const child=spawn(process.execPath,['--input-type=module','-e',source,path,JSON.stringify(envelope)],{cwd:process.cwd(),stdio:['pipe','pipe','pipe']});children.push(child);let out='',err='';let ready=false;
+      let resolveResult:(v:unknown)=>void,rejectResult:(e:Error)=>void;const result=new Promise((resolve,reject)=>{resolveResult=resolve;rejectResult=reject;});
+      child.stdout!.on('data',b=>{out+=String(b);if(!ready&&out.includes('READY\n')) {ready=true;resolveReady({child,result});}});child.stderr!.on('data',b=>{err+=String(b);});child.on('error',reject);
+      child.on('exit',code=>{if(code!==0||!ready){const e=new Error('child '+code+' '+err);reject(e);rejectResult(e);}else {try{resolveResult(JSON.parse(out.trim().split('\n').at(-1)!));}catch(e){rejectResult(e as Error);}}});
+    }));
+    const pair=await Promise.all(launches);for(const p of pair)p.child.stdin!.write('GO\n');
+    const replies=await Promise.all(pair.map(p=>p.result)) as {ok:boolean;code?:string}[];assert.equal(replies.filter(r=>r.ok).length,1);assert.deepEqual(replies.filter(r=>!r.ok).map(r=>r.code),['REVISION_CONFLICT']);
+    s=new Store(path);assert.equal(s.summary('713001').revision,(BigInt(initial.revision)+1n).toString());assert.equal(s.summary('713001').spent,'84');assert.equal(s.group('713001','work',put.createdId).quantity,'3');assert.equal(s.inventory('713001','work').length,2);assert.equal((s.db.prepare('SELECT count(*) n FROM history').get() as {n:number}).n,1);
+    assert.equal((s.db.prepare('SELECT count(*) n FROM commands').get() as {n:number}).n,2);
+  } finally {for(const c of children)if(c.exitCode===null)c.kill();if(s.db.open)s.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('independent backup mode, existing target protection, restored process real HTTP undo/craft',async()=>{
+  const dir=mkdtempSync(join(tmpdir(),'reviewer-backup-')),source=join(dir,'source.sqlite'),existingDir=join(dir,'existing'),target=join(existingDir,'nested','snapshot.sqlite');
+  mkdirSync(existingDir,{mode:0o755});mkdirSync(join(existingDir,'nested'),{mode:0o700});const originalMode=statSync(existingDir).mode&0o777;
+  const s=new Store(source),f=await app(s,cfg);let child:ReturnType<typeof spawn>|undefined;
+  try {
+    const address=await f.listen({host:'127.0.0.1',port:0}),h=await login(address);
+    const added=await command(address,h,{type:'original.put',kind:'🅾',tier:1,value:'10',quantity:'6'});
+    await command(address,h,{type:'level',value:'9007199254740993'});await command(address,h,{type:'equip',items:[{id:added.createdId,quantity:'3'}]});await command(address,h,{type:'craft',items:[{id:added.createdId,quantity:'3',worn:'3'}]});
+    const expected={state:(await jsonRequest(address,'/api/state',h)).data,original:(await jsonRequest(address,'/api/inventory?scope=original',h)).data,work:(await jsonRequest(address,'/api/inventory?scope=work',h)).data};
+    const code="process.umask(0o022); process.argv=[process.argv[0],process.argv[1],process.argv[1],process.argv[2]]; await import('./apps/server/dist/backup.js');";
+    const backup=spawnSync(process.execPath,['--input-type=module','-e',code,source,target],{cwd:process.cwd(),encoding:'utf8'});assert.equal(backup.status,0,backup.stderr);
+    assert.equal(statSync(target).mode&0o777,0o600);assert.equal(statSync(join(existingDir,'nested')).mode&0o777,0o700);assert.equal(statSync(existingDir).mode&0o777,originalMode);
+    const before=readFileSync(target);const again=spawnSync(process.execPath,['--input-type=module','-e',code,source,target],{cwd:process.cwd(),encoding:'utf8'});assert.notEqual(again.status,0);assert.deepEqual(readFileSync(target),before);
+    await f.close();s.close();
+    const socket=createServer();socket.listen(0,'127.0.0.1');await once(socket,'listening');const port=(socket.address() as {port:number}).port;await new Promise<void>((resolve,reject)=>socket.close(e=>e?reject(e):resolve()));
+    const restored='http://127.0.0.1:'+port;let err='';
+    child=spawn(process.execPath,['apps/server/dist/main.js'],{cwd:process.cwd(),env:{...process.env,NODE_ENV:'test',DATABASE_PATH:target,PORT:String(port),PUBLIC_BASE_URL:cfg.baseUrl,SESSION_SECRET:cfg.sessionSecret,TELEGRAM_BOT_TOKEN:cfg.botToken,TELEGRAM_OIDC_CLIENT_ID:'',TELEGRAM_OIDC_CLIENT_SECRET:'',BUILD_SHA:cfg.version},stdio:['ignore','ignore','pipe']});child.stderr!.on('data',b=>{err+=String(b);});
+    let healthy=false;for(let i=0;i<100;i++){try{const r=await jsonRequest(restored,'/health');if(r.status===200){healthy=true;break;}}catch{}if(child.exitCode!==null)throw new Error('restored process exited '+err);await new Promise(r=>setTimeout(r,50));}assert.ok(healthy,'restored process not ready '+err);
+    assert.equal((await jsonRequest(restored,'/version')).data.version,cfg.version);
+    assert.deepEqual({state:(await jsonRequest(restored,'/api/state',h)).data,original:(await jsonRequest(restored,'/api/inventory?scope=original',h)).data,work:(await jsonRequest(restored,'/api/inventory?scope=work',h)).data},expected);
+    const undone=await command(restored,h,{type:'undo'});assert.equal(undone.spent,'0');assert.equal(undone.level,'9007199254740993');assert.deepEqual(undone.equipment,[{id:added.createdId,quantity:'3'}]);
+    const crafted=await command(restored,h,{type:'craft',items:[{id:added.createdId,quantity:'3',worn:'3'}]});assert.equal(crafted.spent,'84');assert.deepEqual(crafted.equipment,[]);
+  } finally {if(child&&child.exitCode===null){child.kill('SIGTERM');await once(child,'exit');}await f.close();if(s.db.open)s.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('independent pipeline failure uses explicit bash pipefail and the checked-in measure pipeline',()=>{
+  const workflow=readFileSync('.github/workflows/verify.yml','utf8');
+  assert.match(workflow,/shell:\s*bash/,'workflow needs explicit bash pipefail semantics');
+  const pipeline=workflow.split('\n').map(l=>l.trim()).find(l=>l.startsWith('- run: npm run measure |'))?.slice('- run: '.length);assert.ok(pipeline,'measure pipeline exists');
+  const dir=mkdtempSync(join(tmpdir(),'reviewer-pipe-'));
+  try {
+    writeFileSync(join(dir,'npm'),'#!/usr/bin/env bash\necho reviewer-deliberate-measure-failure >&2\nexit 42\n',{mode:0o755});
+    const r=spawnSync('bash',['--noprofile','--norc','-e','-o','pipefail','-c',pipeline],{cwd:dir,env:{...process.env,PATH:dir+':'+process.env.PATH},encoding:'utf8'});assert.equal(r.status,42);assert.match(r.stderr,/reviewer-deliberate-measure-failure/);console.log(JSON.stringify({pipeline,shell:'bash --noprofile --norc -e -o pipefail',exit:r.status}));
+  } finally {rmSync(dir,{recursive:true,force:true});}
+});
