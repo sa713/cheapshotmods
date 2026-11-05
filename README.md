@@ -5,6 +5,7 @@
 - [Согласованные требования](PRODUCT.md) — полный продуктовый объём; документ сохранён без изменений.
 - [Паспорт и полномочия](.delivery/PROJECT.md).
 - [Текущий шаг](.delivery/STATE.md) и [очередь](.delivery/TASKS.md).
+- [Готовое задание TASK-001](.delivery/tasks/TASK-001.md) — первая техническая реализация.
 - [Техническая проработка](.delivery/TECHNICAL.md) и [эксплуатация](.delivery/RUNBOOK.md).
 - Вход для агента: [AGENTS.md](AGENTS.md), затем [.ai-development/START.md](.ai-development/START.md).
 
