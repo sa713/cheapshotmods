@@ -1,3 +1,35 @@
+# TASK-001 — повторное независимое ревью исправлений F1–F6
+
+Готовое поручение отдельному чату Claude:
+
+> Репозиторий sa713/cheapshotmods, PR №1. Проведи повторное независимое ревью исправлений TASK-001 по приложенному полному пакету. Проверяемый снимок —293ffb5211b13476fd6021d0f9fa0ae2ee8f3b85; функциональный код —4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b. Самостоятельно оцени соответствие PRODUCT.md и критериям F1–F6, исправление нового дефекта резервного копирования и возможные регрессии. Исходный отзыв и результаты других исполнителей используй как контекст. Дай accepted / changes_required / blocked только для реально проверенной области; для замечаний укажи место, условие, последствия и доказательство. Если командной среды нет, обозначь анализ материалов и необходимые дополнительные исполнения. Код не исправляй. При недостатке материалов сообщи, чего именно не хватает. Верни полный отчёт в Markdown.
+
+## Как читать пакет management
+
+- Проверен HEAD `293ffb5211b13476fd6021d0f9fa0ae2ee8f3b85`; code SHA `4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b`. Разница — только четыре документа передачи. База исходного F1–F6 diff —`559e710ed2bee41f1466f563aad0fedec3782f43`, база новой Codex-коррекции —`95b32660a06c97ca2b809bd5a1a6239be25a5ceb`.
+- Ниже сначала фактическая проверка management, затем полный исходный пакет Codex без изменений, в конце отдельная диагностика management и её stdout. Исходный пакет доступен также в коммите293ffb5, Git blob `3d4d3c1292b352864c86ec2e6547c4994b0164ef`, SHA-256 `36ade30a753a198cf3b26f3654e61667a70708273a270bf86192bb799b143c70`.
+- Вложенные TASK/STATE/очередь являются историческими снимками передачи Codex. Текущее решение management изложено перед ними: `review`, независимый отзыв ожидается. Ранее записанное внутреннее accepted и собственная самопроверка developer не подменяют это ревью.
+- Исходная потребность, полный PRODUCT, задание с F1–F6, применимые правила, исходный отзыв Claude, все45 исходников, оба diff и исполнявшиеся диагностические материалы включены. README, неизменённые прочие копии стандарта, node_modules и бинарные артефакты исключены; необходимые требования и эксплуатационные правила приведены непосредственно.
+- Management проверил состав и целостность вложений. Окружение с доступом к GitHub и командами у Claude не предполагается. Локальные и CI результаты ниже — исполнения других участников, не твои собственные запуски. Пакет является снимком; более поздние HEAD не считаются автоматически проверенными.
+
+## Проверка передачи Codex — management, 2026-11-05 (UTC)
+
+**Результат:** блокирующих дефектов в проверенном изменении не обнаружено. Передача developer достаточна для отдельного независимого ревью; TASK-001 остаётся `review`. Это собственное исполнение проверок management и целевая проверка нового F4, не независимая общая приёмка F1–F6 в той же управленческой сессии, ранее участвовавшей в реализации.
+
+**Версия и объём.** Проверен HEAD PR №1 `293ffb5211b13476fd6021d0f9fa0ae2ee8f3b85`, root tree `c92a304a91026b69c41248d9fff4c18f8ff9bb05`. Функциональный коммит `4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b`; переход от него к проверенному HEAD содержит только четыре документа передачи. От задания `95b32660a06c97ca2b809bd5a1a6239be25a5ceb` изменены backup helper, его регрессия, RUNBOOK и документы передачи. Игровые правила, авторизация, схема, lock-файл и CI этим поручением не переписывались. Код для проверки восстановлен в отдельный detached checkout; все 104 Git blobs и root tree сверены. Во время диагностик отслеживаемые файлы оставались неизменными.
+
+**Собственное исполнение management.** Node 24.22.1/npm 11.9.0, Linux; `npm run build && npm run typecheck && npm run lint && npm test` → exit 0, **22/22**, без пропусков. Использована ранее установленная копия зависимостей после побайтового сравнения неизменённого package-lock (SHA-256 `1d1f4c570585c0f9c5bb087e974cadc7a154ca2f70b2bd050498ca1e9b788b1b`); новый `npm ci` здесь не выполнялся. Native better-sqlite3 13.0.3 реально загружен. Чистая установка подтверждена отдельно логом CI, а не этим локальным запуском.
+
+**Дополнительная диагностика F4.** Временный скрипт вне продуктового checkout, только изолированные фикстуры SQLite; исходник и stdout приложены к review-input. Старый helper воспроизводимо перезаписал существующую БД при trailing space: owner222 сменился на111, сохранился mode0644, появился пустой файл с пробелом. Исправленная версия отвергла все 25 пробельных символов JavaScript trim с обеих сторон (50 случаев) до вызова SQLite; hash и mode существующей БД сохранились, побочные файлы не созданы. Три отдельных вызова настоящего CLI также отказали безопасно. Успешные копии с внутренними пробелами, символом U+200B, который trim не удаляет и каталогом с пробелом получили mode0600; reopen сохранил состояние, undo после reopen прошёл. Отказ EEXIST сохранил данные. URI-подобное имя на pinned driver использовано буквально и не затронуло существующую БД. Скрипт завершился exit0 и удалил собственные фикстуры. Это целевая диагностика, не доказательство отсутствия всех возможных файловых гонок; RUNBOOK требует приватный родительский каталог.
+
+**CI подтверждён по фактическим логам.** [Run42113880828](https://github.com/sa713/cheapshotmods/actions/runs/42113880828) checkout именно293ffb5. [verify127548250499](https://github.com/sa713/cheapshotmods/actions/runs/42113880828/job/127548250499): lock-install, типы/lint/22tests/build, Chromium1/1, негативный pipeline probe17 и measure — success. [container-smoke127548250781](https://github.com/sa713/cheapshotmods/actions/runs/42113880828/job/127548250781): success, seed/check/http на восстановленном volume passed. Image `sha256:b6192f2ecc1de40651f671dbb8b2de595251bca07d7a367596c81bf20c4084ac`, revision293ffb5. Docker/браузер в этой проверке management повторно не запускались; это проверенные чужие исполнения CI, отдельно от собственных команд.
+
+**Полнота передачи.** В исходном пакете Codex сверены SHA-256 всех 66 вложенных блоков, 57 закреплённых файлов совпали с checkout; все 45 файлов приложения/tests/scripts/config/lock присутствуют целиком. Полные diff F1–F6 (29922bytes) и отдельной Codex-коррекции (5257bytes) совпали с заявленными SHA-256, усечение не обнаружено. Сохранены PRODUCT blob `82b74f6b5470e633e4613c24be4e025e0e0d0330`, исходный Claude blob `c92cab43f3910059b7907e501c294ad5ff07b636`; все 45 файлов управляемого стандарта совпали с manifest.
+
+**Остаток приёмки и следующий исполнитель.** Management подготовил один полный читаемый пакет для нового ручного чата Claude: [TASK-001-review-input.md](../reviews/TASK-001-review-input.md). Нужен повторный независимый анализ исправлений F1–F6 на указанном снимке, включая новое F4; предыдущий accepted не переносится. Claude без командной среды подтверждает только анализ материалов, не исполнение. Владелец передаёт пакет и возвращает ответ, management сохраняет и проверяет выводы, при подтверждённых дефектах готовит конкретное задание отдельной сессии Codex. Следующая реализация не назначена до результата ревью. Живой Telegram/nonce/callback/WebView, HTTPS-стенд и полный мобильный интерфейс не входят в подтверждённую область TASK-001. Слияние/публикация не выполнялись.
+
+## Исходный пакет отдельной сессии Codex — начало
+
 # TASK-001 — передача Codex после проверки F1–F6
 
 Поручение для отдельного reviewer от management:
@@ -7613,3 +7645,145 @@ npm notice
 ~~~~~~
 
 Конец пакета. Исходники и оба diff не усечены. Дальнейшее решение принимает management с отдельной приёмкой, а не автор самопроверки.
+
+## Исходный пакет отдельной сессии Codex — конец
+
+## Дополнительная диагностика management — исходник
+
+Проверка исполнена отдельно от продуктового дерева на версии293ffb5. Пути импорта отражают два локальных снимка: manager-review-task001 — проверяемый293ffb5, developer-task001 — прежний helper без защиты trim, код которого в отдельном diff Codex. Store собран из проверяемого снимка; используется настоящий better-sqlite3 13.0.3. Файл не добавлен в продуктовую реализацию. SHA-256 исходника `2f037438def1442126e7cc990ee4797ae45c700f5c7a107d336a555d1ee5948b`.
+
+~~~~~~javascript
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,readFileSync,statSync,existsSync,chmodSync,mkdirSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {randomUUID,createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import {spawnSync} from 'node:child_process';
+import {Store} from './manager-review-task001/apps/server/dist/store.js';
+import {backupToFile as fixed} from './manager-review-task001/apps/server/src/backup-file.ts';
+import {backupToFile as old} from './developer-task001/apps/server/src/backup-file.ts';
+
+const require=createRequire(new URL('./manager-review-task001/package.json',import.meta.url));
+const Database=require('better-sqlite3');
+const driverVersion=require('better-sqlite3/package.json').version;
+assert.equal(driverVersion,'13.0.3');
+const dir=mkdtempSync(join(tmpdir(),'chm-manager-f4-'));
+const previousCwd=process.cwd(),previousUmask=process.umask(0o022);
+let source;
+const observations=[];
+const owners=path=>{const db=new Database(path,{readonly:true});try{return db.prepare('SELECT owner FROM players ORDER BY owner').all().map(x=>x.owner);}finally{db.close();}};
+const hash=path=>createHash('sha256').update(readFileSync(path)).digest('hex');
+try {
+  process.chdir(dir);
+  const sourcePath=join(dir,'source.sqlite'),victim=join(dir,'existing.sqlite');
+  source=new Store(sourcePath);source.player('111');
+  const command=action=>{const s=source.summary('111');return source.command('111',{key:randomUUID(),revision:s.revision,experiment:s.experiment,action});};
+  const group=command({type:'original.put',kind:'💚',tier:2,value:'17',quantity:'9'}).createdId;
+  command({type:'reset'});
+  const output=command({type:'craft',items:[{id:group,quantity:'3',worn:'0'}]}).createdId;
+  command({type:'level',value:'101'});command({type:'equip',items:[{id:output,quantity:'1'}]});
+  const expected=source.summary('111');
+  const makeVictim=()=>{const s=new Store(victim);s.player('222');s.close();chmodSync(victim,0o644);};
+  makeVictim();assert.deepEqual(owners(victim),['222']);
+  await old(source.db,victim+' ');
+  assert.deepEqual(owners(victim),['111']);
+  assert.equal(statSync(victim).mode&0o777,0o644);
+  assert.equal(statSync(victim+' ').size,0);
+  observations.push({case:'old helper + trimmed driver alias',reproduced:true,victimOwners:['111'],victimMode:'0644',misleadingRawFileBytes:0});
+  rmSync(victim+' ');rmSync(victim);
+  for(const suffix of ['-wal','-shm'])rmSync(victim+suffix,{force:true});
+  makeVictim();const before=hash(victim);let driverCalls=0;
+  const real={async backup(path){driverCalls++;return source.db.backup(path);}};
+  const whitespace=[' ','\t','\n','\r','\v','\f','\u00a0','\ufeff','\u1680','\u2000','\u2001','\u2002','\u2003','\u2004','\u2005','\u2006','\u2007','\u2008','\u2009','\u200a','\u2028','\u2029','\u202f','\u205f','\u3000'];
+  for(const w of whitespace) {
+    assert.equal(w.trim(),'');
+    for(const path of [victim+w,w+'existing.sqlite']) {
+      await assert.rejects(()=>fixed(real,path),/surrounding whitespace/);
+      assert.equal(existsSync(path),false);assert.equal(hash(victim),before);assert.equal(statSync(victim).mode&0o777,0o644);
+    }
+  }
+  assert.equal(driverCalls,0);assert.deepEqual(owners(victim),['222']);
+  observations.push({case:'fixed helper rejects surrounding whitespace before SQLite',passed:true,cases:whitespace.length*2,driverCalls,victimDataAndModePreserved:true});
+  const cli=fileURLToPath(new URL('./manager-review-task001/apps/server/dist/backup.js',import.meta.url));
+  for(const path of [' existing.sqlite','existing.sqlite\t','existing.sqlite\u00a0']) {
+    const r=spawnSync(process.execPath,[cli,sourcePath,path],{cwd:dir,encoding:'utf8',timeout:10000});
+    assert.equal(r.status,1);assert.match(r.stderr,/surrounding whitespace/);
+    assert.equal(existsSync(path),false);assert.equal(hash(victim),before);assert.equal(statSync(victim).mode&0o777,0o644);
+  }
+  observations.push({case:'real CLI rejects path aliases',passed:true,cases:3,victimDataAndModePreserved:true});
+  mkdirSync(join(dir,'sub folder'),{mode:0o700});
+  for(const name of ['copy with spaces.sqlite','copy\u200b.sqlite','sub folder/copy.sqlite']) {
+    const path=join(dir,name);await fixed(source.db,path);
+    assert.equal(statSync(path).mode&0o777,0o600);
+    const restored=new Store(path);
+    try {assert.deepEqual(restored.summary('111'),expected);const s=restored.summary('111');assert.equal(restored.command('111',{key:randomUUID(),revision:s.revision,experiment:s.experiment,action:{type:'undo'}}).spent,'0');}
+    finally {restored.close();}
+  }
+  observations.push({case:'valid internal spaces, literal zero-width character and directory spaces',passed:true,cases:3,mode:'0600',exactStateAndUndo:true});
+  await assert.rejects(()=>fixed(source.db,victim),{code:'EEXIST'});assert.equal(hash(victim),before);
+  const uriLike='file:existing.sqlite?mode=rw';await fixed(source.db,uriLike);
+  assert.equal(hash(victim),before);assert.deepEqual(owners(victim),['222']);
+  assert.deepEqual(owners(uriLike),['111']);assert.equal(statSync(uriLike).mode&0o777,0o600);
+  observations.push({case:'URI-like spelling on the pinned native driver',passed:true,literalDestinationUsed:true,existingDatabasePreserved:true});
+  console.log(JSON.stringify({sourceSHA:'293ffb5211b13476fd6021d0f9fa0ae2ee8f3b85',functionalSHA:'4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b',node:process.version,driverVersion,observations,result:'passed'},null,2));
+}finally {
+  source?.close();process.chdir(previousCwd);process.umask(previousUmask);rmSync(dir,{recursive:true,force:true});
+}
+
+~~~~~~
+
+## Дополнительная диагностика management — фактический stdout
+
+Команда `node manager-backup-probe.mjs` → exit0. Все данные синтетические; файлы создавались в приватном временном каталоге, удалённом в finally.
+
+~~~~~~json
+{
+  "sourceSHA": "293ffb5211b13476fd6021d0f9fa0ae2ee8f3b85",
+  "functionalSHA": "4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b",
+  "node": "v24.22.1",
+  "driverVersion": "13.0.3",
+  "observations": [
+    {
+      "case": "old helper + trimmed driver alias",
+      "reproduced": true,
+      "victimOwners": [
+        "111"
+      ],
+      "victimMode": "0644",
+      "misleadingRawFileBytes": 0
+    },
+    {
+      "case": "fixed helper rejects surrounding whitespace before SQLite",
+      "passed": true,
+      "cases": 50,
+      "driverCalls": 0,
+      "victimDataAndModePreserved": true
+    },
+    {
+      "case": "real CLI rejects path aliases",
+      "passed": true,
+      "cases": 3,
+      "victimDataAndModePreserved": true
+    },
+    {
+      "case": "valid internal spaces, literal zero-width character and directory spaces",
+      "passed": true,
+      "cases": 3,
+      "mode": "0600",
+      "exactStateAndUndo": true
+    },
+    {
+      "case": "URI-like spelling on the pinned native driver",
+      "passed": true,
+      "literalDestinationUsed": true,
+      "existingDatabasePreserved": true
+    }
+  ],
+  "result": "passed"
+}
+
+~~~~~~
+
+Конец пакета management. Заключение отдельного reviewer ещё не получено; технический код и исходные отзывы этой подготовкой не изменялись.
