@@ -70,7 +70,8 @@ jobs:
           set -e
           cat ../independent-negative-verify.log
           test "$status" -ne 0
-          grep -q 'not ok.*reviewer deliberate assertion failure' ../independent-negative-verify.log
+          grep -q 'reviewer deliberate assertion failure' ../independent-negative-verify.log
+          grep -q 'AssertionError.*ERR_ASSERTION' ../independent-negative-verify.log
           echo "deliberate assertion verified: exit=$status"
       - name: Preserve checked source
         working-directory: target
