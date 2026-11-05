@@ -22,7 +22,7 @@ python3 .ai-development/scripts/check.py
 
 `verify` выполняет чистую установку, типы, ESLint, unit/integration tests и production build; browser smoke запускается отдельно и в CI. Ни тесты, ни замеры не используют настоящие Telegram-аккаунты. Fixtures создают временные SQLite и RSA-ключи. В CI обязательны jobs `verify` и `container-smoke`; наличие workflow не включает branch protection. Результаты конкретной версии — в TASK-001/PR.
 
-В управляемой cloud-среде npm cache следует направить в доступный каталог (`NPM_CONFIG_CACHE=/tmp/chm-npm`); Chromium — `PLAYWRIGHT_BROWSERS_PATH=/tmp/chm-browsers`. Сетевым командам нужны разрешения среды. Это настройки sandbox, не зависимости приложения.
+В управляемой cloud-среде npm cache следует направить в доступный каталог (`NPM_CONFIG_CACHE=/tmp/chm-npm`, `XDG_CACHE_HOME=/tmp/chm-cache` для node-gyp); Chromium — `PLAYWRIGHT_BROWSERS_PATH=/tmp/chm-browsers`. Сетевым командам нужны разрешения среды. Это настройки sandbox, не зависимости приложения.
 
 ## Конфигурация
 
