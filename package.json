@@ -1,0 +1,49 @@
+{
+  "name": "cheapshotmods",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": "24.22.1",
+    "npm": "11.9.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "tsc -b && npm run build -w @chm/web",
+    "typecheck": "tsc -b && tsc -p tsconfig.check.json --noEmit",
+    "lint": "eslint .",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "start": "node --env-file-if-exists=.env apps/server/dist/main.js",
+    "dev": "npm run build && concurrently -k 'PUBLIC_BASE_URL=http://localhost:5173 node --env-file-if-exists=.env --import tsx --watch apps/server/src/main.ts' 'npm run dev -w @chm/web'",
+    "test:browser": "playwright test",
+    "measure": "node --import tsx scripts/measure.ts",
+    "backup": "node apps/server/dist/backup.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.5",
+    "@fastify/static": "10.1.10",
+    "better-sqlite3": "13.0.3",
+    "fastify": "5.12.8",
+    "jose": "6.2.15",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "concurrently": "10.0.6",
+    "eslint": "10.14.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "8.3.6"
+  }
+}

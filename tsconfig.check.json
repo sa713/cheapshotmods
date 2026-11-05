@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.base.json","compilerOptions":{"jsx":"react-jsx","lib":["ES2023","DOM"]},"include":["tests/**/*.ts","scripts/**/*.ts","apps/web/src/**/*.tsx","playwright.config.ts"]}

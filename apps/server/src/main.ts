@@ -1,0 +1,15 @@
+import { random } from './auth.js';
+import { app } from './app.js';
+import { Store } from './store.js';
+import { requireThat } from '@chm/rules';
+const baseUrl=process.env.PUBLIC_BASE_URL??'http://localhost:3000';
+const url=new URL(baseUrl);
+requireThat(url.origin===baseUrl,'INVALID_BASE_URL');
+const enabled=!!(process.env.TELEGRAM_BOT_TOKEN||process.env.TELEGRAM_OIDC_CLIENT_ID||process.env.TELEGRAM_OIDC_CLIENT_SECRET);
+requireThat(!enabled || (process.env.SESSION_SECRET && process.env.SESSION_SECRET.length>=32),'SESSION_SECRET_REQUIRED');
+requireThat(!enabled || process.env.NODE_ENV!=='production' || url.protocol==='https:','HTTPS_REQUIRED');
+requireThat(!!process.env.TELEGRAM_OIDC_CLIENT_ID===!!process.env.TELEGRAM_OIDC_CLIENT_SECRET,'INCOMPLETE_OIDC_CONFIG');
+const store=new Store(process.env.DATABASE_PATH??'data/cheapshot.sqlite');
+const server=await app(store,{baseUrl,sessionSecret:process.env.SESSION_SECRET??random(),botToken:process.env.TELEGRAM_BOT_TOKEN,clientId:process.env.TELEGRAM_OIDC_CLIENT_ID,clientSecret:process.env.TELEGRAM_OIDC_CLIENT_SECRET,version:process.env.BUILD_SHA??'development'});
+for (const signal of ['SIGINT','SIGTERM']) process.once(signal,()=>{ void server.close().finally(()=>{store.close();process.exit(0);}); });
+await server.listen({port:Number(process.env.PORT??3000),host:'0.0.0.0'});
