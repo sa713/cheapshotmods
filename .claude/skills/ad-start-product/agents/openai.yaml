@@ -1,0 +1,4 @@
+interface:
+  display_name: "Запуск продукта"
+  short_description: "Начать продукт по общему стандарту разработки"
+  default_prompt: "Используй $ad-start-product, чтобы начать новый продукт по нашему стандарту."
