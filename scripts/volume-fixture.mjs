@@ -3,6 +3,7 @@ import {backupToFile} from '/app/apps/server/dist/backup-file.js';
 import assert from 'node:assert/strict';
 import {randomUUID,createHmac} from 'node:crypto';
 import {readFileSync,writeFileSync,statSync} from 'node:fs';
+const {fetch,URLSearchParams}=globalThis;
 const mode=process.argv[2];
 if(mode==='http') {
   const origin=process.env.PUBLIC_BASE_URL,base='http://localhost:3000',expected=JSON.parse(readFileSync('/data/expected.json','utf8'));

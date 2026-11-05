@@ -4,17 +4,13 @@ export async function backupToFile(db: {backup(path: string): Promise<unknown>},
   // Exclusive creation prevents overwriting an existing target, including a
   // symlink. Permissions are private before SQLite opens the destination.
   const fd=openSync(target,'wx',0o600), created=fstatSync(fd);
-  let complete=false;
   try {
     fchmodSync(fd,0o600);
     await db.backup(target);
-    complete=true;
-  } finally {
-    closeSync(fd);
-    if (!complete) {
-      // Remove only the file this operation created, never a replaced path.
-      try {const current=lstatSync(target);if(current.dev===created.dev&&current.ino===created.ino)unlinkSync(target);}
-      catch (e) {if (!(e && typeof e==='object' && 'code' in e && e.code==='ENOENT')) throw e;}
-    }
-  }
+  } catch (error) {
+    // Remove only the file this operation created, never a replaced path.
+    try {const current=lstatSync(target);if(current.dev===created.dev&&current.ino===created.ino)unlinkSync(target);}
+    catch (cleanup) {if (!(cleanup && typeof cleanup==='object' && 'code' in cleanup && cleanup.code==='ENOENT'))throw new AggregateError([error,cleanup],'Backup and cleanup failed',{cause:cleanup});}
+    throw error;
+  } finally {closeSync(fd);}
 }
