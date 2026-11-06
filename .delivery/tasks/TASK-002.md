@@ -1,6 +1,6 @@
 # TASK-002 — полный Cheapshot Mods, готовый к установке на Debian
 
-- Статус: review — готовый кандидат передан management; внешняя установка/живой Telegram ожидают владельца.
+- Статус: accepted в границах устанавливаемого кандидата — передача проверена management; внешняя установка, живой Telegram и продуктовое принятие ожидают владельца.
 - Основание: решение владельца 2026-11-06 — поручить Codex через Goal закончить весь согласованный функционал; следующее участие владельца после передачи результата — установка на Debian и настройка Telegram-бота.
 - Риск: повышенный — авторизация и сохранность личных инвентарей.
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -186,3 +186,17 @@ Backup: `sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods`. Restore
 Итог: `implementation: complete`; `independent_review: accepted`; `delivery: verified` в границе комплекта и изолированной установки; `external_installation: pending`; `product_acceptance: pending`. Передано management в review. Обязательные jobs проверенного функционального SHA успешны, комплект доступен; финальный документационный HEAD/его CI читать в PR/GitHub, без циклического переписывания SHA внутри собственного коммита.
 
 Внешняя установка, публичный DNS/ACME/HTTPS, реальный OIDC (включая nonce/отказ/дополнительные поля callback), реальный Mini App/телефон/Secure cookies и два настоящих пользователя **не проверены**. Следующее участие владельца — установка и настройка, затем эта живая проверка. Слияние/production-публикация/BotFather/расходы не выполнялись. Техническая передача кандидата не объявляет production verified.
+
+## Подтверждение передачи management — 2026-11-06
+
+Прочитан полный независимый TASK-002-code-review: accepted для кандидата `8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab`, R1/R2/N1/N2 закрыты, ограничения реального Telegram/HTTPS раскрыты. Собственные reviewer-запуски 33 native/12 browser и испытания комплекта остаются результатами reviewer, а не новыми запусками management.
+
+Сопоставлен кандидат с финальным HEAD `8caca180c52022e03b11a95fbe95faa78f68ebd1`: runtime и deploy/ не менялись; изменения — документы, два комментария в .env.example и три дополнительные проверки в tests/operations.test.ts. К установке передаётся именно принятый комплект 8f3dd8a.
+
+Проверены фактические GitHub jobs финального HEAD: [checks 42209252023](https://github.com/sa713/cheapshotmods/actions/runs/42209252023) — verify/container-smoke success; [kit 42209252038](https://github.com/sa713/cheapshotmods/actions/runs/42209252038) — debian-kit success, существенные steps success без skipped. Для принятого artifact отдельно проверен [kit run 42207656789](https://github.com/sa713/cheapshotmods/actions/runs/42207656789): build/extract/isolated Debian install/upload success.
+
+Метаданные [artifact 13497906207](https://github.com/sa713/cheapshotmods/actions/runs/42207656789/artifacts/13497906207) подтверждены: имя cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64, 131863144 bytes, expired=false, source SHA совпадает, срок до 2026-12-06. GitHub ZIP digest `7d8962bf92cab5be20ade275c1a2aaab6c1906b40b316ab9ca8f1409f11f826b` совпадает с сохранённым независимым отчётом. Management не скачивал/не переиспытывал этот binary архив заново.
+
+Устанавливаемый кандидат принят для передачи. Следующий операторский шаг: выбрать Debian-хост и домен, проверить ОС/amd64/Docker/Compose/диск/порты, получить проверенный комплект, настроить отдельного бота и выполнить NEXT_STEPS. Поддержка installer — Debian12/13 amd64, Docker>=24/Compose>=2.30; preflight требует свободные TCP80/443 по умолчанию и минимум4GiB диска. На общем хосте сначала выяснить существующие сервисы/proxy; не останавливать и не удалять их ради установки.
+
+`external_installation: pending`, `product_acceptance: pending`. Слияние и изменение внешних систем этим подтверждением не выполняются.
