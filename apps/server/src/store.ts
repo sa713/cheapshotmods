@@ -2,6 +2,7 @@ import Database from 'better-sqlite3';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
+import { validateDatabasePath } from './database-path.js';
 import { craft, integer, inputInteger, keys, mod, record, requireThat, stats, type Equipped, type Group } from '@chm/rules';
 
 interface Player { owner: string; revision: string; level: string; experiment: string; started: number; spent: string; equipment: string }
@@ -21,6 +22,7 @@ export class Store {
     return statement;
   }
   constructor(path: string, private afterMods?: () => void) {
+    validateDatabasePath(path, true);
     if (path !== ':memory:') mkdirSync(dirname(path), {recursive:true});
     this.db = new Database(path);
     this.db.pragma('journal_mode = WAL'); this.db.pragma('foreign_keys = ON'); this.db.pragma('busy_timeout = 5000');

@@ -1,9 +1,8 @@
 import {closeSync, fchmodSync, fstatSync, lstatSync, openSync, unlinkSync} from 'node:fs';
+import { validateDatabasePath } from './database-path.js';
 
 export async function backupToFile(db: {backup(path: string): Promise<unknown>}, target: string) {
-  // better-sqlite3 trims filenames. Exclusive creation and SQLite must address
-  // the same path, otherwise whitespace can alias an existing destination.
-  if (target !== target.trim()) throw new TypeError('Backup target must not have surrounding whitespace');
+  validateDatabasePath(target);
   // Exclusive creation prevents overwriting an existing target, including a
   // symlink. Permissions are private before SQLite opens the destination.
   const fd=openSync(target,'wx',0o600), created=fstatSync(fd);

@@ -24,7 +24,10 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
       - run: bash scripts/check-measure-pipeline.sh
-      - run: npm run measure | tee capacity.txt
+      - name: Measure capacity
+        run: |
+          set -o pipefail
+          npm run measure | tee capacity.txt
       - uses: actions/upload-artifact@v4
         with:
           name: capacity-${{ github.event.pull_request.head.sha || github.sha }}

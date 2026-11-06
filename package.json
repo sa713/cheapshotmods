@@ -16,6 +16,7 @@
     "build": "tsc -b && npm run build -w @chm/web",
     "typecheck": "tsc -b && tsc -p tsconfig.check.json --noEmit",
     "lint": "eslint .",
+    "pretest": "tsc -b --force",
     "test": "node --import tsx --test tests/*.test.ts",
     "start": "node --env-file-if-exists=.env apps/server/dist/main.js",
     "dev": "npm run build && concurrently -k 'PUBLIC_BASE_URL=http://localhost:5173 node --env-file-if-exists=.env --import tsx --watch apps/server/src/main.ts' 'npm run dev -w @chm/web'",
