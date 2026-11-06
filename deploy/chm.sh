@@ -159,6 +159,35 @@ backup() {
   backup_file="$root/backups/$filename"
   echo "$backup_file"
 }
+offline_backup() {
+  local filename="backup-$CHM_VERSION-$(date -u +%Y%m%dT%H%M%SZ)-$(openssl rand -hex 3).sqlite"
+  update_helper="$CHM_PROJECT-offline-backup-$(openssl rand -hex 4)"
+  docker create --name "$update_helper" --label "cheapshotmods.root=$CHM_PROJECT" --mount "source=$CHM_DATA_VOLUME,target=/data" "$CHM_APP_IMAGE" node apps/server/dist/backup.js /data/cheapshot.sqlite /tmp/backup.sqlite >/dev/null
+  docker start --attach "$update_helper" >/dev/null
+  [[ "$(docker inspect --format '{{.State.ExitCode}}' "$update_helper")" == 0 ]] || fail 'offline backup failed; previous volume retained'
+  backup_file="$root/backups/$filename"
+  docker cp "$update_helper:/tmp/backup.sqlite" "$backup_file" >/dev/null
+  chmod 600 "$backup_file"
+  docker rm "$update_helper" >/dev/null
+  update_helper=''
+  echo "$backup_file"
+}
+recover_update() {
+  local status="$?"
+  trap - EXIT
+  if [[ "$status" != 0 ]]; then
+    if [[ -n "${update_helper:-}" ]]; then docker rm -f "$update_helper" >/dev/null 2>&1 || true; fi
+    cp "$root/update-before.env" "$root/current.env.new"
+    mv "$root/current.env.new" "$root/current.env"
+    installed
+    if compose up -d --remove-orphans >/dev/null 2>&1; then
+      echo 'Update failed; restart of previous image and unchanged volume requested. Run check; all candidate volumes retained.' >&2
+    else
+      echo 'Update failed; previous metadata restored. Run start/check using this installation; all volumes retained.' >&2
+    fi
+  fi
+  exit "$status"
+}
 copy_backup_volume() {
   local source="$1" destination="$2" image="$3"
   [[ -f "$source" && ! -L "$source" ]] || fail 'BACKUP must be a regular file'
@@ -207,13 +236,21 @@ case "$command_name" in
     bundle="$(cd "$3" && pwd -P)"; kit_check
     [[ "$version" != "$CHM_VERSION" ]] || fail 'this version is already installed; use restart'
     load_images; release_copy
-    backup
+    cp "$root/current.env" "$root/update-before.env"
+    trap recover_update EXIT
+    # Freeze ingress, then all app writes before taking the migration snapshot.
+    # A normal online backup is deliberately not used as the update source.
+    compose stop proxy >/dev/null
+    compose stop app >/dev/null
+    offline_backup
     project="$CHM_PROJECT"; data_volume="${project}-data-update-$(date +%s)-$(openssl rand -hex 3)"
     copy_backup_volume "$backup_file" "$data_volume" "$app_image"
-    cp "$root/current.env" "$root/previous.env"
+    cp "$root/update-before.env" "$root/previous.env"
     compose down >/dev/null
     write_metadata
     switch_up
+    trap - EXIT
+    rm "$root/update-before.env"
     ;;
   restore)
     [[ $# == 3 ]] || usage

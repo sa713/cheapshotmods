@@ -107,7 +107,7 @@ sudo bash /opt/cheapshotmods/chm.sh update /opt/cheapshotmods /absolute/path/che
 sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 ```
 
-Обновление загружает/проверяет новые images, делает online backup и переносит **копию** в новый volume; старая версия с прежним volume остаётся для отката. Текущий config с секретами сохраняется. На короткое время остановки контейнеров будет недоступность. Если запуск новой версии неуспешен, не удаляйте volumes; выполните `rollback` и сохраните обезличенные health/CI-факты. Откат возвращает состояние **до** обновления/restore; изменения после него остаются в отложенном volume, но не переносятся автоматически.
+Обновление загружает/проверяет новые images, закрывает ingress, останавливает app, делает согласованный offline backup отдельным helper того же image и переносит **копию** в новый volume; старая версия с прежним volume остаётся для отката. Текущий config с секретами сохраняется. После остановки app новые записи не принимаются: snapshot включает все завершённые commit до freeze. На время backup/переключения будет недоступность. При ошибке update восстанавливает прежнюю metadata и запрашивает запуск старой пары image+volume; обязательно выполните `check`. Не удаляйте volumes; если нужно, выполните `start`/`rollback` и сохраните обезличенные health/CI-факты. Откат возвращает состояние **до** обновления/restore; изменения после него остаются в отложенном volume, но не переносятся автоматически.
 
 ```bash
 # Restore всегда в новый volume, никогда поверх текущей БД:
@@ -122,4 +122,4 @@ sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 
 ## Что проверено изолированно
 
-`scripts/test-install.sh BUNDLE_DIR` запускает installer в чистом Debian 13 amd64 с предоставленным Docker CLI/socket. Проверяет preflight, приватные config/backup, HTTPS через Caddy internal CA, health/version/401, сохранность настоящей SQLite после restart, backup/restore/rollback и update на второй версионированный образ. Его TLS internal — только изолированный тест, **не публичный ACME** и не Telegram. Для этого installer имеет явный `--internal-tls`; в обычной установке флаг не указывать. Конкретный SHA/результаты/ограничения — в TASK-002 и CI.
+`scripts/test-install.sh BUNDLE_DIR` запускает installer в чистом Debian 13 amd64 с предоставленным Docker CLI/socket. Проверяет preflight, приватные config/backup, HTTPS через Caddy internal CA, health/version/401, сохранность настоящей SQLite после restart, backup/restore/rollback и update на второй версионированный образ. Отдельные регрессии доказывают восстановление старой пары после ошибки helper и сохранение последнего commit на границе freeze. Его TLS internal — только изолированный тест, **не публичный ACME** и не Telegram. Для этого installer имеет явный `--internal-tls`; в обычной установке флаг не указывать. Конкретный SHA/результаты/ограничения — в TASK-002 и CI.

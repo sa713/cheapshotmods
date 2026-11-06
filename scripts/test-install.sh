@@ -139,13 +139,42 @@ m=json.load(open(sys.argv[1]));m.update(source_sha=sys.argv[3],app_image=sys.arg
 json.dump(m,open(sys.argv[2],'w'),indent=2)
 PY
 (cd "$work/update-bundle"; sha256sum chm.sh compose.yml Caddyfile Caddyfile.internal env.example README.md manifest.json images.tar.gz > SHA256SUMS)
-inside update "$root" "$work/update-bundle"
+# A failed offline helper after freeze must recover the old image+volume.
+mkdir "$work/failure-bin"
+cat > "$work/failure-bin/docker" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == create && "$*" == *-offline-backup-* ]]; then exit 17; fi
+exec /usr/local/bin/docker "$@"
+SH
+chmod +x "$work/failure-bin/docker"
+failed_status=0
+docker exec -e "PATH=$work/failure-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" "$container" bash "$bundle/chm.sh" update "$root" "$work/update-bundle" || failed_status=$?
+docker exec "$container" chown -R "$(id -u):$(id -g)" "$work"
+[[ "$failed_status" == 17 ]]
+inside check "$root" "$work/internal-ca.crt"
 snapshot > "$work/actual.json"; cmp "$work/changed.json" "$work/actual.json"
+# Regression: a command commits at the last possible point before app freeze.
+# Only this harness wraps Docker; the production installer has no fixture hooks.
+mkdir "$work/boundary-bin"
+cat > "$work/boundary-bin/docker" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "$#" -ge 2 && "${@: -2:1}" == stop && "${@: -1}" == app ]]; then
+  /usr/local/bin/docker exec "$CHM_BOUNDARY_APP" node --input-type=module -e 'import {Store} from "./apps/server/dist/store.js";import {randomUUID} from "node:crypto";const s=new Store("/data/cheapshot.sqlite");const p=s.summary("744002");s.command("744002",{key:randomUUID(),revision:p.revision,experiment:p.experiment,action:{type:"level",value:"2001"}});console.log(JSON.stringify({state:s.summary("744002"),original:s.inventory("744002","original"),work:s.inventory("744002","work")}));s.close();' > "$CHM_BOUNDARY_OUT"
+fi
+exec /usr/local/bin/docker "$@"
+SH
+chmod +x "$work/boundary-bin/docker"
+docker exec -e "PATH=$work/boundary-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" -e "CHM_BOUNDARY_APP=$app" -e "CHM_BOUNDARY_OUT=$work/boundary-expected.json" "$container" bash "$bundle/chm.sh" update "$root" "$work/update-bundle"
+docker exec "$container" chown -R "$(id -u):$(id -g)" "$work"
+[[ -s "$work/boundary-expected.json" ]]
+snapshot > "$work/actual.json"; cmp "$work/boundary-expected.json" "$work/actual.json"
 inside check "$root" "$work/internal-ca.crt"
 inside rollback "$root"
-snapshot > "$work/actual.json"; cmp "$work/changed.json" "$work/actual.json"
+snapshot > "$work/actual.json"; cmp "$work/boundary-expected.json" "$work/actual.json"
 inside check "$root" "$work/internal-ca.crt"
 docker volume inspect "$sentinel" >/dev/null
 # Undo history from the original candidate survives restart/backup/restore/update.
-docker exec "$app" node --input-type=module -e 'import {Store} from "./apps/server/dist/store.js";import {randomUUID} from "node:crypto";const s=new Store("/data/cheapshot.sqlite");const p=s.summary("744002");const r=s.command("744002",{key:randomUUID(),revision:p.revision,experiment:p.experiment,action:{type:"undo"}});if(r.spent!=="0"||r.level!=="2000"||r.equipment[0].quantity!=="3")throw Error("undo state");s.close();'
-docker exec "$container" bash -c '. /etc/os-release; printf "Installation test passed: Debian %s, %s; internal HTTPS, native SQLite, restart, backup/restore, synthetic update, rollback, foreign volume retained.\n" "$VERSION_ID" "$(uname -m)"'
+docker exec "$app" node --input-type=module -e 'import {Store} from "./apps/server/dist/store.js";import {randomUUID} from "node:crypto";const s=new Store("/data/cheapshot.sqlite");const p=s.summary("744002");const r=s.command("744002",{key:randomUUID(),revision:p.revision,experiment:p.experiment,action:{type:"undo"}});if(r.spent!=="0"||r.level!=="2001"||r.equipment[0].quantity!=="3")throw Error("undo state");s.close();'
+docker exec "$container" bash -c '. /etc/os-release; printf "Installation test passed: Debian %s, %s; internal HTTPS, native SQLite, restart, backup/restore, synthetic update with last-commit freeze regression, rollback, foreign volume retained.\n" "$VERSION_ID" "$(uname -m)"'
