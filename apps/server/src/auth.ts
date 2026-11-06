@@ -23,7 +23,7 @@ export function telegramId(value: unknown): string {
   if (typeof value === 'number') { requireThat(Number.isSafeInteger(value) && value>0,'INVALID_TELEGRAM_ID',401); return String(value); }
   integer(value); return value as string;
 }
-export function miniIdentity(raw: unknown, token: string, now = Math.floor(Date.now()/1000)): string {
+function signedMiniData(raw: unknown, token: string): {owner:string;time:bigint} {
   requireThat(typeof raw==='string' && raw.length<=16384,'INVALID_INIT_DATA',401);
   const params=new URLSearchParams(raw), seen=new Set<string>();
   for (const k of params.keys()) { requireThat(!seen.has(k),'INVALID_INIT_DATA',401); seen.add(k); }
@@ -34,9 +34,14 @@ export function miniIdentity(raw: unknown, token: string, now = Math.floor(Date.
   const expected=createHmac('sha256',secret).update(check).digest();
   requireThat(timingSafeEqual(expected,Buffer.from(hash,'hex')),'INVALID_INIT_DATA',401);
   const date=params.get('auth_date'); requireThat(date && /^[0-9]+$/.test(date),'INVALID_INIT_DATA',401);
-  const time=BigInt(date); requireThat(time>=BigInt(now-300) && time<=BigInt(now+30),'EXPIRED_INIT_DATA',401);
-  try { return telegramId(record(JSON.parse(params.get('user')??'null')).id); }
+  const time=BigInt(date);
+  try { return {owner:telegramId(record(JSON.parse(params.get('user')??'null')).id),time}; }
   catch { throw new DomainError('INVALID_INIT_DATA',401); }
+}
+export function miniIdentity(raw: unknown, token: string, now = Math.floor(Date.now()/1000)): string {
+  const data=signedMiniData(raw,token);
+  requireThat(data.time>=BigInt(now-300) && data.time<=BigInt(now+30),'EXPIRED_INIT_DATA',401);
+  return data.owner;
 }
 export async function oidcIdentity(token: string, nonce: string, c: Config, t: Transport, now = new Date()) {
   // Keep exp/nbf strict. jose maxTokenAge also forbids future iat, so enforce
@@ -59,6 +64,19 @@ export class Auth {
       this.store.db.prepare('INSERT INTO sessions VALUES (?,?,?,?,NULL)').run(this.hash(raw),owner,csrf,expires);
     }).immediate();
     return {raw,csrf};
+  }
+  mini(raw: unknown, old?: string) {
+    requireThat(this.config.botToken,'LOGIN_UNAVAILABLE',503);
+    const data=signedMiniData(raw,this.config.botToken),now=Math.floor(Date.now()/1000);
+    requireThat(data.time<=BigInt(now+30),'EXPIRED_INIT_DATA',401);
+    if (data.time<BigInt(now-300)) {
+      const current=old?this.store.session(this.hash(old),now):undefined;
+      // Old signed data can only bind an already authenticated, unexpired
+      // session to the SAME identity. Never issue, rotate or prolong a login.
+      requireThat(current?.owner===data.owner,'EXPIRED_INIT_DATA',401);
+      return {raw:old!,csrf:current.csrf,resumed:true};
+    }
+    return {...this.create(data.owner,old),resumed:false};
   }
   cancel(raw: string, state: unknown) {
     requireThat(typeof state==='string','LOGIN_FAILED',401);

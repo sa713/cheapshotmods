@@ -6,7 +6,7 @@ import type {Group} from '@chm/rules';
 
 test.use({baseURL:'http://localhost:3100'});
 let sequence=0;
-async function login(page:Page,id=(BigInt(Date.now())*1000n+BigInt(sequence++)).toString(),oidc=false) {
+async function login(page:Page,id=(BigInt(Date.now())*1000n+BigInt(sequence++)).toString(),oidc=false,raw?:string) {
   await page.context().setExtraHTTPHeaders({'x-forwarded-for':'192.0.2.'+(sequence%250+1)});
   await page.route('https://telegram.org/**',r=>r.abort());
   if(oidc){
@@ -19,7 +19,7 @@ async function login(page:Page,id=(BigInt(Date.now())*1000n+BigInt(sequence++)).
     });
     await page.goto('/');await page.getByRole('link',{name:'Войти через Telegram'}).click();
   } else {
-    await page.addInitScript(raw=>{Object.assign(window,{Telegram:{WebApp:{initData:raw,ready(){},expand(){}}}});},initData(id));
+    await page.addInitScript(raw=>{Object.assign(window,{Telegram:{WebApp:{initData:raw,ready(){},expand(){}}}});},raw??initData(id));
     await page.goto('/');
   }
   await expect(page.getByRole('heading',{name:'Мастерская модов'})).toBeVisible();await saved(page);
@@ -145,4 +145,24 @@ test('S-01/02: two users isolated and inventory pages have no game limit',async(
   }
   await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();await expect(page.getByTestId('work-group')).toHaveCount(100);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(200);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(205);await expect(page.getByRole('button',{name:'Загрузить ещё группы'})).toHaveCount(0);
   const context=await browser.newContext({baseURL:'http://localhost:3100'}),other=await context.newPage();await login(other);await expect(other.getByTestId('work-group')).toHaveCount(0);await expect(other.getByTestId('damage')).toHaveText('1');await context.close();
+});
+
+test('shared cookies cannot replace signed Mini identity or leak data into an old tab',async({page,context})=>{
+  const first=await login(page);await level(page,'200');await add(page);await work(page);
+  const second=await context.newPage();await login(second);await expect(second.getByTestId('damage')).toHaveText('1');await expect(second.getByTestId('work-group')).toHaveCount(0);
+  await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);await expect(page.getByRole('status')).toContainText('Учётная запись изменилась');
+  await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);await expect(page.getByTestId('damage')).toHaveText('200');await expect(group(page)).toContainText('В наборе: 6');
+  // Same account cookie rotation in another tab must not strand a stale CSRF.
+  const same=await context.newPage();await login(same,first);await level(page,'201');await expect(page.getByTestId('damage')).toHaveText('201');
+});
+
+test('stale Mini reload binds same identity only; invalid context and logged-out flag read no inventory',async({page,context})=>{
+  const id=await login(page);await level(page,'200');
+  const stale=await context.newPage();await login(stale,id,false,initData(id,Math.floor(Date.now()/1000)-1000));await expect(stale.getByTestId('damage')).toHaveText('200');
+  const other=(BigInt(id)+1n).toString(),bad=new URLSearchParams(initData(id));bad.set('user',JSON.stringify({id:other}));
+  for(const [raw,url] of [[initData(other,Math.floor(Date.now()/1000)-1000),'/'],[bad.toString(),'/'],[initData(id,Math.floor(Date.now()/1000)+120),'/'],[initData(other),'/?logged_out=1']]){
+    const p=await context.newPage();await p.route('https://telegram.org/**',r=>r.abort());await p.addInitScript(initData=>Object.assign(window,{Telegram:{WebApp:{initData}}}),raw!);
+    let reads=0;p.on('request',r=>{if(/\/api\/(state|inventory)/.test(r.url()))reads++;});
+    await p.goto(url!);await expect(p.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();await expect(p.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);expect(reads).toBe(0);await p.close();
+  }
 });

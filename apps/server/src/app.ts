@@ -3,7 +3,7 @@ import cookie from '@fastify/cookie';
 import serveStatic from '@fastify/static';
 import { resolve } from 'node:path';
 import { DomainError, keys, record, requireThat } from '@chm/rules';
-import { Auth, issuer, miniIdentity, type Config, type Transport } from './auth.js';
+import { Auth, issuer, type Config, type Transport } from './auth.js';
 import { Store } from './store.js';
 import { LoginLimiter } from './login-limiter.js';
 
@@ -38,6 +38,9 @@ export async function app(store: Store, config: Config, remote?: Transport) {
     requireThat(config.botToken || (config.clientId && config.clientSecret),'UNAUTHORIZED',401);
     const raw=req.cookies.chm_session, s=raw?store.session(auth.hash(raw),Math.floor(Date.now()/1000)):undefined;
     requireThat(s?.owner,'UNAUTHORIZED',401);
+    // Optional client precondition, never an identity credential. Stops an old
+    // tab from reading a different account after a shared cookie is rotated.
+    requireThat(req.headers['x-chm-account']===undefined || req.headers['x-chm-account']===auth.hash('account:'+s.owner),'SESSION_CHANGED',401);
     if (mutate) { origin(req); requireThat(req.headers['x-csrf-token']===s.csrf,'CSRF_REJECTED',403); }
     return s as typeof s & {owner:string};
   }
@@ -86,8 +89,8 @@ export async function app(store: Store, config: Config, remote?: Transport) {
     limiter.check(req.ip);
     origin(req); requireThat(config.botToken,'LOGIN_UNAVAILABLE',503);
     const body=record(req.body); keys(body,['initData']);
-    const owner=miniIdentity(body.initData,config.botToken), result=auth.create(owner,req.cookies.chm_session);
-    setSession(reply,result.raw); return {csrf:result.csrf};
+    const result=auth.mini(body.initData,req.cookies.chm_session);
+    if (!result.resumed) setSession(reply,result.raw); return {csrf:result.csrf};
   });
   await f.register(serveStatic,{root:resolve('apps/web/dist'),wildcard:false});
   return f;

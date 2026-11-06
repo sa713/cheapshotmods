@@ -23,6 +23,7 @@ const explanations:Record<string,string> = {
   SERVER_ERROR:'Ошибка сервера. Изменения не подтверждены. Повторите ту же команду.',
   COMMAND_EXPIRED:'Срок хранения ответа команды истёк. Повторного применения не было; загрузите актуальные данные.',
   UNAUTHORIZED:'Сессия завершилась. Войдите через Telegram заново.',
+  SESSION_CHANGED:'Учётная запись изменилась в другом окне. Войдите заново в этом окне.',
   EXPIRED_INIT_DATA:'Данные входа Telegram устарели. Закройте Mini App и откройте его заново.',
   INVALID_INIT_DATA:'Telegram не подтвердил вход. Откройте Mini App заново.',
 };
@@ -32,7 +33,8 @@ async function api<T>(url:string, options:RequestInit = {}):Promise<T> {
   if (!response.ok) {const body=await response.json().catch(()=>({}));throw new ApiError(response.status,body.error??'SERVER_ERROR');}
   return await response.json() as T;
 }
-const post=(body:unknown,csrf?:string):RequestInit=>({method:'POST',headers:{'content-type':'application/json',...(csrf?{'x-csrf-token':csrf}:{})},body:JSON.stringify(body)});
+const accountHeaders=(account:string)=>({'x-chm-account':account});
+const post=(body:unknown,csrf?:string,account?:string):RequestInit=>({method:'POST',headers:{'content-type':'application/json',...(csrf?{'x-csrf-token':csrf}:{}),...(account?accountHeaders(account):{})},body:JSON.stringify(body)});
 function total(items:Equipped[]) {return items.reduce((n,e)=>n+BigInt(e.quantity),0n).toString();}
 function NumberField({label,value,onChange,zero=false}:{label:string;value:string;onChange:(v:string)=>void;zero?:boolean}) {
   return <label>{label}<input inputMode="numeric" pattern={zero?'[0-9]+':'[1-9][0-9]*'} value={value} onChange={e=>onChange(e.target.value)} autoComplete="off" spellCheck={false} required /></label>;
@@ -57,9 +59,9 @@ function App() {
   const lock=useRef(false);
   const storageKey=session?'chm_pending_'+session.account:undefined;
   const webApp=()=> (window as Window & {Telegram?:{WebApp?:WebApp}}).Telegram?.WebApp;
-  const load=useCallback(async()=>{
-    const current=await api<State>('/api/state');
-    const [original,work]=await Promise.all([api<Page>('/api/inventory?scope=original&limit=100'),api<Page>('/api/inventory?scope=work&limit=100')]);
+  const load=useCallback(async(credentials:Session)=>{
+    const options={headers:accountHeaders(credentials.account)},current=await api<State>('/api/state',options);
+    const [original,work]=await Promise.all([api<Page>('/api/inventory?scope=original&limit=100',options),api<Page>('/api/inventory?scope=work&limit=100',options)]);
     if (original.revision!==current.revision || work.revision!==current.revision) throw new ApiError(409,'REVISION_CONFLICT');
     setState(current);setLevel(current.level);setPages({original:original.items,work:work.items});
     setMore({original:original.items.length===100,work:work.items.length===100});setSelection([]);
@@ -69,13 +71,15 @@ function App() {
       webApp()?.ready?.(); webApp()?.expand?.();
       const c=await api<{oidc:boolean;mini:boolean}>('/api/config');setConfig(c);
       let s:Session|undefined;
-      try {s=await api<Session>('/api/session');} catch(e) {if (!(e instanceof ApiError && e.status===401)) throw e;}
-      const initData=webApp()?.initData;
-      if (!s && initData && c.mini && !new URLSearchParams(location.search).has('logged_out')) {
-        await api('/auth/mini',post({initData}));s=await api<Session>('/api/session');
+      const initData=webApp()?.initData,loggedOut=new URLSearchParams(location.search).has('logged_out');
+      if (!loggedOut) {
+        // A valid cookie may belong to another Telegram account in a shared
+        // WebView cookie jar. Bind the signed Mini context BEFORE any data.
+        if (initData && c.mini) await api('/auth/mini',post({initData}));
+        try {s=await api<Session>('/api/session');} catch(e) {if (!(e instanceof ApiError && e.status===401)) throw e;}
       }
       if (s) {
-        setSession(s);await load();setMessage('Все изменения сохранены');
+        setSession(s);await load(s);setMessage('Все изменения сохранены');
         try {const stored=sessionStorage.getItem('chm_pending_'+s.account);if (stored) {setPending(JSON.parse(stored) as Command);setMessage('Есть команда с неподтверждённым результатом. Безопасно повторите её.');}} catch { /* Storage may be unavailable in a WebView. */ }
       } else setMessage(new URLSearchParams(location.search).get('login')==='cancelled'?'Вход отменён. Можно попробовать снова.':c.oidc?'Войдите через Telegram, чтобы открыть свои данные.':c.mini?'Для входа откройте Mini App в Telegram.':'Вход через Telegram пока не настроен. Личные данные недоступны.');
     })().catch(e=>setProblem(explain(e))).finally(()=>setLoading(false));
@@ -98,11 +102,14 @@ function App() {
     lock.current=true;setBusy(true);setProblem('');setMessage('Сохраняем…');remember(command);
     let committed=false;
     try {
-      await api('/api/commands',post(command,session.csrf));
+      // Another tab may rotate the cookie for the same account; refresh CSRF
+      // while the account precondition prevents adopting a different owner.
+      const credentials=await api<Session>('/api/session',{headers:accountHeaders(session.account)});setSession(credentials);
+      await api('/api/commands',post(command,credentials.csrf,session.account));
       committed=true;
       // A replay may describe an older revision. Read current committed data.
       remember();setMessage('Изменения сохранены. Загружаем данные…');
-      await load();setMessage('Все изменения сохранены');return true;
+      await load(session);setMessage('Все изменения сохранены');return true;
     } catch(e) {
       if (committed) {setConflict(true);setMessage('Изменения сохранены');if(e instanceof ApiError&&e.status===401)readError(e);else setProblem('Не удалось загрузить обновлённый набор. Загрузите сохранённые данные перед следующим действием.');return true;}
       if (e instanceof ApiError && e.status===401) {setSession(undefined);setState(undefined);setMessage(explain(e));setProblem('После входа можно безопасно подтвердить прежнюю команду.');return false;}
@@ -115,15 +122,15 @@ function App() {
     } finally {lock.current=false;setBusy(false);}
   }
   async function refresh() {
-    if (busy) return;
+    if (busy||!session) return;
     setBusy(true);setProblem('');
-    try {await load();setConflict(false);setMessage(pending?'Данные загружены; результат команды ещё нужно подтвердить повтором.':'Сохранённые данные загружены');}
+    try {await load(session);setConflict(false);setMessage(pending?'Данные загружены; результат команды ещё нужно подтвердить повтором.':'Сохранённые данные загружены');}
     catch(e) {readError(e);} finally {setBusy(false);}
   }
   async function nextPage() {
-    if (!state || busy) return;setBusy(true);
+    if (!state || !session || busy) return;setBusy(true);
     try {
-      const items=pages[scope], p=await api<Page>('/api/inventory?scope='+scope+'&limit=100&after='+encodeURIComponent(items.at(-1)?.id??''));
+      const items=pages[scope], p=await api<Page>('/api/inventory?scope='+scope+'&limit=100&after='+encodeURIComponent(items.at(-1)?.id??''),{headers:accountHeaders(session.account)});
       if (p.revision!==state.revision) {setConflict(true);throw new Error('REVISION_CONFLICT');}
       setPages(prev=>({...prev,[scope]:[...prev[scope],...p.items]}));setMore(prev=>({...prev,[scope]:p.items.length===100}));
     } catch(e) {if(e instanceof Error&&e.message==='REVISION_CONFLICT')setProblem('Набор изменился. Загрузите сохранённые данные.');else readError(e);} finally {setBusy(false);}
@@ -145,7 +152,7 @@ function App() {
   const disabled=busy||!!pending||conflict;
   if (!session || !state) return <main className="login"><p className="eyebrow">CHEAPSHOT MODS</p><h1>Ваш инвентарь.<br/>Ваш эксперимент.</h1><p className="mods" aria-hidden="true">🅾 💢 💚 🧿</p><p role="status">{loading?'Проверяем вход…':message}</p>{problem&&<p role="alert">{problem}</p>}{!loading&&config?.oidc&&<a className="button" href="/auth/oidc/start">Войти через Telegram</a>}{!loading&&config?.mini&&webApp()?.initData&&<button onClick={()=>{location.href='/';}}>Войти в Mini App</button>}{!loading&&<button className="secondary" onClick={()=>location.reload()}>Повторить подключение</button>}<p className="note">Внесите моды, примерьте экипировку и рассчитайте крафт. Личная работа сохраняется после входа.</p></main>;
   return <main>
-    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {await api('/auth/logout',post({},session.csrf));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){if(e instanceof ApiError&&e.status===401){if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}else setProblem(explain(e));}})()}>Выйти</button></header>
+    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {const current=await api<Session>('/api/session',{headers:accountHeaders(session.account)});await api('/auth/logout',post({},current.csrf,session.account));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){if(e instanceof ApiError&&e.status===401){if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}else setProblem(explain(e));}})()}>Выйти</button></header>
     <div className="save" role="status">{message}</div>
     {problem&&<div className="notice" role="alert">{problem}</div>}
     {pending&&<button disabled={busy} onClick={()=>void send(pending.action,pending)}>Повторить ту же команду</button>}
