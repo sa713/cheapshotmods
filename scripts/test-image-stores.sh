@@ -39,11 +39,12 @@ PY
 start() {
   local mode="$1"
   "${outer[@]}" volume create --label cheapshotmods.task=TASK-003-R6 "$prefix-$mode-data" >/dev/null
-  local mounts=(--mount "type=volume,source=$prefix-$mode-data,target=/var/lib/docker" --mount "type=bind,source=$work,target=$work" --mount "type=bind,source=$bundle,target=$bundle,readonly" --mount "type=bind,source=$scripts,target=$scripts,readonly")
+  # The official DinD wrapper mounts a fresh /tmp; keep bootstrap inputs outside it.
+  local mounts=(--mount "type=volume,source=$prefix-$mode-data,target=/var/lib/docker" --mount "type=bind,source=$work,target=/r6" --mount "type=bind,source=$bundle,target=/r6/bundle,readonly" --mount "type=bind,source=$scripts,target=/r6/scripts,readonly")
   if [[ -n "${CODEX_PROXY_CERT:-}" ]]; then
-    mounts+=(--mount "type=bind,source=/etc/ssl/certs/ca-certificates.crt,target=/etc/ssl/certs/ca-certificates.crt,readonly" --mount "type=bind,source=$CODEX_PROXY_CERT,target=$work/session.crt,readonly")
+    mounts+=(--mount "type=bind,source=/etc/ssl/certs/ca-certificates.crt,target=/etc/ssl/certs/ca-certificates.crt,readonly" --mount "type=bind,source=$CODEX_PROXY_CERT,target=/r6/session.crt,readonly")
   fi
-  "${outer[@]}" run -d --privileged --name "$prefix-$mode" --label cheapshotmods.task=TASK-003-R6 "${mounts[@]}" -e HTTP_PROXY -e HTTPS_PROXY -e NO_PROXY -e http_proxy -e https_proxy -e no_proxy "$dind" dockerd --host=unix:///var/run/docker.sock --config-file "$work/$mode.json" >/dev/null
+  "${outer[@]}" run -d --privileged --name "$prefix-$mode" --label cheapshotmods.task=TASK-003-R6 "${mounts[@]}" -e HTTP_PROXY -e HTTPS_PROXY -e NO_PROXY -e http_proxy -e https_proxy -e no_proxy "$dind" dockerd --host=unix:///var/run/docker.sock --config-file "/r6/$mode.json" >/dev/null
   local ready=false
   for attempt in {1..40}; do
     if "${outer[@]}" exec "$prefix-$mode" docker info >/dev/null 2>&1; then ready=true; break; fi
@@ -54,7 +55,7 @@ start() {
 inside() {
   local mode="$1"; shift
   local envs=()
-  if [[ -n "${CODEX_PROXY_CERT:-}" ]]; then envs=(-e "CODEX_PROXY_CERT=$work/session.crt"); fi
+  if [[ -n "${CODEX_PROXY_CERT:-}" ]]; then envs=(-e "CODEX_PROXY_CERT=/r6/session.crt"); fi
   "${outer[@]}" exec "${envs[@]}" "$prefix-$mode" "$@"
 }
 git -C "$scripts/.." show cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb:deploy/chm.sh > "$work/legacy-chm.sh"
@@ -65,14 +66,15 @@ for mode in classic containerd; do
   PATH="$work/$mode:$PATH" python3 "$bundle/image-proof.py" loaded "$bundle/manifest.json"
   PATH="$work/$mode:$PATH" python3 "$scripts/image-store-observation.py" "$bundle" "$evidence/$mode.json" "$mode"
   if [[ "$mode" == classic ]]; then
-    inside "$mode" bash "$scripts/test-legacy-update.sh" "$bundle" "$work/legacy-chm.sh"
+    inside "$mode" bash /r6/scripts/test-legacy-update.sh /r6/bundle /r6/legacy-chm.sh
   fi
-  inside "$mode" bash "$scripts/test-external.sh" "$bundle"
+  inside "$mode" bash /r6/scripts/test-external.sh /r6/bundle
 done
 # Export the SAME verified images from containerd; never rebuild/re-sign proof.
 PATH="$work/containerd:$PATH" docker image save "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["app_image"])' "$bundle/manifest.json")" "$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["proxy_image"])' "$bundle/manifest.json")" | gzip -1 > "$work/containerd-export.tar.gz"
 python3 "$bundle/image-proof.py" archive "$bundle/manifest.json" "$work/containerd-export.tar.gz"
 # A fresh classic fixture proves reverse import without existing cached images.
+"${outer[@]}" logs "$prefix-classic" > "$evidence/classic-first-daemon.log" 2>&1
 "${outer[@]}" rm -f "$prefix-classic" >/dev/null
 "${outer[@]}" volume rm "$prefix-classic-data" >/dev/null
 start classic
