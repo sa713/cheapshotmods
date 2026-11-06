@@ -162,52 +162,6 @@ ingress('stage')
 assert caddy.read_bytes().count(b'# BEGIN CHEAPSHOT MODS') == 1
 assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 neighbours()
-# Lifecycle update uses a separately labelled synthetic version of the real app.
-update = work/'update-bundle'
-update.mkdir()
-for path in bundle.iterdir():
-    if path.is_file() and path.name not in ('images.tar.gz', 'manifest.json', 'SHA256SUMS'):
-        shutil.copyfile(path, update/path.name)
-new_sha = hashlib.sha1(str(work).encode()).hexdigest()
-new_image = 'cheapshotmods:'+new_sha
-write(work/'update-image', new_image)
-run('docker', 'build', '-q', '-t', new_image, '-', input=f'FROM {app_image}\nENV BUILD_SHA={new_sha}\nLABEL org.opencontainers.image.revision={new_sha}\n'.encode())
-manifest = json.loads((bundle/'manifest.json').read_text())
-manifest.update(source_sha=new_sha, app_image=new_image, app_image_id=json.loads(docker('image', 'inspect', new_image))[0]['Id'])
-write(update/'manifest.json', manifest)
-saved_tar = run('docker', 'image', 'save', new_image, manifest['proxy_image']).stdout
-import gzip
-(update/'images.tar.gz').write_bytes(gzip.compress(saved_tar, compresslevel=1))
-write(update/'SHA256SUMS', ''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(update.iterdir()) if p.is_file() and p.name != 'SHA256SUMS'))
-before_update = state()
-chm('update', root, update)
-assert state() == before_update
-assert json.loads(request('/version')[1])['version'] == new_sha
-new_meta = dict(line.split('=', 1) for line in (root/'current.env').read_text().splitlines())
-for k in ('CHM_PROXY_MODE', 'CHM_ORIGIN', 'CHM_EXTERNAL_NETWORK', 'CHM_APP_ALIAS'):
-    assert new_meta[k] == meta[k]
-chm('rollback', root)
-assert state() == before_update and json.loads(request('/version')[1])['version'] == version
-assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
-neighbours()
-# Origin/mode drift, missing network and disk pressure fail before transitions.
-installed_config = root/'config.env'
-config_before = installed_config.read_bytes()
-for modified in [config_before.replace(b'94.228.170.13', b'94.228.170.14'), config_before.replace(b'CHM_PROXY_MODE=external', b'CHM_PROXY_MODE=standalone').replace(origin.encode(), b'https://example.com')+b'CADDY_EMAIL=fixture@example.com\n']:
-    installed_config.write_bytes(modified)
-    assert chm('restart', root, ok=False).returncode != 0
-    assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
-installed_config.write_bytes(config_before)
-metadata_path = root/'current.env'
-metadata_before = metadata_path.read_bytes()
-metadata_path.write_bytes(metadata_before.replace(meta['CHM_EXTERNAL_NETWORK'].encode(), b'nonexistent-chm-fixture-network'))
-assert chm('restart', root, ok=False).returncode != 0
-metadata_path.write_bytes(metadata_before)
-write(fake/'df', '#!/bin/sh\nprintf "Filesystem 1024-blocks Used Available Capacity Mounted\\nfixture 9999999 9999998 1 100%% /\\n"\n')
-(fake/'df').chmod(0o700)
-assert run('bash', str(bundle/'chm.sh'), 'restore', str(root), str(backup), ok=False, env={**os.environ, 'PATH': str(fake)+':'+os.environ['PATH']}).returncode != 0
-(fake/'df').unlink()
-assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 assert request('/health')[:2] == (200, b'{"status":"ok"}')
 assert json.loads(request('/version')[1])['version'] == version
 assert request('/api/state')[0] == 401
@@ -268,6 +222,52 @@ chm('rollback', root)
 assert state()['level'] == '200'
 assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 neighbours()
+# Lifecycle update uses a separately labelled synthetic version of the real app.
+update = work/'update-bundle'
+update.mkdir()
+for path in bundle.iterdir():
+    if path.is_file() and path.name not in ('images.tar.gz', 'manifest.json', 'SHA256SUMS'):
+        shutil.copyfile(path, update/path.name)
+new_sha = hashlib.sha1(str(work).encode()).hexdigest()
+new_image = 'cheapshotmods:'+new_sha
+write(work/'update-image', new_image)
+run('docker', 'build', '-q', '-t', new_image, '-', input=f'FROM {app_image}\nENV BUILD_SHA={new_sha}\nLABEL org.opencontainers.image.revision={new_sha}\n'.encode())
+manifest = json.loads((bundle/'manifest.json').read_text())
+manifest.update(source_sha=new_sha, app_image=new_image, app_image_id=json.loads(docker('image', 'inspect', new_image))[0]['Id'])
+write(update/'manifest.json', manifest)
+saved_tar = run('docker', 'image', 'save', new_image, manifest['proxy_image']).stdout
+import gzip
+(update/'images.tar.gz').write_bytes(gzip.compress(saved_tar, compresslevel=1))
+write(update/'SHA256SUMS', ''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(update.iterdir()) if p.is_file() and p.name != 'SHA256SUMS'))
+before_update = state()
+chm('update', root, update)
+assert state() == before_update
+assert json.loads(request('/version')[1])['version'] == new_sha
+new_meta = dict(line.split('=', 1) for line in (root/'current.env').read_text().splitlines())
+for k in ('CHM_PROXY_MODE', 'CHM_ORIGIN', 'CHM_EXTERNAL_NETWORK', 'CHM_APP_ALIAS'):
+    assert new_meta[k] == meta[k]
+chm('rollback', root)
+assert state() == before_update and json.loads(request('/version')[1])['version'] == version
+assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
+neighbours()
+# Origin/mode drift, missing network and disk pressure fail before transitions.
+installed_config = root/'config.env'
+config_before = installed_config.read_bytes()
+for modified in [config_before.replace(b'94.228.170.13', b'94.228.170.14'), config_before.replace(b'CHM_PROXY_MODE=external', b'CHM_PROXY_MODE=standalone').replace(origin.encode(), b'https://example.com')+b'CADDY_EMAIL=fixture@example.com\n']:
+    installed_config.write_bytes(modified)
+    assert chm('restart', root, ok=False).returncode != 0
+    assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
+installed_config.write_bytes(config_before)
+metadata_path = root/'current.env'
+metadata_before = metadata_path.read_bytes()
+metadata_path.write_bytes(metadata_before.replace(meta['CHM_EXTERNAL_NETWORK'].encode(), b'nonexistent-chm-fixture-network'))
+assert chm('restart', root, ok=False).returncode != 0
+metadata_path.write_bytes(metadata_before)
+write(fake/'df', '#!/bin/sh\nprintf "Filesystem 1024-blocks Used Available Capacity Mounted\\nfixture 9999999 9999998 1 100%% /\\n"\n')
+(fake/'df').chmod(0o700)
+assert run('bash', str(bundle/'chm.sh'), 'restore', str(root), str(backup), ok=False, env={**os.environ, 'PATH': str(fake)+':'+os.environ['PATH']}).returncode != 0
+(fake/'df').unlink()
+assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 # A browser/curl attacker cannot change the observed IP through Caddy forwarding.
 assert any(request('/auth/mini', 'POST', {'initData': init_data()}, {'Origin': origin, 'X-Forwarded-For': '198.51.100.'+str(i)})[0] == 429 for i in range(1, 26))
 ingress('rollback')
