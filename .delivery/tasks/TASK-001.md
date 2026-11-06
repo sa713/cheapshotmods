@@ -1,6 +1,6 @@
 # TASK-001 — техническая основа и проверяемые механизмы калькулятора
 
-- Статус: review; повторный отзыв Claude оказался blocked по старому пакету f7215149. Исправления этим отзывом не проверены. Management подготовил новый FIXES-R2 для снимка8dfa8cc; следующий этап — независимый анализ по правильному пакету. Слияние и выпуск не разрешены.
+- Статус: ready — возврат developer на корректировку подтверждённого G1 и небольших N1/N2 по поручению ниже. Анализ Claude исправлений F1–F6 принят в своей области; общая техническая приёмка и независимый native-прогон ещё не завершены. Слияние и выпуск не разрешены.
 - Риск: повышенный — авторизация, разделение данных игроков и атомарное изменение инвентаря; реальные данные/секреты пока не используются.
 - Требования: [PRODUCT.md](../../PRODUCT.md), S-01–S-06; [технические решения](../TECHNICAL.md); [полномочия](../PROJECT.md).
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -9,6 +9,10 @@
 - PR: https://github.com/sa713/cheapshotmods/pull/1, продолжать эту ветку и PR; не создавать конкурирующую реализацию. При технической невозможности продолжить ветку передать management точное ограничение и новый связанный PR.
 - Зависимости: подключение стандарта сохранено в исходном SHA. Следующее продвижение ветки, добавляющее только эту карточку/состояние, является ожидаемой подготовкой; проверить diff и продолжить с фактического HEAD без reset/force push. Любые другие изменения сначала сопоставить с заданием. Других активных реализаций при подготовке нет.
 - Внешние блокеры: настоящий бот, HTTPS-адрес и целевой хост не предоставлены. Они не требуются для локальных/CI-критериев этой задачи; живой Telegram и доступный с телефона стенд остаются неподтверждёнными.
+
+## Даты и исторические решения
+
+Новые даты management указаны в Europe/Moscow (UTC+3). Исторические даты авторских передач/отзывов сохраняются как в исходнике; известная запись management в UTC ниже явно приведена к московской дате. Поздние решения заменяют помеченные исторические выводы, не перенося их accepted на новый код.
 
 ## Цель и границы
 
@@ -181,6 +185,8 @@
 
 ## Итог технической приёмки — management, 2026-11-05
 
+> Исторический раздел, заменён решениями «Восстановление маршрута» и текущим поручением после FIXES-R2 ниже. Его accepted относится только к указанным старым SHA. Фраза о прекращении ручной передачи не действует: developer работает в отдельной сессии Codex по поручению management. Текущий статус указан в начале карточки и STATE.
+
 - Отдельный developer выполнил F1–F6 из текущего управляющего чата, отдельный reviewer проверил результат независимо от автора. [Единый отчёт reviewer](../reviews/TASK-001-independent-review.md) сохранён без изменения. Его заключение — **accepted** для функционального кода `654f90cb6c7c4b0919112065fef084d5c5a0581a` и тождественных кодовых файлов передачи `f952eebece24b8200377b3b258cdd29cdb10e7ae`.
 - Management прочитал заключение и сопоставил его с фактическими GitHub-логами. Самостоятельно подтверждены 21/21 в новом clean verify, browser1/1, все6 собственных сценариев reviewer, реальный HTTP после восстановления, контрольный assertion с22tests/21passed/1deliberatefailed и ERR_ASSERTION. Конкретные логи и область каждого запуска — в отчёте; это не голосование моделей и не пересказ одной самопроверки автора.
 - Штатный CI передачи f952: [run42098672680](https://github.com/sa713/cheapshotmods/actions/runs/42098672680), [verify127495373135](https://github.com/sa713/cheapshotmods/actions/runs/42098672680/job/127495373135) и [container127495373411](https://github.com/sa713/cheapshotmods/actions/runs/42098672680/job/127495373411) — success. Image ID `sha256:b71124abba095daa79e4a60016e8b8793c183a1d16dfa53a00fb08ed81ceafb4`, revision f952; образ собирался и проверялся в CI, во внешний registry не публиковался.
@@ -231,7 +237,9 @@
 - delivery: pending — этап Codex выполнен, результат передан management для приёмки исправленного кода; интеграция в main/внешний выпуск не выполнялись.
 - Последнее подтверждение: отдельная сессия Codex после поручения по восстановленному маршруту; проверенный код, собственные команды и фактические CI указаны в новом разделе выше. Следующий ответственный — management.
 
-## Проверка передачи Codex — management, 2026-11-05 (UTC)
+## Проверка передачи Codex — management, 2026-11-06 (Europe/Moscow)
+
+Дата приведена к Europe/Moscow (UTC+3); исходная запись была озаглавлена «2026-11-05 (UTC)». Содержание и версии проверки сохранены.
 
 **Результат:** блокирующих дефектов в проверенном изменении не обнаружено. Передача developer достаточна для отдельного независимого ревью; TASK-001 остаётся `review`. Это собственное исполнение проверок management и целевая проверка нового F4, не независимая общая приёмка F1–F6 в той же управленческой сессии, ранее участвовавшей в реализации.
 
@@ -256,3 +264,73 @@
 - Новый [review-input](../reviews/TASK-001-review-input.md): **FIXES-R2 / 8dfa8cc / f7215149**, 570081bytes, SHA-256 `28a62b902299eb1933d88b2f20a6cb8a65419c5496d42874f58a1b9e297a5672`. Готовое вложение владельцу называется **TASK-001-FIXES-R2-8dfa8cc-2026-11-06.md**. Полные44 исходника кроме неизменённого lock; lock blob/SHA указаны. Состав и границы проверены; текст прежнего blocked-отзыва включён без изменений.
 - CI опубликованного8dfa8cc: [run42120202318](https://github.com/sa713/cheapshotmods/actions/runs/42120202318), verify127570253292/container-smoke127570252654 success, обязательные шаги не skipped. В этом этапе сверены metadata/steps; прошлые локальные запуски и логи293ffb5 не переименованы в новое исполнение. Повторять неизменённый код только из-за неверно выбранного вложения оснований нет.
 - Следующий шаг: владелец прикладывает новый файл FIXES-R2 в новый чат Claude и возвращает Markdown-отчёт. В начале отчёта ожидается маркер FIXES-R2/8dfa8cc/f7215149. Management оценит выводы и при доказанных дефектах сформирует поручение отдельной сессии Codex. Автозапуск reviewer, самостоятельная реализация, merge/release не выполняются.
+
+## Разбор FIXES-R2 — management, 2026-11-06 (Europe/Moscow)
+
+- [Исходный отзыв Claude](../reviews/TASK-001-claude-rereview-FIXES-R2.md) сохранён без изменений:25404bytes, SHA-256 `91ea345e07e89f512b97e446be8b964c2b8ee77f839eea373f7ee8de6996c84b`. Маркер FIXES-R2/8dfa8cc/f7215149, пакет570081bytes/SHA-25628a62b90… совпали с отправленным. Первый blocked-отзыв остаётся историческим и не подменяется новым файлом.
+- **Принято в указанной области:** независимый анализ требований/кода F1–F6 и регрессий на8dfa8cc, функционально4cdcd2e. Новых блокирующих дефектов именно F1–F6 Claude не заявил. Это не общая техническая приёмка. Его11tests исполнялись на Node22 с самодельным shim вместо native better-sqlite3; они не закрывают проверку настоящего драйвера, Fastify/jose/Docker/Chromium.
+- **Независимость исполнений:** существовавший внутренний отчёт на654f сохранён; он не охватывает новый F4 и не завершает восстановленный маршрут. Обобщение Claude «ни у кого вне цепочки» не принимается как проверенный факт обо всей истории. Практический остаток для актуального кода — отдельный reviewer в закреплённой native-среде. После предстоящей правки проверять нужно новую версию; предыдущие логи не переименовываются в новый запуск.
+- **N1 подтверждено чтением:** worker и backup CLI в tests используют dist, а npm test не гарантирует актуальную сборку. Canonical verify сначала выполняет tsc-b, поэтому текущий CI этим не опровергнут. Берём маленькое исправление в следующий цикл: будущий независимый прогон не должен зависеть от старого dist.
+- **N2 подтверждено чтением:** workflow сейчас явно задаёт bash и корректный pipefail; probe сам жёстко задаёт эти флаги и не обнаружит удаление workflow defaults. Текущий CI не признан ошибочным. В том же малом цикле сделать шаг замера самодостаточным и проверить отрицательный путь.
+- **N3 исправлено management:** устаревший итог приёмки/разрешение внутренних исполнителей явно помечены как заменённые, известная UTC-запись переведена на Europe/Moscow с сохранением исходной даты. Неподтверждённые часовые пояса чужих исторических отчётов не угадываются; исходные отзывы не редактируются.
+- **G1 подтверждено native-диагностикой и уточнено последствие.** better-sqlite3/lib/database.js13.0.3 делает filenameGiven.trim(), Store создаёт каталог по raw path и открывает Database без readonly/fileMustExist. SOURCE CLI проверяется через raw existsSync. На Node24.22.1/native13.0.3 Store с trailing space открыл имя без пробела. При двух файлах requestedSOURCE с owner222 и trimmedSOURCE с owner111 команда успешно скопировала111. Если существует только requestedSOURCE с owner444, команда создала новую БД под обрезанным именем и успешно скопировала пустое состояние. Исходные файлы фикстур сохранились. Утверждение в отзыве, что источник только читается, для Store-конструктора слишком сильное: возможны создание другой БД и миграции. Реальные данные не использовались, продуктовый код не менялся.
+- **Решение по G1:** устранить до общей технической приёмки. Успешная пустая/чужая копия — существенная ошибка сохранности, даже при редкой ошибке конфигурации. Исходный F1–F6 accepted остаётся scoped; G1 оформлен конкретной корректировкой существующего механизма пути БД. Публикация с известным G1 не допускается. До исправления эксплуатация разрешена только с однозначными путями без пробельных символов по краям; новых живых запусков не поручено.
+- GitHub8dfa8cc→c5bf25e содержит только5 документов. CI [c5bf25e/run42178610053](https://github.com/sa713/cheapshotmods/actions/runs/42178610053) completed/success по metadata. В этом этапе заново весь verify/Docker не исполнялся; новая собственная проверка — только G1 ниже.
+
+### Воспроизведение G1 management
+
+Команда `node manager-g1-probe.mjs` → exit0 на Node24.22.1/native better-sqlite3 13.0.3, функциональный код4cdcd2e. Два запуска: первый подтвердил подмену источника; второй добавил случай отсутствующего trimmedSOURCE и подтвердил новую пустую БД. Fixture-каталог удалён в finally. Это диагностический код вне продуктового дерева; локальные пути импортов отражают проверяемый снимок. Изменённые исходники приложения им не подменялись.
+
+~~~~~~javascript
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,existsSync,renameSync,copyFileSync,readFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+import {createHash} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {Store} from './manager-review-task001/apps/server/dist/store.js';
+const require=createRequire(new URL('./manager-review-task001/package.json',import.meta.url));
+const Database=require('better-sqlite3');assert.equal(require('better-sqlite3/package.json').version,'13.0.3');
+const dir=mkdtempSync(join(tmpdir(),'chm-manager-g1-'));
+const hash=p=>createHash('sha256').update(readFileSync(p)).digest('hex');
+const owners=p=>{const db=new Database(p,{readonly:true});try{return db.prepare('SELECT owner FROM players ORDER BY owner').all().map(x=>x.owner);}finally{db.close();}};
+try {
+ const configured=join(dir,'configured.sqlite ');
+ const s=new Store(configured);s.player('333');const opened=s.db.pragma('database_list')[0].file;s.close();
+ assert.equal(existsSync(configured),false);assert.equal(opened,configured.trim());assert.deepEqual(owners(configured.trim()),['333']);
+ const source=join(dir,'source.sqlite'),literal=source+' ',stage=join(dir,'stage.sqlite'),target=join(dir,'copy.sqlite');
+ for(const [p,owner] of [[source,'111'],[stage,'222']]){const db=new Store(p);db.player(owner);db.close();}
+ renameSync(stage,literal);const a=hash(source),b=hash(literal);
+ const cli=fileURLToPath(new URL('./manager-review-task001/apps/server/dist/backup.js',import.meta.url));
+ const result=spawnSync(process.execPath,[cli,literal,target],{encoding:'utf8',timeout:10000});assert.equal(result.status,0,result.stderr);
+ assert.deepEqual(owners(target),['111']);
+ copyFileSync(literal,stage);assert.deepEqual(owners(stage),['222']);
+ assert.equal(hash(source),a);assert.equal(hash(literal),b);
+ const onlyRaw=join(dir,'only-raw.sqlite '),onlyStage=join(dir,'only-stage.sqlite'),emptyTarget=join(dir,'empty-copy.sqlite');
+ const v=new Store(onlyStage);v.player('444');v.close();renameSync(onlyStage,onlyRaw);
+ const rawHash=hash(onlyRaw);assert.equal(existsSync(onlyRaw.trim()),false);
+ const second=spawnSync(process.execPath,[cli,onlyRaw,emptyTarget],{encoding:'utf8',timeout:10000});assert.equal(second.status,0,second.stderr);
+ assert.deepEqual(owners(emptyTarget),[]);assert.equal(existsSync(onlyRaw.trim()),true);assert.equal(hash(onlyRaw),rawHash);
+ console.log(JSON.stringify({node:process.version,driver:'better-sqlite3 13.0.3 native',codeSHA:'4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b',storeOpensTrimmedName:true,cliRawSourceOwner:'222',cliBackupOwner:'111',sourceFilesUnchanged:true,whenTrimmedSourceAbsent:{unexpectedSourceFileCreated:true,successfulBackupHasNoPlayers:true,requestedLiteralSourceHasOwner:'444'},result:'G1 confirmed on isolated fixtures'},null,2));
+}finally{rmSync(dir,{recursive:true,force:true});}
+
+~~~~~~
+
+Результат: storeOpensTrimmedName=true; cliRawSourceOwner=222; cliBackupOwner=111; sourceFilesUnchanged=true; whenTrimmedSourceAbsent.unexpectedSourceFileCreated=true; successfulBackupHasNoPlayers=true при requestedLiteralSourceHasOwner=444.
+
+## Поручение Codex: корректировка G1/N1/N2 перед независимой приёмкой — management, 2026-11-06
+
+**Роль — developer, отдельная сессия Codex.** Это ограниченная корректировка TASK-001, не новая пользовательская функциональность и не независимое ревью. Management в текущем чате функциональный код не реализует. После исправления понадобится отдельная сессия reviewer вне реализации.
+
+**Версия и полномочия.** Репозиторий sa713/cheapshotmods, существующая ветка chm-001-foundation, PR №1. Исходный подтверждённый HEAD `c5bf25eb3302502a0c65fffabd3ed163a98ec140`, функциональный код `4cdcd2e36b1c096dd6057f83c3ce66e8f5879c4b`. Следующий management-коммит с этим поручением меняет только документы. Восстанови актуальный HEAD/чистоту и проверь разницу; при чужих функциональных изменениях сопоставь их с поручением, без reset/force push. Полный PRODUCT, стандарт и исходные отзывы сохранить. Новые функции/инфраструктура/расходы/бот-настройки/merge/release не поручены.
+
+**Прочитать:** AGENTS.md, закреплённые START/WORKFLOW/роль developer, PROJECT, PRODUCT, актуальный TASK-001 и RUNBOOK, полный FIXES-R2 отзыв Claude и этот разбор. Прежние принятые F1–F6 и nonce не ослаблять.
+
+1. **G1 — устранить неоднозначные пути до побочных действий.** Store и конфигурация DATABASE_PATH должны отвергать крайние пробельные символы, которые trim удаляет, без молчаливой нормализации. Backup CLI должен проверять SOURCE и TARGET до открытия SQLite/создания каталогов и файлов. Пустой/целиком пробельный путь файла — явный отказ; существующее использование `:memory:` в Store для тестов сохранить. Внутренние пробелы в допустимых путях сохранить. Минимально достаточная общая проверка предпочтительнее разъезжающихся правил; схемы/игровую модель/поведение корректных путей не переписывать. Ранее исправленные0600/exclusive creation/cleanup/trim-target гарантии остаются в силе.
+2. **Регрессии G1 на настоящем драйвере.** Store(path с краевым whitespace), запуск main с таким DATABASE_PATH и реальный backup CLI с таким SOURCE должны отказать до mkdir/SQLite/target. Проверить trailing и leading whitespace, хотя бы space/tab/NBSP; обычные имена/внутренние пробелы проходят. Для CLI сделать два различимых файла (trimmed/literal) и сценарий только literal с отсутствующим trimmed; после отказа оба исходника побайтово/по данным прежние, target и новый trimmedSOURCE не появились. Не открывать literal через драйвер для проверки его содержимого — тот сам trim-ит путь; использовать hash или безопасное переименование/копию фикстуры. Неверный TARGET также отклоняется до открытия SOURCE. Чистая SQLite/синтетические данные, временные каталоги и процессы удаляются.
+3. **N1 — npm test сам готовит актуальный dist.** Обеспечить воспроизводимое выполнение штатного npm test после чистого checkout и после изменения src при оставшемся старом dist. Проверить также удаление dist при сохранённых tsbuildinfo: команда не должна полагаться на старое инкрементальное состояние. Можно выбрать минимальный build-hook или другой подход без смены product-стека. Проверять поведение команды, не писать тест, который лишь ищет строку pretest в package.json. Изменения RUNBOOK/скриптов минимальны.
+4. **N2 — явный pipefail в самом шаге замера.** Сделать pipeline замера независимым от workflow defaults, сохранив ненулевой отказ первого звена. В изолированной копии воспроизвести соответствующий шаг с отрицательным measure и без defaults shell; он обязан завершиться ненулевым кодом, tee не скрывает отказ. Не редактировать продуктовые файлы проверяемой ветки ради probe и не выдавать синтетический probe за реальный замер.
+5. **Самопроверка developer.** Закреплённые Node24.22.1/npm11.9.0 и native better-sqlite3 13.0.3, без shim/подмены зависимостей/отключения install scripts. Чистый `bash scripts/verify.sh`, `npm run test:browser`, полный `bash scripts/container-smoke.sh`, обязательные CI jobs нового HEAD без skipped/подавления отказов. Подтвердить F1 и F2 на настоящих jose/Fastify и сохранение F3–F6; restored volume должен пройти HTTP health/version/состояние/undo/craft. Количество тестов после новых регрессий может вырасти, старые22 не должны исчезнуть. Если среда чего-то не позволяет — точный блокер и непроверенный критерий, а не accepted.
+6. **Передача.** Продолжить существующие ветку и PR №1. Сохранить исходные отчёты, обновить TASK-001/RUNBOOK и PR фактическими изменениями G1/N1/N2, SHA, своими командами/результатами/CI и ограничениями. Не менять исторический пакет FIXES-R2 на новый код под тем же SHA. Вернуть management статус review; accepted/done самостоятельно не выставлять. Своё исполнение developer не называть независимым. Следующий этап после этой передачи — отдельный reviewer с native-средой для новой версии, включая целевые регрессии G1 и исправления N1/N2.
