@@ -1,6 +1,6 @@
 # TASK-002 — полный Cheapshot Mods, готовый к установке на Debian
 
-- Статус: in_progress.
+- Статус: review — готовый кандидат передан management; внешняя установка/живой Telegram ожидают владельца.
 - Основание: решение владельца 2026-11-06 — поручить Codex через Goal закончить весь согласованный функционал; следующее участие владельца после передачи результата — установка на Debian и настройка Telegram-бота.
 - Риск: повышенный — авторизация и сохранность личных инвентарей.
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -9,8 +9,6 @@
 - Требования: [PRODUCT.md](../../PRODUCT.md), S-01–S-06 целиком. Стандарт 1.1.0 / `2ff5fe41b5c91f539dda4fce8944007aa0eb425f`.
 - Основа: [TECHNICAL.md](../TECHNICAL.md), [RUNBOOK.md](../RUNBOOK.md), [PROJECT.md](../PROJECT.md).
 - Зависимость: техническая область TASK-001 принята на основании отдельного [native-review](../reviews/TASK-001-native-review.md). От проверенного им 67e8abe3 до исходной версии изменён только файл этого отчёта; CI исходной версии [успешен](https://github.com/sa713/cheapshotmods/actions/runs/42193551971). Это историческое доказательство основы, не приёмка будущего кода TASK-002.
-
-## Конечная точка
 
 ## План developer (2026-11-06)
 
@@ -21,6 +19,8 @@
 3. Сквозные S-01–S-06 на настоящем HTTP/SQLite с подписанными изолированными фикстурами и криптографическим OIDC.
 4. Изолированная подзадача комплекта Debian (только deploy/packaging/RUNBOOK, без конкурирующей реализации приложения), испытание установки, приватный CI artifact.
 5. Проверки закреплённой среды, CI и отдельный reviewer в новом контексте; исправление доказанных блокирующих замечаний, передача готового кандидата.
+
+## Конечная точка
 
 Передать полностью реализованный и проверенный кандидат для установки: весь мобильный калькулятор, сервер, сохранение, оба механизма Telegram-входа, контейнер и пригодный для получения установочный комплект. Владельцу остаются размещение на своём Debian, передача реальных настроек, настройка выделенного бота и проверка живого входа.
 
@@ -128,3 +128,61 @@
 
 Завершай Goal только по критериям TASK-002, с конкретными SHA, результатами проверок, ссылкой на комплект и готовым NEXT_STEPS. Если обязательный критерий реально недоступен, сохрани выполненное и точный блокер вместо ложной готовности. Не размещай сервис, не меняй BotFather, не создавай расходы и не сливай PR.
 ```
+
+## Отчёт developer — кандидат (2026-11-06)
+
+Проверенный функциональный код: `8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab`. База получена fast-forward с сохранением локального состояния; reset/force push не применялись. Одна реализация приложения; изолированная подзадача подготовила deploy/packaging, отдельный reviewer работает в новом контексте. PRODUCT, закреплённый стандарт, TASK-001 и исходные отзывы сохранены.
+
+Реализованы все рабочие экраны и завершённые операции S-01–S-06: вход/выход/возврат сессии, уровень и точные характеристики, исходные группы всех типов/уровней, правка/удаление/страницы, один эксперимент, preview/крафт/алмазы, примерка 100, отмены и подтверждаемый сброс. Состояние подтверждается после commit; точная команда с прежним key переживает reload/истечение сессии, 409 требует явного чтения. Сохраняется исходный набор и current level. Технические условия входа/сессий/ретенции/диагностики закрыты, политики — в RUNBOOK.
+
+| Критерий / проверка | Доказательство и результат |
+| --- | --- |
+| Закреплённая среда | Node 24.22.1, npm 11.9.0, настоящий better-sqlite3 13.0.3/SQLite 3.53.4; Chromium 156.0.8078.4/Playwright 1.64.1. Builder/runtime Node и Caddy закреплены registry digests. |
+| Clean verify | `NPM_CONFIG_CACHE=/tmp/chm-002-npm XDG_CACHE_HOME=/tmp/chm-002-cache bash scripts/verify.sh`: локально exit 0 на fedb417, 31/31. После R2 локально types/lint/test/build: **33/33**. На итоговом 8f3dd8a clean verify CI и отдельного reviewer: **33/33**, 0 skipped, types/lint/build success. |
+| Полный browser | `PLAYWRIGHT_BROWSERS_PATH=/tmp/chm-002-browsers XDG_CACHE_HOME=/tmp/chm-002-cache npm run test:browser`: локально **12/12** после R2. На итоговом 8f3dd8a CI и независимый прогон: **12/12**, 0 skipped; canonical CI `playwright install --with-deps chromium` success. |
+| Сквозные сценарии | Настоящий HTTP/SQLite, подписи HMAC/RS256, PKCE/state/nonce. Все заданные числовые примеры, 20 цен, 101-й отказ, 2 крафта/2 undo, надетые/результат/текущий level, source isolation/reset, 205 групп страницами, два пользователя/один ID через оба transport, reload/relogin/server restart, lost response после commit+reload+same key, 409, реальный SQLite trigger failure и session expiry прошли. Ввод 128 цифр, производный 129 и характеристики проверены UI/API/reload без Number. |
+| Native container | [CI 42207656769](https://github.com/sa713/cheapshotmods/actions/runs/42207656769): verify и container-smoke **success**, каждый существенный шаг success. Контейнерные restart/WAL backup/новыйvolume restore/HTTP undo/craft, health/version/401, непривилегированный runtime. |
+| Установка | [CI 42207656789](https://github.com/sa713/cheapshotmods/actions/runs/42207656789), debian-kit **success**, build/extract/install/upload success. Чистый Debian 13 amd64, Docker/Compose через локальный socket, Caddy internal TLS, native SQLite, restart, 0600 backup/restore в новый volume, rollback, update с последнимcommit передfreeze и auto recovery при ошибке helper; чужой sentinelvolume сохранён. Debian 12 допускается preflight, но отдельно не испытан. Другие архитектуры/ОС останавливаются до изменений. |
+| Measure/pipeline | `bash scripts/check-measure-pipeline.sh`:17 приошибке, контроль0 безpipefail. `npm run measure`:10000 групп,1млн экземпляров,9007199254740993; p95 последовательных HTTP commit 3,79 мс, peak RSS 117 MiB, DB+WAL 14 571 312 байт на Xeon 8573C / 5 vCPU / 18 008 MiB. Это выборка, не SLA. |
+| Стандарт | `python3 .ai-development/scripts/check.py`:passed/errors 0; PRODUCT/managed files не изменены. |
+| Независимость | Отдельный Codex reviewer, собственные clean verify 33/33, browser 12/12, дополнительные HTTP/browser matrices, миграция 1→2, native installer/container и скачивание CI-комплекта. Единственный отчёт — [TASK-002-code-review.md](../reviews/TASK-002-code-review.md); заключение accepted на 8f3dd8a в области устанавливаемого кандидата, R1/R2/N1/N2 закрыты. |
+
+Подтверждённые исправления в этой задаче:
+
+- R1 — cwd SHA-256 check в CI: первый kit run 42203326111 failed, install/upload skipped; это не выдано за pass.
+- R2 — Mini-контекст другого Telegram ID больше не подменяется существующей cookie. Подписанный initData проверяется до чтений; старое окно не принимает чужую cookie-личность. Нельзя войти по просроченным данным: same-ID resume требует уже действующую сессию и не создаёт/не продлевает SID. Серверные и UI-регрессии, включая invalid/stale/future и logged_out, проходят. **Предыдущий комплект 1d17a64 не использовать для установки**, он предшествует R2; его успешные installer-проверки — только исторические доказательства.
+- N1 — переход к входу после 401 чтений/выхода; N2 — неканонические origin (включая сокращённый/hex/octal IPv4) отклоняются preflight до изменений, без нормализации.
+- Самопроверкой закрыто окно потери новых commit при update: app останавливается до snapshot, регрессия last commit=2001. На vfs первая cold-сборка завершилась ENOSPC при 32 GiB; удалены только созданные ей cache IDs, сокращены слои Dockerfile, повтор успешен. Локальный bf9 build и полный installer прошли, artifact/evidence SHA сохранены; актуальный app проверен отдельно на8f. Драйвер/daemon не менялись, глобальной очистки не было.
+
+### Доступный версионированный комплект
+
+Уже загружен [приватный artifact 13497906207](https://github.com/sa713/cheapshotmods/actions/runs/42207656789/artifacts/13497906207), имя `cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64`, 131 863 144 байт; не expired, срок до 2026-12-06. SHA-256 внешнего ZIP: `7d8962bf92cab5be20ade275c1a2aaab6c1906b40b316ab9ca8f1409f11f826b`. Внутри tar.gz, его `.sha256`, images.tar.gz (app+Caddy), manifest/source SHA/imageIDs/base digests, внутренний SHA256SUMS, chm.sh, compose, Caddyfiles, безопасныйenv и полная README. Это передача через GitHub, а не путь /tmp. Повторная сборка изGit описана в [RUNBOOK](../RUNBOOK.md) и [deploy/README](../../deploy/README.md). Более поздние CI artifacts/HEAD читаются в PR/GitHub; этот SHA — неизменяемое доказательство проверенного кандидата.
+
+Независимо сверены также tar.gz SHA-256 `35ff50ae4c789e18dabdaa1d63416e8ae1328cb934e883674fa9537f7e207877`, app image ID `sha256:b47f03720279c85070da3899032f5ef0eb5ab7847ac65106ccbd6cda5995196d` и все внутренние SHA256SUMS/manifest/operator-файлы. Передаётся именно этот принятый образ; последующие документные коммиты не переименовывают его.
+
+### NEXT_STEPS
+
+На поддержанном Debian 12/13 amd64 сначала установить/проверить Docker>=24/Compose>=2.30 и системные зависимости по [точной инструкции](../../deploy/README.md). Для получения с правом чтения приватного репозитория:
+
+```bash
+gh run download 42207656789 --repo sa713/cheapshotmods --name cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64 --dir kit
+cd kit
+sha256sum --check cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64.tar.gz.sha256
+tar -xzf cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64.tar.gz
+cd cheapshotmods-8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab-linux-amd64
+sha256sum --check SHA256SUMS
+umask 077
+cp env.example config.env
+chmod 600 config.env
+nano config.env
+sudo bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
+sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+```
+
+Заполнить реальные `PUBLIC_BASE_URL` (HTTPS origin без завершающего `/`), `CADDY_EMAIL`; после создания выделенного бота — `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OIDC_CLIENT_ID`, `TELEGRAM_OIDC_CLIENT_SECRET`. Пустой SESSION_SECRET installer приватно сгенерирует; значения не печатать/не класть в Git. Основные порты 80/443, DNS на выбранный хост. BotFather: Allowed URLs=`PUBLIC_BASE_URL` и `PUBLIC_BASE_URL/auth/oidc/callback`, RS256+profile, Main Mini App URL и `/setmenubutton`=`PUBLIC_BASE_URL/`; полная пошаговая инструкция вREADME. После заполнения установленного `/opt/cheapshotmods/config.env` выполнить `sudo bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods` и `check`.
+
+Backup: `sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods`. Restore конкретной согласованной копии: `sudo bash /opt/cheapshotmods/chm.sh restore /opt/cheapshotmods /opt/cheapshotmods/backups/backup-FULL_NAME.sqlite`; затем `check`. Откат прежней пары image+volume: `sudo bash /opt/cheapshotmods/chm.sh rollback /opt/cheapshotmods`; затем `check`. Точные команды обновления, последствия восстановления точки времени и сохранение старых volumes — вREADME. Никаких глобальных prune или down --volumes.
+
+Итог: `implementation: complete`; `independent_review: accepted`; `delivery: verified` в границе комплекта и изолированной установки; `external_installation: pending`; `product_acceptance: pending`. Передано management в review. Обязательные jobs проверенного функционального SHA успешны, комплект доступен; финальный документационный HEAD/его CI читать в PR/GitHub, без циклического переписывания SHA внутри собственного коммита.
+
+Внешняя установка, публичный DNS/ACME/HTTPS, реальный OIDC (включая nonce/отказ/дополнительные поля callback), реальный Mini App/телефон/Secure cookies и два настоящих пользователя **не проверены**. Следующее участие владельца — установка и настройка, затем эта живая проверка. Слияние/production-публикация/BotFather/расходы не выполнялись. Техническая передача кандидата не объявляет production verified.
