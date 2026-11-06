@@ -151,6 +151,15 @@ wrapper.chmod(0o700)
 env = {**os.environ, 'PATH': str(fake)+':'+os.environ['PATH'], 'DROP_OVERRIDE': '1'}
 assert ingress('stage', ok=False, env=env).returncode != 0
 assert caddy.read_bytes() == original and not (caddy.parent/'compose.cheapshotmods.yaml').exists()
+# Changed source env must not silently become a neighbour's new configuration.
+base_bytes = files[0].read_bytes()
+changed = json.loads(base_bytes)
+changed['services']['ip-proxy']['environment']['PRIVATE_LITERAL'] = 'replacement-env'
+write(files[0], changed)
+refused = ingress('stage', ok=False)
+assert refused.returncode != 0 and b'effective proxy environment differs' in refused.stderr
+assert caddy.read_bytes() == original and not (caddy.parent/'compose.cheapshotmods.yaml').exists()
+files[0].write_bytes(base_bytes)
 ingress('stage')
 plan = json.loads((root/'ingress'/'plan.json').read_text())
 assert plan['files'] == list(map(str, files))

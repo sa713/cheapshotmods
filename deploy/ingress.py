@@ -94,6 +94,8 @@ class Ingress:
         args = ['docker', 'compose', '--project-directory', plan['working_dir'], '--project-name', plan['project']]
         for path in plan['files'] + ([str(extra)] if extra else []):
             args.extend(['-f', path])
+        for path in plan.get('env_files', []):
+            args.extend(['--env-file', path])
         return args
 
     def config(self, plan, extra=None):
@@ -133,6 +135,15 @@ class Ingress:
         require(networks == set(container['NetworkSettings']['Networks']), 'rendered networks differ from running proxy')
         image = json.loads(self.docker('image', 'inspect', service['image']))[0]
         require(image['Id'] == container['Image'] == plan['image'], 'proxy image/tag changed; refuse implicit upgrade')
+        def environment(items):
+            return dict(item.split('=', 1) for item in items or [])
+        desired_env = environment(image['Config'].get('Env'))
+        for key, value in (service.get('environment') or {}).items():
+            if value is None:
+                desired_env.pop(key, None)
+            else:
+                desired_env[key] = str(value)
+        require(desired_env == environment(container['Config'].get('Env')), 'effective proxy environment differs; reproduce the original env-file/shell inputs before staging')
         require(service.get('command', container['Config']['Cmd']) == container['Config']['Cmd'], 'proxy command differs from running service')
 
     def validation(self, cfg, plan, caddy_file, name):
@@ -176,16 +187,17 @@ class Ingress:
         running = self.inspect(container_name)
         labels = running['Config']['Labels']
         files = labels['com.docker.compose.project.config_files'].split(',')
+        env_files = [p for p in labels.get('com.docker.compose.project.environment_file', '').split(',') if p]
         working_dir = labels['com.docker.compose.project.working_dir']
         require(labels['com.docker.compose.service'] == 'ip-proxy', 'target must be the existing ip-proxy service')
-        require(all(Path(f).is_absolute() and Path(f).is_file() for f in files), 'all running ordered compose files must exist')
+        require(all(Path(f).is_absolute() and Path(f).is_file() for f in files+env_files), 'all running ordered compose/env files must exist')
         caddy = [m for m in running['Mounts'] if m['Destination'] == '/etc/caddy/Caddyfile']
         require(len(caddy) == 1 and caddy[0]['Type'] == 'bind', 'expected existing Caddyfile bind mount')
         target = Path(caddy[0]['Source'])
         require(not target.is_symlink(), 'Caddyfile symlink not supported')
         override = target.parent/'compose.cheapshotmods.yaml'
         require(not override.exists(), 'override already exists without matching transaction; refuse overwrite')
-        plan = dict(status='staged', container=container_name, original_container=running['Id'], project=labels['com.docker.compose.project'], service='ip-proxy', files=files, working_dir=working_dir, caddy=str(target), override=str(override), image=running['Image'], origin=self.meta['CHM_ORIGIN'], hashes={f: digest(Path(f).read_bytes()) for f in files})
+        plan = dict(status='staged', container=container_name, original_container=running['Id'], project=labels['com.docker.compose.project'], service='ip-proxy', files=files, env_files=env_files, working_dir=working_dir, caddy=str(target), override=str(override), image=running['Image'], origin=self.meta['CHM_ORIGIN'], hashes={f: digest(Path(f).read_bytes()) for f in files+env_files})
         require(len(files) == len(set(files)), 'duplicate running compose file')
         base = self.config(plan)
         self.running_matches(base, plan, running)
