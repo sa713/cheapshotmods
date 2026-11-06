@@ -64,6 +64,9 @@ test('Mini signed context takes precedence over another account cookie, and old 
     assert.equal(login.statusCode,200);const fresh=login.cookies[0]!.value;assert.notEqual(fresh,old.raw);
     assert.equal((await f.inject({url:'/api/state',cookies:{chm_session:old.raw}})).statusCode,401);
     const cookies={chm_session:fresh};assert.equal((await f.inject({url:'/api/state',cookies})).json().level,'1');
+    assert.equal((await f.inject({url:'/api/state',headers:{'x-chm-account':oldAccount}})).statusCode,401);
+    const newAccount=(await f.inject({url:'/api/session',cookies})).json().account;
+    assert.equal((await f.inject({url:'/api/state',cookies,headers:{'x-chm-account':newAccount}})).json().level,'1');
     for(const url of ['/api/state','/api/session','/api/inventory?scope=work']){
       const r=await f.inject({url,cookies,headers:{'x-chm-account':oldAccount}});assert.equal(r.statusCode,401);assert.deepEqual(r.json(),{error:'SESSION_CHANGED'});
     }
