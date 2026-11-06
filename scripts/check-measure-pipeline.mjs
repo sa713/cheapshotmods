@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,readFileSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {URL} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import process from 'node:process';
 import {log} from 'node:console';
@@ -9,7 +10,7 @@ import {log} from 'node:console';
 // Execute the actual workflow step, rather than supplying pipefail in the
 // probe shell. This also detects removing the protection from the workflow.
 const workflow=readFileSync(new URL('../.github/workflows/verify.yml',import.meta.url),'utf8');
-const match=workflow.match(/^      - name: Measure capacity\n        run: \|\n((?:          .*\n)+)/m);
+const match=workflow.match(/^ {6}- name: Measure capacity\n {8}run: \|\n((?: {10}.*\n)+)/m);
 assert.ok(match,'Cannot locate the measurement step');
 const step=match[1].split('\n').filter(line=>line.length).map(line=>line.slice(10)).join('\n')+'\n';
 const dir=mkdtempSync(join(tmpdir(),'chm-pipeline-'));
