@@ -352,7 +352,16 @@ assert run('bash', str(bundle/'chm.sh'), 'restore', str(root), str(backup), ok=F
 (fake/'df').unlink()
 assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 # A browser/curl attacker cannot change the observed IP through Caddy forwarding.
-assert any(request('/auth/mini', 'POST', {'initData': init_data()}, {'Origin': origin, 'X-Forwarded-For': '198.51.100.'+str(i)})[0] == 429 for i in range(1, 26))
+# In <50s there are at most two fixed minute windows: 2*20+1 attempts
+# must hit the per-IP limit, while staying below the global100 limit.
+rate_started = time.monotonic()
+rate_statuses = []
+for i in range(1, 42):
+    assert time.monotonic()-rate_started < 50, 'rate fixture exceeded its two-window bound'
+    rate_statuses.append(request('/auth/mini', 'POST', {'initData': init_data()}, {'Origin': origin, 'X-Forwarded-For': '198.51.100.'+str(i)})[0])
+    if rate_statuses[-1] == 429:
+        break
+assert 429 in rate_statuses, rate_statuses
 ingress('rollback')
 ingress('rollback')
 assert caddy.read_bytes() == original
