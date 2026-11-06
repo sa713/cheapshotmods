@@ -155,3 +155,38 @@ Management прочитал полный отдельный отчёт TASK-003-
 Исправленная последовательность: установить gh из Debian13, интерактивно gh auth login --hostname github.com --git-protocol https --web под аккаунтом с доступом к репозиторию; выполнять последующие команды в subshell с set -euo pipefail и umask077. Скачать run42233523724 в новый приватный mktemp-каталог; сверить tar с закреплённым SHA256 5b6683f43cbb11361b317011ab2ef452e25e1f2e8416533b24a1e9e72aa702d4 и внутренний SHA256SUMS. Скопировать env.external.example (Telegram пока пустой), install → stage → локальный diff → apply → check. При первой ошибке прекратить зависимые шаги, сохранить только обезличенный диагностический вывод. Общий ip-proxy при apply кратко пересоздаётся; остальные сервисы не пересоздаются.
 
 Следующий исполнитель — владелец на Debian; management разбирает возвращённый вывод. Сертификат9443, внешние маршруты/соседи, BotFather и реальные пользователи остаются pending. Комплект/история reviewer не изменены, main/PR не слиты.
+
+## Уточнение владельца: доступ GitHub без CLI — 2026-11-06
+
+Владелец отклонил установку gh и повторную авторизацию CLI: на сервере уже используется доступ к GitHub по ключам, для Cheapshot нужен отдельный проектный ключ. Требование gh не является зависимостью продукта и снимается из операторского маршрута. Ранее предложенные CLI-команды остаются историей передачи, не текущим следующим шагом.
+
+Выбран fine-grained GitHub PAT: owner sa713, Only select repositories → cheapshotmods, Actions Read-only для готового Actions-архива, Contents Read-only для чтения репозитория, Metadata автоматически. Срок90 дней. Это credential GitHub, не Telegram/ключ приложения. Создание выполняется владельцем на https://github.com/settings/personal-access-tokens/new; management не имеет инструмента выдачи личного PAT. Новый ключ ещё не выдан/проверен в этой сессии, существующие токены/SSH других проектов не читать и не переносить.
+
+Постоянный локальный credential-файл: /root/.config/cheapshotmods/github.curl, каталог0700, файл0600; ключ вводится скрытым read, не через argv/history/chat. Скачать выбранный artifact можно штатным curl --config PATH --fail --location по https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13508679421/zip; --location-trusted не использовать. Сверить закреплённый ZIP hash2221cebd7b53f556d17e08ae6c2f5a9662cf411b4a150b01fb5be00ab3c3b871, извлечь ZIP через python3 -m zipfile, затем tar/internal checksums как в принятом комплекте. Release/CI/kit не меняются.
+
+Первый операторский шаг после создания PAT — локально сохранить credential и проверить доступ без вывода ответов/секретов:
+
+```bash
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  install -d -m 700 /root/.config/cheapshotmods
+  read -r -s -p 'Вставь GitHub token: ' CHM_GITHUB_TOKEN
+  printf '\n'
+  test -n "$CHM_GITHUB_TOKEN"
+  printf 'header = "Authorization: Bearer %s"\n' "$CHM_GITHUB_TOKEN" \
+    > /root/.config/cheapshotmods/github.curl
+  chmod 600 /root/.config/cheapshotmods/github.curl
+  unset CHM_GITHUB_TOKEN
+
+  curl --fail --silent --show-error \
+    --config /root/.config/cheapshotmods/github.curl \
+    --output /dev/null \
+    https://api.github.com/repos/sa713/cheapshotmods/actions/runs/42233523724/artifacts
+
+  printf 'Доступ к комплекту Cheapshot подтверждён\n'
+)
+```
+
+Следующий шаг после подтверждения доступа — curl-скачивание принятого архива в новый private каталог и продолжение install/stage/apply/check. gh/git clone/сборка на сервере для скачивания готового artifact не требуются. Источники: GitHub REST Actions artifacts / Download an artifact (Actions read), документация fine-grained PAT.
