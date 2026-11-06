@@ -171,3 +171,11 @@ bash scripts/test-external.sh artifacts/cheapshotmods-FULL_SHA-linux-amd64
 ```
 
 Test-install использует чистый Debian 13 amd64, настоящий Docker/SQLite, loopback HTTPS и отдельную internal CA Caddy, проверяет restart, согласованный backup, restore в новый volume, синтетическую вторую версию для механики update и rollback. Он не является внешним размещением, ACME или живым Telegram; test fixture image не передаётся владельцу. Результаты конкретной исходной версии сохраняются в TASK-002. Реальные DNS/ACME/HTTPS, OIDC/nonce/отказ/дополнительные callback поля и Secure cookie в Telegram WebView остаются явно непроверенными до операторской настройки.
+
+## Текущая передача R6: curl и переносимое image proof
+
+Использовать только [последний раздел TASK-003](tasks/TASK-003.md#итоговая-передача-r6): sourcefbe82aef6008d292515c0efce2fde601c221f3d2, [artifact13522083303](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/artifacts/13522083303). Там exact ZIP/tar hashes и полная последовательность от root: новый private mktemp-каталог → curl с уже существующим `/root/.config/cheapshotmods/github.curl` → обе внешние и13внутренних checksums → install/stage → локальныйdiff → отдельные apply/check. Без sudo/gh/newtoken/git/build и без изменения Docker daemon/storage. Не продолжать после ошибки; неожиданно существующий ROOT не перезаписывать, shared images/cache/volumes не чистить.
+
+Manifest2 проверяет SHA256 raw config и ordered uncompressed layers до import и на фактическом Docker export после load; native IDs — только daemon-local observations. Kit прошёл обе real Docker29.8stores (classic/vfs и containerd/native) и containerdexport→freshclassic, весь external/lifecycle на обоих и schema1→incoming2→oldpairrollback. Для legacy format1 установки update запускать входящим новым `NEW_BUNDLE/chm.sh`, старые expected IDs/checksums не править. Результаты/ограничения/независимый R6 review — в карточке; прежние команды/kit cf0 и старый code review являются историей.
+
+На реальном Debian выполняет владелец: freshinstall и публичный9443/firewall/TLS chain/renewal/HTTP-01/живые соседи, затем BotFather и реальные Login/Mini App. Эти наблюдения не заменяются isolated CA/synthetic Telegram. Existing working proxy image/env/process guards и весь ordered stack сохраняются; при apply нужен короткий recreate только ip-proxy.

@@ -1,7 +1,7 @@
 # TASK-003 — установка на Debian за существующим IP-прокси
 
-- Статус: changes_required
-- Текущее допзадание developer: R6 — переносимая проверка Docker-образов, последний раздел этой карточки. Приёмка cf0 сохранена как история; на целевом containerd install не прошёл.
+- Статус: review
+- Текущая передача: [R6 — новый комплект и curl-команды](#итоговая-передача-r6). Предыдущие комплекты и попытки сохранены как история; для новой установки использовать только эту передачу.
 - Риск: повышенный — TLS, граница доверия proxy и сохранение работающих сервисов общего хоста.
 - Основание: решение владельца об установке без домена по IP:порту и предоставленная диагностика; [.delivery/PROJECT.md](../PROJECT.md), раздел размещения без домена. Продуктовые требования [PRODUCT.md](../../PRODUCT.md) сохраняются.
 - Репозиторий: https://github.com/sa713/cheapshotmods
@@ -202,7 +202,7 @@ Management прочитал exact cf0 deploy/chm.sh и scripts/bundle.sh: manife
 
 ## R6 — переносимая проверка Docker-образов: текущее допзадание
 
-- Статус исправления: implementing; задача TASK-003 возвращена в changes_required после отказа на целевом хосте. Изолированная приёмка cf0a793 сохранена как историческое доказательство, не приёмка нового кода.
+- Статус исправления: review; задача TASK-003 ранее возвращена в changes_required после отказа на целевом хосте. Изолированная приёмка cf0a793 сохранена как историческое доказательство, не приёмка нового кода.
 - База исправления: ветка `chm-003-external-proxy`, полный SHA `d4eabf608d8a9e86bc2c3f38accce95401069597`; её runtime/installer совпадают с cf0a793, последующие изменения — management-документы. Текущая постановка также doc-only, безопасное продвижение проверить без reset/force. Продолжать в том же PR №3 с base chm-001-foundation, без параллельной реализации/слияния в main.
 - Цель: новый неизменяемый комплект проходит установку на существующем Docker29/containerd владельца и сохраняет надёжную проверку содержимого образов; сервер не подстраивается под установщик.
 
@@ -250,3 +250,78 @@ proxy revision label отсутствует
 2. Добавить явное переносимое image proof, проверяемое по архиву до import и по фактически загруженному содержимому до ROOT/data/edge/app. Native ID оставить наблюдением daemon; ingress same-daemon guard сохранить. Обновить совместимые bundle/installer/test генераторы и диагностику.
 3. Негативные случаи с теми же tag/revision/platform, неверными config/layers/platform/kit; один canonical kit в обоих stores и обратный export. Обязательная CI cross-store регрессия, остальные checks и lifecycle не ослаблять.
 4. Новый immutable artifact, отдельный reviewer в новом контексте, исправления доказанных находок, docs/карточка/PR и curl-команды с уже настроенным credential-файлом. Старые отзывы/артефакты не переписывать.
+
+### Причина и реализация R6
+
+В `format2` переносимая идентичность — SHA-256 точных bytes config плюс ordered SHA-256 uncompressed layers, сверяемые с `rootfs.diff_ids`. Native `.Id` сохраняется только как `builder_observations`; совпадения tag/platform/revision недостаточно. `image-proof.py` сначала проверяет содержимое архива до import, затем фактический Docker export загруженных images до ROOT/data/edge/app. После export повторно сверяется привязка tags к daemon-local IDs, чтобы не принять изменение во время проверки. Диагностика содержит тип proof и digests, не Env/secret values.
+
+Формат manifest2 намеренно не принимается старым installer как format1. Для обновления существующей format1 установки используется входящий новый `NEW_BUNDLE/chm.sh update ROOT NEW_BUNDLE`; новый installer не загружает старый format1 kit как новый вход. Rollback возвращает сохранённые локальные image+volume/старый installer без повторного импорта старого архива. В dedicated classic fixture это проверено exact cf0 installer с явно synthetic predecessor, обновлением в2, записью и возвратом состояния300/старой пары. В2→2 lifecycle проверяется на обоих stores. SQLite/schema/игровые правила/OIDC/UI не изменялись; same-daemon ingress image/env/process guard сохранён побайтово.
+
+Локальное исследование неизменённого cf0 (это не новый handoff kit): Docker29.8.0 в двух отдельных DinD контейнерах, classic/vfs и containerd/native с DriverStatus `io.containerd.snapshotter.v1`. Exact старое тело load_images даёт classic exit0 и containerd exit1; containerd native IDs224b715.../5bf74fd... совпали с выводом владельца. Universal config digests cfdcc939.../aac61abc... и8+5 ordered layer hashes одинаковы. Actual containerd export импортирован в пустой dedicated classic без rebuild/правки ожидаемой идентичности, повторный proof exit0. Исходный tar SHA5b6683...702d4/старый отчёт сохранены. Основной cloud daemon не переключался/не перезапускался; default DinD bootstrap здесь ограничен readonly cgroup, поэтому локальная матрица относится к identity/import/export, полноценная установка выполняется в rootful CI fixtures.
+
+Новые негативные проверки охватывают wrong config/layer/order/platform, malformed config, повреждённый kit, лишний tag, duplicate member, gzip больше decoder chunk, усечённый и trailing gzip. Actual installer получает подменённый загруженный image при тех же tag/platform/revision/rootfs: изменённый runtime config отклоняется до ROOT/БД/edge/app, secret-marker не печатается. Неповреждённый архив и expected proof при этом не меняются; это отдельная синтетическая fixture, а не обход старого cf0 guard.
+
+История проверки нового кода сохраняется:4d CI standalone/external passed, matrix failed до запуска из-за скрытого DinD tmpfs config; исправлено переносом inputs в/r6. Независимый reviewer нашёл gzip trailing-stream loop (R6-F3), исправлен bounded decode/progress и regression;14/14 offline, собственный повтор reviewer valid0/truncated1/trailing1. Наe37 external old25-attempt rate probe пересёк fixed-minute boundary и не получил429: исправлен только тест на41unique forgedXFF (<global100) в bounded burst, production limiter/proxy не менялись. 6f прошёл full CI matrix и upload, но не рекомендуется из-за ещё не исправленного там F3. Предыдущие runs не выдаются за приёмку нового источника.
+
+### Итоговая передача R6
+
+Неизменяемый комплект **fbe82aef6008d292515c0efce2fde601c221f3d2**, `cheapshotmods-fbe82aef6008d292515c0efce2fde601c221f3d2-linux-amd64`, linux/amd64, manifest format2. [Artifact13522083303](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/artifacts/13522083303), ZIP131881374 bytes, доступен до2026-12-06. Reviewer независимо скачал/сверил13/13 SHA256SUMS,11/11 packaged source и отдельным streaming parser без импорта авторского helper проверил оба config и8+5 слоёв. Старыйcf0 и промежуточные4d/6f/e37 не рекомендуются для новой попытки. Последующие документы/отчёт не подменяют этот source SHA/архив.
+
+| Доказательство | SHA-256 |
+| --- | --- |
+| ZIP | `fb78a81f5df989c361390c227008916c239b5ad41a5535515cfe1f0581cec062` |
+| Tar.gz | `cd250916ed39f7594d0eea37fea6adb185eb2fe9ec2528be7e9e57ea50d8238d` |
+| images.tar.gz | `f5a300101c1dbc6c280dd2a13441ce3546e774d21341041034e0ece15375dc13` |
+| App config, переносимая идентичность | `c312b0b3470fb7edbadfbe8cf462d647a45efae9d466d9e1b9ca4f79da8758d4` |
+| Packaged Caddy config, переносимая идентичность | `aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510` |
+
+[Checks42253960150](https://github.com/sa713/cheapshotmods/actions/runs/42253960150) — verify33/33,0skipped, browser12/12, container-smoke, measure pipeline/capacity success. [Kit42253960168/job128016036465](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465) — [14 proof tests](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:4:1), [build/extract](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:5:1), [standalone](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:7:1), [external](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:8:1), [real cross-store matrix](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:9:1), [evidence/kit uploads](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/job/128016036465#step:10:1) — все success, обязательные проверки не skipped. Node24.22.1/npm11.9.0/native better-sqlite3 13.0.3 сохранены. Локально verify33/33 и browser12/12 exit0; structural checker0errors; PRODUCT/45managed files/app/auth/UI/ingress unchanged относительноe3d44fa.
+
+Матрица использует один exact images.tar.gz выше в реальных Docker29.8.0 classic(vfs) и containerd(native snapshotter, DriverStatusio.containerd.snapshotter.v1); это различие image store, не смена backend на сервере. App native ID classic=`sha256:c312b0b3470fb7edbadfbe8cf462d647a45efae9d466d9e1b9ca4f79da8758d4`, containerd=`sha256:0217f2634f59e04f4a5b51697507adaa78ebeb80dad0b138d56f82cf8ac3b24a`; packaged Caddy classic=`sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510`, containerd=`sha256:5bf74fd0ea8316ea9934240b594242392bcc0e4f2678d4e06d5c5d3fb9f5932d`. Config/layers совпадают. Reverse containerd export SHA `127faecebfb86cf10457b963a2f04da4829e254b1fc6a7c6a3a1467d77e9d803` без rebuild импортирован в fresh classic, исходный expected proof сохранён, classic IDs вернулись. Обе полные external/lifecycle/negative матрицы и schema1→incoming2→old pair rollback с данными300 прошли. Это не две независимые сборки вместо переноса.
+
+[Evidence13523361428](https://github.com/sa713/cheapshotmods/actions/runs/42253960168/artifacts/13523361428), ZIP SHA `dcebd78d18dbcd24d7cc00bfb585bf9b7cd4ddf9a53c408ceb6f6a228bd606b1`: три observations JSON, summary и daemon logs; reviewer независимо сверил API/bytes и полные job logs. Для будущего воспроизведения — exact checkout source SHA, `bash scripts/bundle.sh artifacts` и `bash scripts/test-image-stores.sh EXTRACTED_KIT EVIDENCE_DIR` в выделенной среде с privileged DinD; не на общем сервере владельца. После истечения retention новый CI artifact собирает developer, сборка на Debian владельца не требуется.
+
+Команды для владельца, от **root**, с уже настроенным `/root/.config/cheapshotmods/github.curl`. Новый private каталог, без sudo/gh/newtoken/git/build/очистки общих images. Сначала download/install/stage; при любой ошибке subshell останавливается:
+
+```bash
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  test -r /root/.config/cheapshotmods/github.curl
+  test ! -e /opt/cheapshotmods
+  CHM_DOWNLOAD=$(mktemp -d /root/cheapshotmods-r6-XXXXXX)
+  cd "$CHM_DOWNLOAD"
+  curl --disable --config /root/.config/cheapshotmods/github.curl --fail --silent --show-error --location --output kit.zip https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13522083303/zip
+  printf '%s  kit.zip\n' fb78a81f5df989c361390c227008916c239b5ad41a5535515cfe1f0581cec062 | sha256sum --check -
+  python3 -m zipfile -e kit.zip .
+  printf '%s  cheapshotmods-fbe82aef6008d292515c0efce2fde601c221f3d2-linux-amd64.tar.gz\n' cd250916ed39f7594d0eea37fea6adb185eb2fe9ec2528be7e9e57ea50d8238d | sha256sum --check -
+  tar -xzf cheapshotmods-fbe82aef6008d292515c0efce2fde601c221f3d2-linux-amd64.tar.gz
+  cd cheapshotmods-fbe82aef6008d292515c0efce2fde601c221f3d2-linux-amd64
+  sha256sum --check SHA256SUMS
+  cp env.external.example config.env
+  chmod 600 config.env
+  bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
+  python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
+  cat /opt/cheapshotmods/ingress/changes.diff
+)
+```
+
+Diff просмотреть локально и не отправлять resolved configs/секреты в чат. Если stage прошёл и diff соответствует подключению, применить отдельно:
+
+```bash
+(
+  set -euo pipefail
+  python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
+  bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+  openssl s_client -connect 127.0.0.1:9443 -verify_ip 94.228.170.13 -verify_return_error -CApath /etc/ssl/certs -brief
+)
+```
+
+`PUBLIC_BASE_URL=https://94.228.170.13:9443`/external уже в env example. Telegram пока пустой, SESSION_SECRET installer генерирует приватно. Expected version — exact fbe82aef6008d292515c0efce2fde601c221f3d2. App не имеет public port/своего Caddy. Stage/apply сохраняют все пять оригинальных overrides плюс шестой Cheapshot; краткое пересоздание только ip-proxy остаётся необходимым. Если `/opt/cheapshotmods` неожиданно существует, install не перезапускают поверх него и ничего не удаляют: сначала проверить его metadata/процессы. Old cf0 tags оставляются, daemon/storage/working services ради R6 не перенастраиваются.
+
+Backup/restart/restore/update/rollback и точные Telegram origin/callback/Mini App URL — [EXTERNAL-PROXY](../../deploy/EXTERNAL-PROXY.md). Rollback ingress: `python3 /opt/cheapshotmods/ingress.py rollback /opt/cheapshotmods`, затем `bash /opt/cheapshotmods/chm.sh stop /opt/cheapshotmods` при необходимости; volumes сохраняются. Реальная новая установка, публичный9443/firewall/цепочка/renewal/HTTP-01/живые соседи, BotFather и живые пользователи по-прежнему проверяются владельцем. Из development/CI к реальному хосту/ACME/Telegram не обращались, production verified не заявляется.
+
+Независимое [R6 заключение](../reviews/TASK-003-R6-review.md): **accepted** exact fbe82aef6008d292515c0efce2fde601c221f3d2 и artifact13522083303; F1–F4 закрыты. Отчёт перенесён побайтово, SHA256 `d2a507b375e5d8a56b121adfb3f3936da8987b36cd236ac939e7d2dc1965093d`; прежнийcf0 отчёт SHA590cbe...1d20 сохранён. Reviewer собственным независимым parser проверил13слоёв, импортировал один unmodified fbearchive на оба real local Docker29.8stores, проверил packaged archive/loaded proof и фактическую ENV-подмену при same tag/platform/revision/rootfs на обоих; правильные tags восстановлены и повторный proof прошёл. Inner containers/volumes0→0, exact networks/oldcf0 images сохранены; outer resources во время reviewer не менялись. Own full local app/ingress не заявляются: они действительно выполнены на обоих stores в CI, отдельный reviewer прочитал полные logs/JSON evidence.
+
+После освобождения review-окна developer сохранил daemon logs и удалил только два созданных R6 контейнера и их маркированные data volumes, без global prune; основной cloud daemon/backend/исходные images/default networks сохранены. Реальный сервер не затрагивался. Карточка/STATE/TASKS/RUNBOOK актуализированы, PR3 продолжается, reset/force/main merge не выполнялись. Developer возвращает management **review**, delivery нового kit **verified**, новая external_installation и живой Telegram **pending**; management принимает область по отдельному заключению, автор не присваивает себе accepted/done.
