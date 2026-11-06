@@ -1,6 +1,8 @@
 # Запуск и эксплуатация
 
-Для выбранного общего хоста 94.228.170.13 и существующего IP-прокси прежний standalone kit ещё не подходит как проверенный способ установки. Требуемый external-proxy режим и точная передача — [TASK-003](tasks/TASK-003.md), пока ready. Ниже сохранены команды исходного TASK-002; не применять их к общему proxy через ручную подмену проверенного архива.
+Для выбранного Debian 13.7 amd64 и адреса **https://94.228.170.13:9443** основной маршрут — [инструкция external proxy](../deploy/EXTERNAL-PROXY.md). Версия комплекта, доступный artifact, результаты CI и независимого ревью находятся в последнем разделе [TASK-003](tasks/TASK-003.md). Устанавливается только app на отдельной сети; TLS завершает существующий `uek-radar-ip-proxy-1`. Новый listener требует краткого пересоздания только этого proxy, со всем его ordered compose stack. Реальные серверные действия и BotFather выполняет владелец после передачи.
+
+Ниже также сохранены команды standalone-установки TASK-002. Для выбранного общего IP-прокси используйте новый комплект и `env.external.example`, не старый kit и не ручную подмену его файлов.
 
 Кандидат TASK-002: мобильный калькулятор, один процесс Fastify, один origin, SQLite на локальном постоянном диске. Результаты и область приёмки — в карточке задачи. Живой Telegram и целевой хост проверяются после настройки владельцем. Публикация/registry upload не выполняются.
 
@@ -133,9 +135,9 @@ docker compose exec app node apps/server/dist/backup.js /data/cheapshot.sqlite /
 
 BotFather, настоящий браузерный Telegram Login и Telegram WebView не проверены. До живого стенда management назначает выделенного бота, origin/callback/Mini App URL, хост, канал секретов и полномочия размещения. Ресурсы других продуктов не использовать. Реальный общий аккаунт сайта/Mini App и работа cookie на телефоне проверяются отдельно; подписанные фикстуры этих наблюдений не заменяют.
 
-## Комплект Debian — TASK-002
+## Комплект Debian — standalone
 
-Авторитетная операторская инструкция и точные команды: [deploy/README.md](../deploy/README.md). Комплект содержит app image полного исходного SHA, Caddy 2.10.2 с закреплённым manifest digest, compose, HTTPS-конфигурацию, installer, безопасный env, manifest/image IDs и SHA-256. Публичный registry не используется. CI workflow **TASK-002 Debian kit**, job **debian-kit**, проверяет установку в изолированном Debian и отдаёт приватный artifact `cheapshotmods-<full-SHA>-linux-amd64` с retention 30 дней. Финальный run/artifact указан в TASK-002/PR. Истёкший artifact воспроизводится checkout принятого исходного SHA и `scripts/bundle.sh` по точным командам README; исходники/lock-файл/скрипты остаются в Git. `workflow_dispatch` предусмотрен условно после регистрации workflow в default branch; до слияния кнопка Run workflow может быть недоступна.
+Авторитетная операторская инструкция и точные команды: [deploy/README.md](../deploy/README.md). Комплект содержит app image полного исходного SHA, Caddy 2.10.2 с закреплённым manifest digest, compose, HTTPS-конфигурацию, installer, безопасный env, manifest/image IDs и SHA-256. Публичный registry не используется. CI workflow **Debian installation kit**, job **debian-kit**, проверяет standalone и external в изолированном Debian и отдаёт приватный artifact `cheapshotmods-<full-SHA>-linux-amd64` с retention 30 дней. Фактический run/artifact указан в соответствующей карточке/PR. Истёкший artifact воспроизводится checkout принятого исходного SHA и `scripts/bundle.sh` по точным командам README; исходники/lock-файл/скрипты остаются в Git. `workflow_dispatch` предусмотрен условно после регистрации workflow в default branch; до слияния кнопка Run workflow может быть недоступна.
 
 Проверяемая installer-платформа — Debian 12/13 amd64; фактически испытанный вариант указан в карточке и CI. Неизвестный хост останавливается до изменений. Зависимости: локальный Docker >=24, Compose >=2.30 (literal/raw env), Python3, openssl, curl, iproute2/ss, стандартные coreutils/tar/gzip. Installer не устанавливает пакеты и не трогает чужие контейнеры, volumes и каталоги. Должны быть свободны выбранные TCP-порты и минимум 4 GiB диска; рекомендуемый запас выше и зависит от backup. Только reverse proxy имеет публичные порты; app доверяет ровно одному proxy hop.
 
@@ -163,6 +165,7 @@ sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods
 bash scripts/bundle.sh artifacts
 # Извлечь построенный архив, затем:
 bash scripts/test-install.sh artifacts/cheapshotmods-FULL_SHA-linux-amd64
+bash scripts/test-external.sh artifacts/cheapshotmods-FULL_SHA-linux-amd64
 ```
 
 Test-install использует чистый Debian 13 amd64, настоящий Docker/SQLite, loopback HTTPS и отдельную internal CA Caddy, проверяет restart, согласованный backup, restore в новый volume, синтетическую вторую версию для механики update и rollback. Он не является внешним размещением, ACME или живым Telegram; test fixture image не передаётся владельцу. Результаты конкретной исходной версии сохраняются в TASK-002. Реальные DNS/ACME/HTTPS, OIDC/nonce/отказ/дополнительные callback поля и Secure cookie в Telegram WebView остаются явно непроверенными до операторской настройки.

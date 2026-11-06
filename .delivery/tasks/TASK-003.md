@@ -1,6 +1,6 @@
 # TASK-003 — установка на Debian за существующим IP-прокси
 
-- Статус: implementing
+- Статус: review
 - Риск: повышенный — TLS, граница доверия proxy и сохранение работающих сервисов общего хоста.
 - Основание: решение владельца об установке без домена по IP:порту и предоставленная диагностика; [.delivery/PROJECT.md](../PROJECT.md), раздел размещения без домена. Продуктовые требования [PRODUCT.md](../../PRODUCT.md) сохраняются.
 - Репозиторий: https://github.com/sa713/cheapshotmods
@@ -9,11 +9,9 @@
 - Конфликтующие работы: на момент постановки другие активные реализации не обнаружены; перед стартом проверить GitHub и рабочее дерево.
 - PR: для этой связной адаптации создать отдельную рабочую ветку от актуальной chm-001-foundation и PR с base chm-001-foundation. В main не сливать. Фактический HEAD/CI получать из GitHub.
 
-## Цель и границы
-
 ## План developer (2026-11-06)
 
-Исходное дерево чистое, ветка безопасно продвинута fast-forward с8caca180 до постановки cbfe78164daebf5fed041e391f25087b303784d7: только management-документы. Создана отдельная ветка chm-003-external-proxy с будущим PR в chm-001-foundation.
+Исходное дерево чистое, ветка безопасно продвинута fast-forward с 8caca180 до постановки cbfe78164daebf5fed041e391f25087b303784d7: только management-документы. Создана ветка `chm-003-external-proxy`, [PR №3](https://github.com/sa713/cheapshotmods/pull/3), base `chm-001-foundation`. Reset/force push не выполнялись; PR №1 и принятая история сохранены.
 
 1. Добавить external compose и сохраняемый режим/сеть/alias, ранние проверки конфигурации/места/сети; сохранить standalone и его lifecycle.
 2. Подготовить операторскую транзакцию ingress: фактический ordered stack из running labels, private backup/diff, проверка compose против running mounts/networks/ports и полной Caddy-конфигурации в той же среде, адресное применение/восстановление только ip-proxy.
@@ -68,8 +66,82 @@
 
 ## Передача и результаты
 
-Заполнить итоговым полным SHA, ссылками на CI/kit/review, результатами каждого критерия, конкретными командами для владельца, откатом и оставшимися внешними проверками. Состояние и RUNBOOK обновить, не создавать отдельную вторую очередь.
+### Версия и доступный комплект — 2026-11-06
+
+Передаётся неизменяемый комплект исходного SHA **`cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb`**. Последующие изменения передачи относятся к документации/отчёту и не подменяют версию архива.
+
+- [Приватный artifact](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/artifacts/13508679421), `cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64`, linux/amd64, 131883353 bytes ZIP. Скачан и проверен отдельным reviewer; доступен до 2026-12-06, нужен доступ к репозиторию.
+- ZIP SHA-256: `2221cebd7b53f556d17e08ae6c2f5a9662cf411b4a150b01fb5be00ab3c3b871`.
+- Tar.gz SHA-256: `5b6683f43cbb11361b317011ab2ef452e25e1f2e8416533b24a1e9e72aa702d4`. Все 12 внутренних SHA256SUMS проверены reviewer, 10 операторских файлов совпадают с Git этого SHA.
+- App image: `cheapshotmods:cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb`, ID `sha256:cfdcc939fdc357b5478772a5c836f35819baba1f069691e99ba3636e80095a92`.
+- External proxy сохраняет image работающего контейнера владельца; точный ID фиксируется в private operator plan. Fixture: Caddy 2.11.4-alpine, digest `sha256:6aeddd44c3078b0f9a35206472a11420648a79c184603ef95957d0a20044cb2b`. Caddy 2.10.2 из архива нужен standalone и в external не запускается.
+
+### Реализация и результаты
+
+Приложение/игровые правила/авторизация сохранены. Добавлены external compose и постоянные mode/origin/network/alias, bounded disk preflight, операторская транзакция ingress, модель общего proxy и обязательный CI step. Общий проект не получает `down`; пересоздаётся только ip-proxy со всем ordered stack. Private resolved configs/секреты в artifact не входят.
+
+| Критерий | Доказательство и результат |
+| --- | --- |
+| 1. External app | CI: единственный app без published ports/своего proxy, своя сеть/alias/data volume; точный IP:9443; API401, оба входа config=false, UI доступен. |
+| 2. Shared ingress | CI: пять overrides, совпадение с running ports/mounts/networks/image/effective env/process; private backup/diff, полная compose/Caddy validation с исходными read-only mounts/env без сети; адресный recreate только ip-proxy, идемпотентные stage/apply. |
+| 3. HTTPS / доверие | Настоящий локальный HTTPS с fixture CA и проверкой IP SAN; health/version/401; подписанный Mini App, Secure/HttpOnly cookie, успешная запись с точным Origin. Неверный Origin отклонён, forged XFF не обходит IP limiter. |
+| 4. Соседи | Старые четыре порта/routes, networks/mounts, данные соседа и HTTP-01 через frontend сохраняются после apply/rollback. Пропущенный override, drift env/entrypoint отклонены до изменения proxy. |
+| 5. Lifecycle | Restart, online backup0600, restore в новый volume, synthetic update/rollback сохраняют данные/external-привязку, не пересоздают общий proxy. Смена mode/origin, нет сети/места — ранний отказ; обычный и прерванный отказ ingress восстановлены. Standalone полный test passed. |
+| 6. Telegram | Точные origin/callback/Mini App URL и private config в инструкции; тестовые HMAC/RS256 изолированы. BotFather/живые потоки проверяет владелец. |
+| 7. Передача | Новый приватный artifact скачан/сверён независимо. Обязательные CI steps выполнены; отдельный reviewer повторил полный external test неизменённого cf0 комплекта, exit0. |
+
+- [Checks](https://github.com/sa713/cheapshotmods/actions/runs/42233523620): [verify](https://github.com/sa713/cheapshotmods/actions/runs/42233523620/job/127945133631) — `bash scripts/verify.sh`, 33/33, typecheck/lint/build; полный browser suite 12/12 на HTTP/SQLite, measure pipeline/замер passed. [Container smoke](https://github.com/sa713/cheapshotmods/actions/runs/42233523620/job/127945134081) — passed.
+- [Kit job](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/job/127945133681): [build](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/job/127945133681#step:4:1), [standalone](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/job/127945133681#step:6:1), [external](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/job/127945133681#step:7:1), [upload](https://github.com/sa713/cheapshotmods/actions/runs/42233523724/job/127945133681#step:8:1) — все success, не skipped.
+- Node 24.22.1/npm 11.9.0, native better-sqlite3 13.0.3; модель Debian13 amd64 с настоящими Docker/Caddy. `python3 .ai-development/scripts/check.py`: passed, errors=0; bash/Python syntax и `git diff --check` passed. PRODUCT/45 управляемых файлов стандарта не менялись.
+- Промежуточные ошибки не скрываются: installed() возвращал false при `set -e`, Compose добавлял пустой IPAM, fixture учитывала регистр HTTP-заголовков. Исправлены, успешный CI полного нового кандидата получен. Первичные находки отдельного reviewer и их закрытие сохраняются в его отчёте.
+- Независимо подтверждённая R5: в f1e37945479c9dbf7af68c62b25a53eb1722c954 откат мог потерять добавленный позже сторонний override. Этот прежний artifact отозван из рекомендации несмотря на зелёный исходный CI. В cf0a793 исправлены проверки текущего ordered stack/env/context/identity и runtime до любых записей при manual/automatic/interrupted recovery. Регрессии с поздним дополнительным портом и переименованным контейнером проверяют отказ без изменения Caddyfile/owned override/container/соседа, затем штатное восстановление. Reviewer отдельно выполнил 11/11 положительных/отрицательных случаев guard.
+- Локальная пересборка e8cc032 остановилась на ENOSPC в vfs Docker; canonical kit успешно собран CI. Удалялся только новый build cache этой задачи по точным ID. Локальные диагностические комплекты с ec5/f1 runtime и новыми operator-файлами не передаются владельцу и не выдаются за canonical cf0 artifact. Полный авторский external-прогон после R5 — exit0; проверка именно неизменённого нового архива выполнена отдельно reviewer.
+- Независимый native-повтор cf0: `bash scripts/test-external.sh /tmp/chm-task003-review-artifact-cf0/cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64` — **exit0**, включая новые R5-регрессии и весь lifecycle. Docker image ID/revision/platform совпали с manifest; containers/volumes0→0, исходные три сети и baseline images сохранены, cache54→54. Лог reviewer `/tmp/chm-task003-review-external-cf0.log`. Отдельное [заключение](../reviews/TASK-003-code-review.md) сохраняет R1–R5, свои проверки, CI/artifact и ограничения.
+- Публичный TLS-block отдельно адаптирован/валидирован reviewer на закреплённом Caddy2.11.4 без сети/выдачи сертификата: shortlived принят, apps.tls до/после совпал. Issuer policy совпадает с прочитанным исходником Radar; actual host config/renewal этим не подтверждаются.
+- Итог отдельного reviewer: **accepted** для exact cf0 кода/неизменяемого комплекта в изолированной области TASK-003; открытых находок нет. [Отчёт](../reviews/TASK-003-code-review.md) перенесён побайтово, SHA-256 `590cbe220ad765c5f4ae37ee4b24cdd2b96951edc339dc11f9cb72d6be2d1d20`. Это заключение reviewer, статус задачи остаётся review для management.
+
+### Один маршрут владельца на выбранном Debian
+
+При наличии `gh` и авторизации в GitHub (подготовка описана в README комплекта), из нового каталога:
+
+```bash
+gh run download 42233523724 --repo sa713/cheapshotmods --name cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64 --dir kit
+cd kit
+sha256sum --check cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64.tar.gz.sha256
+tar -xzf cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64.tar.gz
+cd cheapshotmods-cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb-linux-amd64
+sha256sum --check SHA256SUMS
+umask 077
+cp env.external.example config.env
+chmod 600 config.env
+nano config.env
+sudo bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
+sudo python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
+sudo less /opt/cheapshotmods/ingress/changes.diff
+sudo python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
+sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+openssl s_client -connect 127.0.0.1:9443 -verify_ip 94.228.170.13 -verify_return_error -CApath /etc/ssl/certs -brief
+```
+
+Не менять `CHM_PROXY_MODE=external` / `PUBLIC_BASE_URL=https://94.228.170.13:9443`. До настройки бота Telegram-поля пустые; SESSION_SECRET генерируется приватно. После apply проверить снаружи9443 и прежние маршруты444/713/888/8443/фотогалереи/HTTP-01: health200, полный SHA в version, state401 до входа. Краткий перерыв только маршрутов ip-proxy при recreate возможен. При отказе читать private diagnostics локально, не публиковать resolved config/секреты.
+
+Telegram настраивает владелец в **выделенном** боте: Allowed origin `https://94.228.170.13:9443`, callback `https://94.228.170.13:9443/auth/oidc/callback`, Main Mini App/menu button `https://94.228.170.13:9443/`. Три Telegram secret вводятся только в `/opt/cheapshotmods/config.env` (0600), затем `sudo bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods` и `check`. Принятие числового адреса BotFather пока не подтверждено; при отказе передать management обезличенную причину, не менять механизм входа/HTTPS.
+
+Эксплуатация и восстановление — [EXTERNAL-PROXY.md](../../deploy/EXTERNAL-PROXY.md). Адресный откат подключения:
+
+```bash
+sudo python3 /opt/cheapshotmods/ingress.py rollback /opt/cheapshotmods
+sudo bash /opt/cheapshotmods/chm.sh stop /opt/cheapshotmods
+```
+
+App/data/certificate volumes и соседи сохраняются. Backup — `sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods`; возвращённый файл0600 передаётся `restore /opt/cheapshotmods /absolute/path/to/backup.sqlite`. Update получает каталог нового проверенного комплекта, rollback возвращает сохранённую пару image+volume. Images не собирать и глобальный prune на общем хосте не выполнять.
+
+### Границы передачи management
+
+Реальный Debian, внешний firewall/NAT, публичная цепочка9443, будущее продление IP-сертификата, BotFather Allowed URLs и живой общий аккаунт сайта/Mini App/WebView cloud-сессией не проверены. Ни запросов к реальному IP/ACME, ни изменения бота не выполнялось. Private CA/синтетический Telegram этих проверок не заменяют.
+
+Developer передаёт **review**; technical acceptance остаётся management после отдельного заключения. External installation и пользовательское принятие продукта остаются pending. PR не слит, сервис не размещён, новые платные ресурсы не подключались.
 
 - product_acceptance: not_applicable — установка сохраняет согласованный функционал; пользовательское принятие продукта остаётся pending.
-- delivery: pending — комплект для shared IP-proxy ещё не реализован/принят.
-- Последнее подтверждение: 2026-11-06; management, по выводу владельца и прочитанному installer/compose.
+- delivery: verified — приватный комплект скачан независимо, checksums/manifest/source проверены; установка на реальном сервере pending.
+- Последнее подтверждение: 2026-11-06; developer по actual CI, отдельный reviewer по скачанному комплекту; management принимает итоговую область.
