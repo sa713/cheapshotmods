@@ -138,14 +138,18 @@ def neighbours():
     assert (base/'neighbour'/'sentinel').read_text() == 'neighbour-data-unchanged'
 
 
-for attempt in range(40):
-    try:
-        neighbours()
-        break
-    except (OSError, AssertionError):
-        if attempt == 39:
-            raise
-        time.sleep(1)
+def wait_neighbours():
+    for attempt in range(40):
+        try:
+            neighbours()
+            return
+        except (OSError, AssertionError):
+            if attempt == 39:
+                raise
+            time.sleep(1)
+
+
+wait_neighbours()
 neighbour_id = json.loads(docker('inspect', neighbour_name))[0]['Id']
 original = caddy.read_bytes()
 # Deliberately omit one RUNNING compose override in the discovery response.
@@ -185,6 +189,59 @@ ingress('stage')
 assert caddy.read_bytes().count(b'# BEGIN CHEAPSHOT MODS') == 1
 assert json.loads(docker('inspect', proxy_name))[0]['Id'] == proxy_id
 neighbours()
+# A later operator override must never be discarded by our rollback/recovery.
+later = base/'deploy'/'compose.later-maintenance.yaml'
+later_port = free_port()
+write(later, {'services': {'ip-proxy': {'ports': ['127.0.0.1:'+str(later_port)+':8443']}}})
+shared_with_ours = cmd+['-f', plan['override']]
+run(*shared_with_ours, '-f', str(later), 'up', '-d', '--no-deps', '--force-recreate', '--pull', 'never', 'ip-proxy')
+wait_neighbours()
+later_id = json.loads(docker('inspect', proxy_name))[0]['Id']
+applied_caddy = caddy.read_bytes()
+override_bytes = Path(plan['override']).read_bytes()
+journal = root/'ingress'/'plan.json'
+journal_bytes = journal.read_bytes()
+for action in ('apply', 'stage', 'rollback'):
+    refused = ingress(action, ok=False)
+    assert refused.returncode != 0 and b'ordered compose inputs changed' in refused.stderr
+for automatic in (False, True):
+    interrupted = json.loads(journal_bytes)
+    interrupted['status'] = 'applying'
+    write(journal, interrupted)
+    if automatic:
+        refused = run('python3', '-c', 'import sys,json; from pathlib import Path; sys.path.insert(0,sys.argv[1]); from ingress import Ingress; i=Ingress(Path(sys.argv[2])); i.rollback(json.loads(i.plan_file.read_text()),automatic=True)', str(bundle), str(root), ok=False)
+    else:
+        refused = ingress('rollback', ok=False)
+    assert refused.returncode != 0 and b'ordered compose inputs changed' in refused.stderr
+    assert caddy.read_bytes() == applied_caddy and Path(plan['override']).read_bytes() == override_bytes
+    assert json.loads(docker('inspect', proxy_name))[0]['Id'] == later_id
+journal.write_bytes(journal_bytes)
+assert request('/', port=later_port)[:2] == (200, b'neighbour-data-unchanged')
+neighbours()
+assert json.loads(docker('inspect', neighbour_name))[0]['Id'] == neighbour_id
+# A renamed service container must not be mistaken for a missing failed apply.
+renamed = proxy_name+'-later'
+write(later, {'services': {'ip-proxy': {'container_name': renamed, 'ports': ['127.0.0.1:'+str(later_port)+':8443']}}})
+run(*shared_with_ours, '-f', str(later), 'up', '-d', '--no-deps', '--force-recreate', '--pull', 'never', 'ip-proxy')
+wait_neighbours()
+renamed_id = json.loads(docker('inspect', renamed))[0]['Id']
+for automatic in (False, True):
+    interrupted = json.loads(journal_bytes)
+    interrupted['status'] = 'applying'
+    write(journal, interrupted)
+    if automatic:
+        refused = run('python3', '-c', 'import sys,json; from pathlib import Path; sys.path.insert(0,sys.argv[1]); from ingress import Ingress; i=Ingress(Path(sys.argv[2])); i.rollback(json.loads(i.plan_file.read_text()),automatic=True)', str(bundle), str(root), ok=False)
+    else:
+        refused = ingress('rollback', ok=False)
+    assert refused.returncode != 0 and b'service identity changed' in refused.stderr
+    assert caddy.read_bytes() == applied_caddy and Path(plan['override']).read_bytes() == override_bytes
+    assert json.loads(docker('inspect', renamed))[0]['Id'] == renamed_id
+journal.write_bytes(journal_bytes)
+# Restore the known fixture stack explicitly, then exercise normal lifecycle.
+run(*shared_with_ours, 'up', '-d', '--no-deps', '--force-recreate', '--pull', 'never', 'ip-proxy')
+wait_neighbours()
+later.unlink()
+proxy_id = json.loads(docker('inspect', proxy_name))[0]['Id']
 assert request('/health')[:2] == (200, b'{"status":"ok"}')
 assert json.loads(request('/version')[1])['version'] == version
 assert request('/api/state')[0] == 401

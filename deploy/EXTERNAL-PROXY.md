@@ -21,7 +21,7 @@ sha256sum --check SHA256SUMS
 
 ## Установка и подготовка ingress
 
-На выбранном Debian13.7 amd64 уже Docker29.8.0/Compose5.5.1. Требуются python3, openssl, curl, iproute2/ss и coreutils, доступны root/sudo и локальный Docker socket. Около4.5G свободно: сначала проверьте `df -h / /var/lib/docker`; скрипт выполняет ограниченную проверку запаса, ничего глобально не чистит. Если места мало — остановитесь, сохраните свои backups на отдельный носитель; не удаляйте чужие images/volumes/cache. Порты80/443,444/713/888/8443 и loopback8088/8092 заняты другими сервисами и не переназначаются.
+На выбранном Debian 13.7 amd64 уже Docker 29.8.0/Compose 5.5.1. Требуются python3, openssl, curl, iproute2/ss и coreutils, доступны root/sudo и локальный Docker socket. Около 4.5G свободно: сначала проверьте `df -h / /var/lib/docker`; скрипт требует 2 GiB запаса плюс два размера images из manifest и два размера данных (при restore учитывает и backup). Проверяется файловая система установки и локальное Docker storage. Ничего глобально не чистится. Если места мало — остановитесь, сохраните свои backups на отдельный носитель; не удаляйте чужие images/volumes/cache. Порты 80/443,444/713/888/8443 и loopback 8088/8092 заняты другими сервисами и не переназначаются.
 
 Из каталога извлечённого комплекта:
 
@@ -44,7 +44,7 @@ sudo python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
 4. `/opt/uek-radar/deploy/compose.anjie.yaml`
 5. `/opt/uek-radar/deploy/compose.gtd.yaml`
 
-Скрипт сверяет полный resolved compose с реальными ports/mounts/networks/image/command. При пропущенном override, неожиданном drift или другой TLS-политике он останавливается до изменения общего проекта. В приватном `/opt/cheapshotmods/ingress/` сохраняются исходный Caddyfile, полный compose, staged версии, diff и diagnostics. Файлы0600, каталог0700; resolved compose может содержать секреты соседей — не публикуйте его и не отправляйте в чат. Diff можно просмотреть локально в редакторе; это добавление нового listener/alias, не замена старых маршрутов.
+Скрипт сверяет полный resolved compose с реальными ports/mounts/networks/image, итоговыми environment/entrypoint/command/user/working directory. Файлы окружения из running labels также сохраняют порядок. Если для воспроизводимости не хватает исходных локальных env-file/shell inputs, он откажется применять изменение; восстановите их локально, не передавайте значения в чат или аргументы команд. При пропущенном override, неожиданном drift или другой TLS-политике он останавливается до изменения общего проекта. В приватном `/opt/cheapshotmods/ingress/` сохраняются исходный Caddyfile, полный compose, staged версии, diff и diagnostics. Файлы 0600, каталог 0700; resolved compose может содержать секреты соседей — не публикуйте его и не отправляйте в чат. Diff можно просмотреть локально в редакторе; это добавление нового listener/alias, не замена старых маршрутов.
 
 Проверяются объединённый compose и весь Caddyfile на фактическом установленном image, с исходными env/mounts в read-only validation-контейнере без сети. TLS automation должна совпасть до/после; новый listener использует существующую ACME shortlived/IP/HTTP-01 политику с отключённым TLS-ALPN. HTTP-01 через фотогалерею, действующие certificate volumes, mounts и сети не изменяются. Private CA не является fallback для реального хоста.
 
@@ -54,9 +54,16 @@ sudo python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
 sudo python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
 sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 openssl s_client -connect 127.0.0.1:9443 -verify_ip 94.228.170.13 -verify_return_error -CApath /etc/ssl/certs -brief
+curl --fail --silent --show-error https://94.228.170.13:9443/health
+curl --fail --silent --show-error https://94.228.170.13:9443/version
+curl --silent --show-error --output /dev/null --write-out '%{http_code}\n' https://94.228.170.13:9443/api/state
 ```
 
+До входа последний запрос должен вернуть `401`; `/health` — `status: ok`, `/version` — полный SHA выбранного комплекта. TLS проверяется системным CA, без `-k`.
+
 Добавляется `/opt/uek-radar/deploy/compose.cheapshotmods.yaml`: только TCP9443 и выделенная сеть. В существующий Caddyfile добавляется маркированный site block с единственным upstream alias:3000. Для публикации порта Docker должен пересоздать **только ip-proxy**: используется весь исходный ordered stack плюс новый override, `up -d --no-deps --force-recreate --pull never --no-build ip-proxy`. Возможен короткий перерыв маршрутов этого proxy, нулевой downtime не обещается. Фотогалерея/соседи не пересоздаются. Общий `compose down` запрещён.
+
+При последующем обслуживании общего ip-proxy сохраняйте все пять исходных compose-файлов и новый шестой override последним. Скрипты размещения других продуктов автоматически не менялись; пересоздание proxy по прежнему списку без нового override удалит привязку9443/сеть Cheapshot. Собственные restart/update/restore/rollback Cheapshot общий proxy не меняют.
 
 Повторные stage/apply не дублируют route/port. Drift после stage отклоняется. При неудаче применения исходный Caddyfile/stack восстанавливаются адресно; все данные сохраняются. До завершения проверок держите private backup. После apply проверить снаружи доступность9443, текущие маршруты444/713/888/8443, фотогалерею и HTTP-01. `check` должен вернуть точный SHA комплекта. Это действия владельца, они не выполнены cloud developer.
 

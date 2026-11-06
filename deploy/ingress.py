@@ -118,7 +118,7 @@ class Ingress:
         require(endpoint.startswith('unix://'), 'only a local Docker Unix socket is supported')
         self.network()
 
-    def running_matches(self, cfg, plan, container):
+    def running_matches(self, cfg, plan, container, incomplete=False):
         """Detect omitted overrides against actual running resources, not a template."""
         service = cfg['services'][plan['service']]
         def ports_config():
@@ -132,7 +132,8 @@ class Ingress:
         actual_mounts = {(v['Type'], v.get('Name') if v['Type'] == 'volume' else v['Source'], v['Destination'], v['RW']) for v in container['Mounts']}
         require(mounts == actual_mounts, 'rendered mounts differ from running proxy; omitted override or changed configuration')
         networks = {cfg['networks'][name]['name'] for name in service.get('networks', {})}
-        require(networks == set(container['NetworkSettings']['Networks']), 'rendered networks differ from running proxy')
+        actual_networks = set(container['NetworkSettings']['Networks'])
+        require(actual_networks <= networks if incomplete and not container['State']['Running'] else actual_networks == networks, 'rendered networks differ from running proxy')
         image = json.loads(self.docker('image', 'inspect', service['image']))[0]
         require(image['Id'] == container['Image'] == plan['image'], 'proxy image/tag changed; refuse implicit upgrade')
         def environment(items):
@@ -157,6 +158,26 @@ class Ingress:
             require(str(effective or '') == str(container['Config'].get(key) or ''), 'proxy user/working directory differs from running configuration')
         argv = (effective_entrypoint or []) + (effective_command or [])
         require(isinstance(argv, list) and argv[:2] == ['caddy', 'run'] and ('--config' in argv and argv[argv.index('--config')+1:argv.index('--config')+2] == ['/etc/caddy/Caddyfile'] or '--config=/etc/caddy/Caddyfile' in argv), 'supported proxy must run Caddy using the mounted /etc/caddy/Caddyfile')
+
+    def known_proxy(self, plan, recovery=False):
+        """Never discard another operator's later compose inputs/resources."""
+        ids = self.docker('ps', '-aq', '--no-trunc', '--filter', 'name=^/'+re.escape(plan['container'])+'$').decode().split()
+        scoped = self.docker('ps', '-aq', '--no-trunc', '--filter', 'label=com.docker.compose.project='+plan['project'], '--filter', 'label=com.docker.compose.service='+plan['service']).decode().split()
+        require(set(scoped) == set(ids), 'proxy service identity changed; refuse replacing another container')
+        if not ids:
+            require(recovery and plan['status'] == 'applying', 'expected proxy is missing; refuse unrelated transition')
+            return
+        require(len(ids) == 1, 'ambiguous proxy identity')
+        current = self.inspect(ids[0])
+        labels = current['Config']['Labels']
+        files = labels.get('com.docker.compose.project.config_files', '').split(',')
+        before = files == plan['files']
+        after = files == plan['files']+[plan['override']]
+        require(after or recovery and before, 'proxy ordered compose inputs changed since stage; refuse dropping a later override')
+        env_files = [p for p in labels.get('com.docker.compose.project.environment_file', '').split(',') if p]
+        require(env_files == plan.get('env_files', []) and labels.get('com.docker.compose.project') == plan['project'] and labels.get('com.docker.compose.project.working_dir') == plan['working_dir'] and labels.get('com.docker.compose.service') == plan['service'], 'proxy compose context changed since stage')
+        snapshot = 'before.compose.json' if before else 'staged.compose.json'
+        self.running_matches(json.loads((self.directory/snapshot).read_text()), plan, current, incomplete=recovery and plan['status'] == 'applying' and after)
 
     def validation(self, cfg, plan, caddy_file, name):
         # Resolve actual env/mounts through Compose; no host secrets are printed.
@@ -192,7 +213,7 @@ class Ingress:
             plan = json.loads(self.plan_file.read_text())
             if plan['status'] == 'applied':
                 self.unchanged(plan, applied=True)
-                self.running_matches(self.config(plan, plan['override']), plan, self.inspect(plan['container']))
+                self.known_proxy(plan)
                 print('Ingress already applied; no duplicate route or port added.')
                 return
             require(plan['status'] == 'rolled_back', 'existing pending stage; apply/rollback it first')
@@ -292,6 +313,7 @@ class Ingress:
         require(self.config(plan) == json.loads((self.directory/'before.compose.json').read_text()), 'resolved configuration drift; rollback refused')
         if Path(plan['override']).exists():
             require(digest(Path(plan['override']).read_bytes()) == plan['override_hash'], 'owned override drift; rollback refused')
+        self.known_proxy(plan, recovery=True)
         target = Path(plan['caddy'])
         atomic(target, (self.directory/'before.Caddyfile').read_bytes(), target.stat())
         override = Path(plan['override'])
@@ -306,6 +328,7 @@ class Ingress:
     def apply(self, plan):
         if plan['status'] == 'applied':
             self.unchanged(plan, applied=True)
+            self.known_proxy(plan)
             print('Ingress already applied.')
             return
         require(plan['status'] == 'staged', 'stage again after rollback')
