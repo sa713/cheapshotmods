@@ -1,0 +1,25 @@
+services:
+  app:
+    image: ${CHM_APP_IMAGE:?}
+    pull_policy: never
+    env_file:
+      - path: ${CHM_CONFIG_FILE:?}
+        format: raw
+    environment:
+      DATABASE_PATH: /data/cheapshot.sqlite
+      PORT: "3000"
+      TRUST_PROXY: "1"
+    volumes:
+      - database:/data
+    restart: unless-stopped
+    networks:
+      edge:
+        aliases: ["${CHM_APP_ALIAS:?}"]
+networks:
+  edge:
+    external: true
+    name: ${CHM_EXTERNAL_NETWORK:?}
+volumes:
+  database:
+    external: true
+    name: ${CHM_DATA_VOLUME:?}

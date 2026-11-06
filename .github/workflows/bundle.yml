@@ -1,4 +1,4 @@
-name: TASK-002 Debian kit
+name: Debian installation kit
 on:
   pull_request:
   workflow_dispatch:
@@ -31,6 +31,8 @@ jobs:
           tar -xzf "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz" -C artifacts
       - name: Test installation on isolated Debian
         run: bash scripts/test-install.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
+      - name: Test external shared ingress on isolated Debian
+        run: bash scripts/test-external.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
       - uses: actions/upload-artifact@v4
         with:
           name: cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64

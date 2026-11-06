@@ -16,7 +16,7 @@ name="cheapshotmods-$sha-linux-amd64"
 kit="$work/$name"
 mkdir "$kit" "$work/source"
 git archive "$sha" | tar -x -C "$work/source"
-cp "$work/source/deploy/"{chm.sh,compose.yml,Caddyfile,Caddyfile.internal,env.example,README.md} "$kit/"
+cp "$work/source/deploy/"{chm.sh,compose.yml,compose.external.yml,ingress.py,Caddyfile,Caddyfile.internal,env.example,env.external.example,README.md,EXTERNAL-PROXY.md} "$kit/"
 image="cheapshotmods:$sha"
 # Version is fixed; the downloaded manifest digest and exact image IDs are recorded.
 proxy='caddy:2.10.2-alpine'
@@ -28,17 +28,18 @@ docker pull --platform linux/amd64 "$proxy@${proxy_digest#*@}"
 docker image tag "$proxy@${proxy_digest#*@}" "$proxy"
 app_id="$(docker image inspect --format '{{.Id}}' "$image")"
 proxy_id="$(docker image inspect --format '{{.Id}}' "$proxy")"
+image_bytes="$(( $(docker image inspect --format '{{.Size}}' "$image") + $(docker image inspect --format '{{.Size}}' "$proxy") ))"
 [[ "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$proxy")" == linux/amd64 ]]
 docker image save "$image" "$proxy" | gzip -1 > "$kit/images.tar.gz"
-python3 - "$kit/manifest.json" "$sha" "$image" "$app_id" "$proxy" "$proxy_id" "$proxy_digest" "$work/source/Dockerfile" <<'PY'
+python3 - "$kit/manifest.json" "$sha" "$image" "$app_id" "$proxy" "$proxy_id" "$proxy_digest" "$work/source/Dockerfile" "$image_bytes" <<'PY'
 import json,sys
-path,sha,image,app_id,proxy,proxy_id,digest,dockerfile=sys.argv[1:]
+path,sha,image,app_id,proxy,proxy_id,digest,dockerfile,image_bytes=sys.argv[1:]
 bases=[line.split()[1] for line in open(dockerfile) if line.startswith("FROM ")]
 with open(path,'w') as out:
-    json.dump({'format':1,'source_sha':sha,'platform':'linux/amd64','app_image':image,'app_image_id':app_id,'proxy_image':proxy,'proxy_image_id':proxy_id,'proxy_manifest_digest':digest,'node':'24.22.1','npm':'11.9.0','base_images':bases},out,indent=2)
+    json.dump({'format':1,'source_sha':sha,'platform':'linux/amd64','app_image':image,'app_image_id':app_id,'proxy_image':proxy,'proxy_image_id':proxy_id,'proxy_manifest_digest':digest,'node':'24.22.1','npm':'11.9.0','base_images':bases,'image_bytes':int(image_bytes),'external_proxy_source':'existing running image; tested Caddy 2.11.4; exact image ID captured in private operator plan'},out,indent=2)
     out.write('\n')
 PY
-(cd "$kit"; sha256sum chm.sh compose.yml Caddyfile Caddyfile.internal env.example README.md manifest.json images.tar.gz > SHA256SUMS)
+(cd "$kit"; sha256sum chm.sh compose.yml compose.external.yml ingress.py Caddyfile Caddyfile.internal env.example env.external.example README.md EXTERNAL-PROXY.md manifest.json images.tar.gz > SHA256SUMS)
 tar -C "$work" -czf "$output/$name.tar.gz" "$name"
 (cd "$output"; sha256sum "$name.tar.gz" > "$name.tar.gz.sha256")
 echo "$output/$name.tar.gz"
