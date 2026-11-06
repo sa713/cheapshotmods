@@ -88,6 +88,10 @@ function App() {
     setPending(command);
     if (storageKey) try {if (command) sessionStorage.setItem(storageKey,JSON.stringify(command));else sessionStorage.removeItem(storageKey);} catch { /* Memory still retains the exact retry. */ }
   }
+  function readError(error:unknown) {
+    if (error instanceof ApiError && error.status===401) {setSession(undefined);setState(undefined);setMessage(explain(error));setProblem('Войдите, чтобы загрузить сохранённые данные.');}
+    else setProblem(explain(error));
+  }
   async function send(action:Record<string,unknown>, retry?:Command) {
     if (!session || !state || lock.current || (pending&&!retry)) return false;
     const command=retry??{key:crypto.randomUUID(),revision:state.revision,experiment:state.experiment,action};
@@ -100,7 +104,7 @@ function App() {
       remember();setMessage('Изменения сохранены. Загружаем данные…');
       await load();setMessage('Все изменения сохранены');return true;
     } catch(e) {
-      if (committed) {setConflict(true);setMessage('Изменения сохранены');setProblem('Не удалось загрузить обновлённый набор. Загрузите сохранённые данные перед следующим действием.');return true;}
+      if (committed) {setConflict(true);setMessage('Изменения сохранены');if(e instanceof ApiError&&e.status===401)readError(e);else setProblem('Не удалось загрузить обновлённый набор. Загрузите сохранённые данные перед следующим действием.');return true;}
       if (e instanceof ApiError && e.status===401) {setSession(undefined);setState(undefined);setMessage(explain(e));setProblem('После входа можно безопасно подтвердить прежнюю команду.');return false;}
       if (e instanceof ApiError && e.status<500) {
         remember();setMessage('Изменения не сохранены');
@@ -114,7 +118,7 @@ function App() {
     if (busy) return;
     setBusy(true);setProblem('');
     try {await load();setConflict(false);setMessage(pending?'Данные загружены; результат команды ещё нужно подтвердить повтором.':'Сохранённые данные загружены');}
-    catch(e) {setProblem(explain(e));} finally {setBusy(false);}
+    catch(e) {readError(e);} finally {setBusy(false);}
   }
   async function nextPage() {
     if (!state || busy) return;setBusy(true);
@@ -122,7 +126,7 @@ function App() {
       const items=pages[scope], p=await api<Page>('/api/inventory?scope='+scope+'&limit=100&after='+encodeURIComponent(items.at(-1)?.id??''));
       if (p.revision!==state.revision) {setConflict(true);throw new Error('REVISION_CONFLICT');}
       setPages(prev=>({...prev,[scope]:[...prev[scope],...p.items]}));setMore(prev=>({...prev,[scope]:p.items.length===100}));
-    } catch(e) {setProblem(e instanceof Error&&e.message==='REVISION_CONFLICT'?'Набор изменился. Загрузите сохранённые данные.':explain(e));} finally {setBusy(false);}
+    } catch(e) {if(e instanceof Error&&e.message==='REVISION_CONFLICT')setProblem('Набор изменился. Загрузите сохранённые данные.');else readError(e);} finally {setBusy(false);}
   }
   function beginEdit(g:Group|null) {setEdit(g);setKind(g?.kind??'🅾');setTier(g?.tier??1);setValue(g?.value??'10');setQuantity(g?.quantity??'1');setProblem('');}
   function changeType(k:Kind,t:number) {setKind(k);setTier(t);if (t===1 && k!=='💚') setValue(k==='🅾'?'10':'8');}
@@ -141,7 +145,7 @@ function App() {
   const disabled=busy||!!pending||conflict;
   if (!session || !state) return <main className="login"><p className="eyebrow">CHEAPSHOT MODS</p><h1>Ваш инвентарь.<br/>Ваш эксперимент.</h1><p className="mods" aria-hidden="true">🅾 💢 💚 🧿</p><p role="status">{loading?'Проверяем вход…':message}</p>{problem&&<p role="alert">{problem}</p>}{!loading&&config?.oidc&&<a className="button" href="/auth/oidc/start">Войти через Telegram</a>}{!loading&&config?.mini&&webApp()?.initData&&<button onClick={()=>{location.href='/';}}>Войти в Mini App</button>}{!loading&&<button className="secondary" onClick={()=>location.reload()}>Повторить подключение</button>}<p className="note">Внесите моды, примерьте экипировку и рассчитайте крафт. Личная работа сохраняется после входа.</p></main>;
   return <main>
-    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {await api('/auth/logout',post({},session.csrf));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){setProblem(explain(e));}})()}>Выйти</button></header>
+    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {await api('/auth/logout',post({},session.csrf));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){if(e instanceof ApiError&&e.status===401){if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}else setProblem(explain(e));}})()}>Выйти</button></header>
     <div className="save" role="status">{message}</div>
     {problem&&<div className="notice" role="alert">{problem}</div>}
     {pending&&<button disabled={busy} onClick={()=>void send(pending.action,pending)}>Повторить ту же команду</button>}

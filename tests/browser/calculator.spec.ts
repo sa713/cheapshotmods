@@ -115,6 +115,17 @@ test('expired session recovers via signed Mini login and retains the exact pendi
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await expect(page.getByRole('button',{name:'Повторить ту же команду'})).toBeVisible();
   await page.getByRole('button',{name:'Повторить ту же команду'}).click();await saved(page);await expect(page.getByTestId('damage')).toHaveText('200');
 });
+
+test('expired session on read shows login, and logout can finish after expiry',async({page})=>{
+  const id=await login(page),db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
+  const expire=()=>db.prepare('UPDATE sessions SET expires=1 WHERE owner=?').run(id);
+  expire();await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);
+  await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);
+  expire();db.close();await page.getByRole('button',{name:'Выйти',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);
+});
 async function levelAttempt(page:Page,n:string){await page.getByLabel('Уровень игрока',{exact:true}).fill(n);await page.getByRole('button',{name:'Сохранить уровень'}).click();}
 
 test('S-02: large integers and derived 129 digits survive UI/API/reload; invalid health and deletion',async({page})=>{
