@@ -122,7 +122,7 @@ def request(path, method='GET', data=None, headers=None, port=9443):
         h['Content-Type'] = 'application/json'
     c.request(method, path, json.dumps(data).encode() if data is not None else None, h)
     r = c.getresponse()
-    result = r.status, r.read(), dict(r.getheaders())
+    result = r.status, r.read(), {key.lower(): value for key, value in r.getheaders()}
     c.close()
     return result
 
