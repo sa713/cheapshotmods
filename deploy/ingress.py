@@ -212,7 +212,7 @@ class Ingress:
         require(normalized(staged) == normalized(expected), 'merged compose changes more than one port and the dedicated network')
         private(self.directory/'staged.compose.json', encoded(staged))
         tls = 'tls internal' if internal else 'tls {\n        issuer acme {\n            profile shortlived\n            disable_tlsalpn_challenge\n        }\n    }'
-        block = f'\n# BEGIN CHEAPSHOT MODS {self.meta["CHM_PROJECT"]}\nhttps://{self.url.hostname}:{self.url.port} {{\n    {tls}\n    reverse_proxy {self.meta["CHM_APP_ALIAS"]}:3000\n}}\n# END CHEAPSHOT MODS\n'
+        block = f'\n# BEGIN CHEAPSHOT MODS {self.meta["CHM_PROJECT"]}\nhttps://{self.url.hostname}:{self.url.port} {{\n    {tls}\n    reverse_proxy {self.meta["CHM_APP_ALIAS"]}:3000 {{\n        header_up X-Forwarded-For {{http.request.remote.host}}\n        header_up X-Forwarded-Proto https\n        header_up -Forwarded\n    }}\n}}\n# END CHEAPSHOT MODS\n'
         private(self.directory/'staged.Caddyfile', original+block.encode())
         before = self.validation(base, plan, self.directory/'before.Caddyfile', 'before')
         after = self.validation(staged, plan, self.directory/'staged.Caddyfile', 'staged')
@@ -256,8 +256,15 @@ class Ingress:
                 self.unchanged(plan)
                 print('Ingress already rolled back.')
                 return
-            require(plan['status'] == 'applied', 'stage was not applied')
-            self.unchanged(plan, applied=True)
+            require(plan['status'] in ('applied', 'applying'), 'stage was not applied')
+        # Also recover an interrupted apply, but never overwrite unrelated drift.
+        self.platform()
+        for path, expected in plan['hashes'].items():
+            require(digest(Path(path).read_bytes()) == expected, 'compose source changed; rollback refused')
+        require(digest(Path(plan['caddy']).read_bytes()) in (plan['caddy_before'], plan['caddy_after']), 'Caddyfile drift; rollback refused')
+        require(self.config(plan) == json.loads((self.directory/'before.compose.json').read_text()), 'resolved configuration drift; rollback refused')
+        if Path(plan['override']).exists():
+            require(digest(Path(plan['override']).read_bytes()) == plan['override_hash'], 'owned override drift; rollback refused')
         target = Path(plan['caddy'])
         atomic(target, (self.directory/'before.Caddyfile').read_bytes(), target.stat())
         override = Path(plan['override'])
@@ -281,6 +288,8 @@ class Ingress:
         self.running_matches(self.config(plan), plan, self.inspect(plan['container']))
         # Last validation before the only writes to the shared project.
         self.validation(json.loads((self.directory/'staged.compose.json').read_text()), plan, self.directory/'staged.Caddyfile', 'apply')
+        plan['status'] = 'applying'
+        private(self.plan_file, encoded(plan))
         try:
             target = Path(plan['caddy'])
             atomic(target, (self.directory/'staged.Caddyfile').read_bytes(), target.stat())

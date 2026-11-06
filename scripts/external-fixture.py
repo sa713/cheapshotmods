@@ -287,4 +287,14 @@ assert (work/'failure-once').exists() and caddy.read_bytes() == original
 assert json.loads((root/'ingress'/'plan.json').read_text())['status'] == 'rolled_back'
 neighbours()
 assert json.loads(docker('inspect', neighbour_name))[0]['Id'] == neighbour_id
+# Interrupted apply is also journalled and recoverable by the documented command.
+ingress('stage')
+text = wrapper.read_text()
+text = text.replace('r=subprocess.run', 'if os.environ.get("INTERRUPT_INGRESS") and "up" in a and any(x.endswith("compose.cheapshotmods.yaml") for x in a):\n import signal; os.kill(os.getppid(),signal.SIGTERM); sys.exit(17)\nr=subprocess.run', 1)
+wrapper.write_text(text)
+assert ingress('apply', ok=False, env={**os.environ, 'PATH': str(fake)+':'+os.environ['PATH'], 'INTERRUPT_INGRESS': '1'}).returncode != 0
+assert json.loads((root/'ingress'/'plan.json').read_text())['status'] == 'applying'
+ingress('rollback')
+assert caddy.read_bytes() == original
+neighbours()
 print('External installer passed: exact IP:9443 over isolated trusted CA; Secure/Origin/forwarding; five overrides, neighbours/HTTP-01/mounts; restart/backup/restore/update/rollback; drift/network/disk refusal; ingress idempotence/rollback/failure recovery. No real IP/ACME/Telegram contacted.')
