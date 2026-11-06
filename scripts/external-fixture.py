@@ -138,7 +138,14 @@ def neighbours():
     assert (base/'neighbour'/'sentinel').read_text() == 'neighbour-data-unchanged'
 
 
-neighbours()
+for attempt in range(40):
+    try:
+        neighbours()
+        break
+    except (OSError, AssertionError):
+        if attempt == 39:
+            raise
+        time.sleep(1)
 neighbour_id = json.loads(docker('inspect', neighbour_name))[0]['Id']
 original = caddy.read_bytes()
 # Deliberately omit one RUNNING compose override in the discovery response.
@@ -165,7 +172,7 @@ changed = json.loads(base_bytes)
 changed['services']['ip-proxy']['entrypoint'] = ['/bin/sh', '-c', 'exec sleep infinity', '--']
 write(files[0], changed)
 refused = ingress('stage', ok=False)
-assert refused.returncode != 0 and b'entrypoint differs' in refused.stderr
+assert refused.returncode != 0 and b'entrypoint differs' in refused.stderr, (refused.returncode, refused.stderr.decode())
 files[0].write_bytes(base_bytes)
 ingress('stage')
 plan = json.loads((root/'ingress'/'plan.json').read_text())

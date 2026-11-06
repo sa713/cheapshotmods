@@ -142,7 +142,9 @@ class Ingress:
             if value is None:
                 desired_env.pop(key, None)
             else:
-                desired_env[key] = str(value)
+                # Compose config JSON is escaped for a Compose roundtrip.
+                # Its $$ represents one literal dollar in the container.
+                desired_env[key] = str(value).replace('$$', '$')
         require(desired_env == environment(container['Config'].get('Env')), 'effective proxy environment differs; reproduce the original env-file/shell inputs before staging')
         entrypoint = service.get('entrypoint')
         effective_entrypoint = image['Config'].get('Entrypoint') if entrypoint is None else entrypoint
@@ -176,9 +178,9 @@ class Ingress:
             volume['external'] = True
             volume.pop('labels', None)
         path = self.directory/(name+'.validation.json')
-        # Resolved env may contain literal dollars. Prevent a second Compose
-        # interpolation when feeding its JSON back to Compose for validation.
-        private(path, encoded(test_cfg).replace(b'$', b'$$'))
+        # Compose config output already escapes literal dollars for roundtrip.
+        # Keep that representation; escaping it again changes the runtime env.
+        private(path, encoded(test_cfg))
         command = ['docker', 'compose', '--project-directory', plan['working_dir'], '-f', str(path), 'run', '--rm', '--no-deps', '-T', 'validate']
         adapted = json.loads(self.run(command+['adapt', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile']))
         self.run(command+['validate', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile'])

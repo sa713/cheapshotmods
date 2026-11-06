@@ -9,6 +9,10 @@ project="chm-$(printf '%s' "$work/install" | sha256sum | cut -c1-12)"
 shared="$host-shared"
 cleanup() {
   local status=$?
+  if [[ "$status" != 0 ]]; then
+    mkdir -p /tmp/chm-003-evidence
+    docker logs "$shared-proxy" > "/tmp/chm-003-evidence/$(basename "$work").proxy.log" 2>&1 || true
+  fi
   docker exec "$host" chown -R "$(id -u):$(id -g)" "$work" >/dev/null 2>&1 || true
   if [[ "$status" != 0 && -d "$work/install/ingress" ]]; then
     mkdir -p /tmp/chm-003-evidence
