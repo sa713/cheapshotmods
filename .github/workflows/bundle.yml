@@ -27,7 +27,7 @@ jobs:
         run: bash scripts/bundle.sh artifacts
       - name: Extract kit
         run: |
-          sha256sum --check "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz.sha256"
+          (cd artifacts; sha256sum --check "cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz.sha256")
           tar -xzf "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz" -C artifacts
       - name: Test installation on isolated Debian
         run: bash scripts/test-install.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
