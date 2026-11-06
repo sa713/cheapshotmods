@@ -91,8 +91,15 @@ fi
 exec /usr/local/bin/docker "$@"
 SH
 chmod +x "$work/preflight-bin/docker"
+cat > "$work/preflight-bin/ss" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'ports reached\n' >> "$CHM_PREFLIGHT_PORT_MARKER"
+printf 'occupied-by-preflight-regression\n'
+SH
+chmod +x "$work/preflight-bin/ss"
 url_case=0
-for bad_origin in https://EXAMPLE.com https://example.com:443; do
+for bad_origin in https://EXAMPLE.com https://example.com:443 https://127.1 https://2130706433 https://0x7f000001 https://0177.0.0.1 https://127.1. https://127.0.0.1.; do
   url_case=$((url_case+1))
   invalid_config="$work/invalid-url-$url_case.env"
   python3 - "$work/config.env" "$invalid_config" "$bad_origin" <<'PY'
@@ -106,12 +113,25 @@ with open(sys.argv[2],'w') as out:
 PY
   chmod 600 "$invalid_config"
   invalid_root="$work/rejected-url-$url_case"
-  if docker exec -e "PATH=$work/preflight-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" -e "CHM_PREFLIGHT_MARKER=$work/preflight-side-effect" "$container" bash "$bundle/chm.sh" install "$invalid_root" "$invalid_config" --internal-tls > "$work/invalid-url-$url_case.log" 2>&1; then
+  if docker exec -e "PATH=$work/preflight-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" -e "CHM_PREFLIGHT_MARKER=$work/preflight-side-effect" -e "CHM_PREFLIGHT_PORT_MARKER=$work/preflight-ports" "$container" bash "$bundle/chm.sh" install "$invalid_root" "$invalid_config" --internal-tls > "$work/invalid-url-$url_case.log" 2>&1; then
     echo 'Noncanonical origin accepted' >&2; exit 1
   fi
   grep -q 'CONFIG rejected before changes' "$work/invalid-url-$url_case.log"
-  [[ ! -e "$invalid_root" && ! -e "$work/preflight-side-effect" ]]
+  [[ ! -e "$invalid_root" && ! -e "$work/preflight-side-effect" && ! -e "$work/preflight-ports" ]]
 done
+# Canonical IPv4 passes config validation, then the harness stops at ports.
+cat > "$work/canonical-ip.env" <<'CONFIG'
+PUBLIC_BASE_URL=https://127.0.0.1
+CHM_HTTP_PORT=80
+CHM_HTTPS_PORT=443
+CADDY_EMAIL=
+CONFIG
+chmod 600 "$work/canonical-ip.env"
+if docker exec -e "PATH=$work/preflight-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" -e "CHM_PREFLIGHT_MARKER=$work/preflight-side-effect" -e "CHM_PREFLIGHT_PORT_MARKER=$work/preflight-ports" "$container" bash "$bundle/chm.sh" install "$work/canonical-ip-root" "$work/canonical-ip.env" --internal-tls > "$work/canonical-ip.log" 2>&1; then
+  echo 'Port-stage guard was bypassed' >&2; exit 1
+fi
+grep -q 'requested TCP ports are occupied' "$work/canonical-ip.log"
+[[ -f "$work/preflight-ports" && ! -e "$work/canonical-ip-root" && ! -e "$work/preflight-side-effect" ]]
 inside install "$root" "$work/config.env" --internal-tls
 [[ "$(stat -c %a "$root/config.env")" == 600 ]]
 # No secret text is printed: verify generated session secret only as a boolean.

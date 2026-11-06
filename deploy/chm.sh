@@ -36,7 +36,7 @@ config_check() {
   # Parse literal dotenv without executing input or interpolating secrets.
   local fields
   fields="$(python3 - "$file" "${tls_mode:-public}" <<'PY'
-import sys,re,urllib.parse
+import sys,re,urllib.parse,ipaddress
 values={}
 allowed={'PUBLIC_BASE_URL','SESSION_SECRET','TELEGRAM_BOT_TOKEN','TELEGRAM_OIDC_CLIENT_ID','TELEGRAM_OIDC_CLIENT_SECRET','CHM_HTTP_PORT','CHM_HTTPS_PORT','CHM_BIND_ADDRESS','CADDY_EMAIL'}
 try:
@@ -52,6 +52,10 @@ try:
     host=url.hostname or ''
     if url.scheme!='https' or url.path or url.query or url.fragment or url.username or url.password or base!=base.strip(): raise ValueError()
     if not re.fullmatch(r'[A-Za-z0-9.-]+',host) or not 1<=http<=65535 or not 1<=https<=65535 or http==https or (url.port or 443)!=https: raise ValueError()
+    last_label=host.rstrip('.').rsplit('.',1)[-1]
+    if re.fullmatch(r'(?:[0-9]+|0x[0-9a-f]*)',last_label):
+        # WHATWG interprets numeric endings as IPv4; accept only canonical dotted decimal.
+        if str(ipaddress.IPv4Address(host))!=host: raise ValueError()
     canonical_origin='https://'+host+((':'+str(url.port)) if url.port not in (None,443) else '')
     if base!=canonical_origin: raise ValueError()
     bind=values.get('CHM_BIND_ADDRESS','0.0.0.0')
