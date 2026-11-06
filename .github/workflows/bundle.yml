@@ -1,0 +1,42 @@
+name: TASK-002 Debian kit
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full accepted source SHA to rebuild (same repository)
+        required: true
+        type: string
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  debian-kit:
+    runs-on: ubuntu-24.04
+    env:
+      REQUESTED_SHA: ${{ inputs.source_sha || github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Validate requested source version
+        run: '[[ "$REQUESTED_SHA" =~ ^[a-f0-9]{40}$ ]]'
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REQUESTED_SHA }}
+      - name: Build versioned private kit
+        run: bash scripts/bundle.sh artifacts
+      - name: Extract kit
+        run: |
+          sha256sum --check "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz.sha256"
+          tar -xzf "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz" -C artifacts
+      - name: Test installation on isolated Debian
+        run: bash scripts/test-install.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64
+          path: |
+            artifacts/cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64.tar.gz
+            artifacts/cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

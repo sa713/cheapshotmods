@@ -114,3 +114,37 @@ docker compose exec app node apps/server/dist/backup.js /data/cheapshot.sqlite /
 Прямые runtime-зависимости Fastify 5.12.8, better-sqlite3 13.0.3, jose 6.2.15, React/React DOM 19.3.1, @fastify/cookie 11.1.5, @fastify/static 10.1.10 — MIT; прочитаны LICENSE из установленных exact-пакетов. TypeScript 5.9.3 и Playwright 1.64.1 — Apache-2.0; Vite 8.3.6 — MIT. LICENSE/NOTICE сохраняются в node_modules образа; Vite включает copyright-комментарии bundled зависимостей. Покупка API/сервиса для этого стека не требуется; это не полный юридический аудит транзитивных зависимостей.
 
 BotFather, настоящий браузерный Telegram Login и Telegram WebView не проверены. До живого стенда management назначает выделенного бота, origin/callback/Mini App URL, хост, канал секретов и полномочия размещения. Ресурсы других продуктов не использовать. Реальный общий аккаунт сайта/Mini App и работа cookie на телефоне проверяются отдельно; подписанные фикстуры этих наблюдений не заменяют.
+
+## Комплект Debian — TASK-002
+
+Авторитетная операторская инструкция и точные команды: [deploy/README.md](../deploy/README.md). Комплект содержит app image полного исходного SHA, Caddy 2.10.2 с закреплённым manifest digest, compose, HTTPS-конфигурацию, installer, безопасный env, manifest/image IDs и SHA-256. Публичный registry не используется. CI workflow **TASK-002 Debian kit**, job **debian-kit**, проверяет установку в изолированном Debian и отдаёт приватный artifact `cheapshotmods-<full-SHA>-linux-amd64` с retention 30 дней. Финальный run/artifact указан в TASK-002/PR. Истёкший artifact воспроизводится workflow_dispatch с полным `source_sha`; исходники/lock-файл/скрипты остаются в Git.
+
+Проверяемая installer-платформа — Debian 12/13 amd64; фактически испытанный вариант указан в карточке и CI. Неизвестный хост останавливается до изменений. Зависимости: локальный Docker >=24, Compose >=2.30 (literal/raw env), Python3, openssl, curl, iproute2/ss, стандартные coreutils/tar/gzip. Installer не устанавливает пакеты и не трогает чужие контейнеры, volumes и каталоги. Должны быть свободны выбранные TCP-порты и минимум 4 GiB диска; рекомендуемый запас выше и зависит от backup. Только reverse proxy имеет публичные порты; app доверяет ровно одному proxy hop.
+
+```bash
+# В извлечённом комплекте, значения SHA/RUN_ID взять из передачи:
+gh run download RUN_ID --repo sa713/cheapshotmods --name cheapshotmods-SHA-linux-amd64 --dir kit
+cd kit
+sha256sum --check cheapshotmods-SHA-linux-amd64.tar.gz.sha256
+tar -xzf cheapshotmods-SHA-linux-amd64.tar.gz
+cd cheapshotmods-SHA-linux-amd64
+umask 077
+cp env.example config.env
+chmod 600 config.env
+nano config.env
+sudo bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
+sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods
+```
+
+Заполняются `PUBLIC_BASE_URL`, email ACME, выделенный `TELEGRAM_BOT_TOKEN`, OIDC Client ID/Secret; `SESSION_SECRET` генерируется при install, если оставлен пустым. Секреты вводятся на Debian вне Git и командных аргументов. Compose читает значения буквально, без интерполяции `$`. Команды установки Docker, BotFather/Allowed URLs/Main Mini App/Menu Button, restart/update/backup/restore/rollback полностью приведены в [README комплекта](../deploy/README.md). Restore/обновление используют новый volume, предыдущая пара image+volume остаётся для отката. Утилизация и retention — отдельное адресное действие оператора, глобальный prune недопустим.
+
+Локальное воспроизведение сборки и installation test:
+
+```bash
+bash scripts/bundle.sh artifacts
+# Извлечь построенный архив, затем:
+bash scripts/test-install.sh artifacts/cheapshotmods-FULL_SHA-linux-amd64
+```
+
+Test-install использует чистый Debian 13 amd64, настоящий Docker/SQLite, loopback HTTPS и отдельную internal CA Caddy, проверяет restart, согласованный backup, restore в новый volume, синтетическую вторую версию для механики update и rollback. Он не является внешним размещением, ACME или живым Telegram; test fixture image не передаётся владельцу. Результаты конкретной исходной версии сохраняются в TASK-002. Реальные DNS/ACME/HTTPS, OIDC/nonce/отказ/дополнительные callback поля и Secure cookie в Telegram WebView остаются явно непроверенными до операторской настройки.
