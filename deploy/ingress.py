@@ -232,6 +232,9 @@ class Ingress:
             for svc in cfg['services'].values():
                 svc['ports'] = sorted(svc.get('ports', []), key=lambda p: json.dumps(p, sort_keys=True))
                 svc['networks'] = {k: v or None for k, v in svc.get('networks', {}).items()}
+            for network in cfg.get('networks', {}).values():
+                if network.get('ipam') == {}:
+                    network.pop('ipam')
             return cfg
         require(normalized(staged) == normalized(expected), 'merged compose changes more than one port and the dedicated network')
         private(self.directory/'staged.compose.json', encoded(staged))
