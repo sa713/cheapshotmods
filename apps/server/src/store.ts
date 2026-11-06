@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { validateDatabasePath } from './database-path.js';
@@ -27,7 +27,7 @@ export class Store {
     this.db = new Database(path);
     this.db.pragma('journal_mode = WAL'); this.db.pragma('foreign_keys = ON'); this.db.pragma('busy_timeout = 5000');
     const version = this.db.pragma('user_version', {simple:true});
-    requireThat(version === 0 || version === 1, 'UNKNOWN_DATABASE_VERSION', 503);
+    requireThat(version === 0 || version === 1 || version === 2, 'UNKNOWN_DATABASE_VERSION', 503);
     if (version === 0) this.db.transaction(()=>this.db.exec(`
       CREATE TABLE players(owner TEXT PRIMARY KEY, revision TEXT NOT NULL, level TEXT NOT NULL, experiment TEXT NOT NULL, started INTEGER NOT NULL, spent TEXT NOT NULL, equipment TEXT NOT NULL);
       CREATE TABLE groups(owner TEXT NOT NULL REFERENCES players(owner), scope TEXT NOT NULL CHECK(scope IN ('original','work')), id TEXT NOT NULL, kind TEXT NOT NULL, tier INTEGER NOT NULL, value TEXT NOT NULL, quantity TEXT NOT NULL, PRIMARY KEY(owner,scope,id));
@@ -39,6 +39,22 @@ export class Store {
       CREATE TABLE oidc_codes(hash TEXT PRIMARY KEY, expires INTEGER NOT NULL);
       PRAGMA user_version = 1;
     `)).immediate();
+    if (version !== 2) this.db.transaction(()=>this.db.exec(`
+      ALTER TABLE commands ADD COLUMN created INTEGER NOT NULL DEFAULT 0;
+      UPDATE commands SET created=unixepoch();
+      CREATE INDEX command_expiry ON commands(created) WHERE result<>'';
+      PRAGMA user_version = 2;
+    `)).immediate();
+  }
+  // Results last 30 days. Compact permanent receipts prevent an old key from
+  // ever applying twice, including after reset, restore and session rotation.
+  maintain(now = Math.floor(Date.now()/1000)) {
+    this.db.transaction(()=>{
+      this.sql('DELETE FROM sessions WHERE expires<=?').run(now);
+      this.sql('DELETE FROM oidc_codes WHERE expires<=?').run(now);
+      const old=this.sql("SELECT owner,key,payload FROM commands WHERE result<>'' AND created<? LIMIT 500").all(now-30*86400) as {owner:string;key:string;payload:string}[];
+      for (const c of old) this.sql("UPDATE commands SET payload=?,result='' WHERE owner=? AND key=?").run(createHash('sha256').update(c.payload).digest('hex'),c.owner,c.key);
+    }).immediate();
   }
   close() { this.db.close(); }
   player(owner: string): Player {
@@ -65,7 +81,7 @@ export class Store {
     const p = this.player(owner), equipment = JSON.parse(p.equipment) as Equipped[];
     const items = equipment.map(e=>({...this.group(owner,'work',e.id),quantity:e.quantity}));
     const last = this.sql('SELECT body FROM history WHERE owner=? ORDER BY seq DESC LIMIT 1').get(owner) as {body:string}|undefined;
-    return {revision:p.revision,level:p.level,experiment:p.experiment,started:!!p.started,spent:p.spent,equipment,stats:stats(p.level,items),lastCraft:last ? JSON.parse(last.body) as Undo : null};
+    return {revision:p.revision,level:p.level,experiment:p.experiment,started:!!p.started,spent:p.spent,equipment,equippedMods:items,stats:stats(p.level,items),lastCraft:last ? JSON.parse(last.body) as Undo : null};
   }
   copyOriginal(owner: string) {
     this.sql("DELETE FROM groups WHERE owner=? AND scope='work'").run(owner);
@@ -87,7 +103,12 @@ export class Store {
     return this.db.transaction(()=>{
       const p = this.player(owner);
       const previous = this.sql('SELECT payload,result FROM commands WHERE owner=? AND key=?').get(owner,c.key as string) as {payload:string;result:string}|undefined;
-      if (previous) { requireThat(previous.payload === payload, 'KEY_REUSED',409); return JSON.parse(previous.result) as ReturnType<Store['summary']> & {createdId?:string}; }
+      if (previous) {
+        const expected=previous.result==='' ? createHash('sha256').update(payload).digest('hex') : payload;
+        requireThat(previous.payload === expected, 'KEY_REUSED',409);
+        requireThat(previous.result!=='','COMMAND_EXPIRED',410);
+        return JSON.parse(previous.result) as ReturnType<Store['summary']> & {createdId?:string};
+      }
       requireThat(p.revision === c.revision && p.experiment === c.experiment, 'REVISION_CONFLICT',409);
       let equipment = JSON.parse(p.equipment) as Equipped[];
       let createdId: string | undefined;
@@ -160,7 +181,7 @@ export class Store {
       p.revision=(BigInt(p.revision)+1n).toString();
       this.sql('UPDATE players SET revision=?,level=?,experiment=?,started=?,spent=?,equipment=? WHERE owner=?').run(p.revision,p.level,p.experiment,p.started,p.spent,JSON.stringify(equipment),owner);
       const result = {...this.summary(owner),...(createdId ? {createdId} : {})};
-      this.sql('INSERT INTO commands VALUES (?,?,?,?)').run(owner,c.key as string,payload,JSON.stringify(result));
+      this.sql('INSERT INTO commands(owner,key,payload,result,created) VALUES (?,?,?,?,?)').run(owner,c.key as string,payload,JSON.stringify(result),Math.floor(Date.now()/1000));
       return result;
     }).immediate();
   }

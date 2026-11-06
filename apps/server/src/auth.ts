@@ -6,7 +6,7 @@ import type { Store } from './store.js';
 export const issuer = 'https://oauth.telegram.org';
 export const random = () => randomBytes(32).toString('base64url');
 export const sha256 = (s: string) => createHash('sha256').update(s).digest('base64url');
-export interface Config { baseUrl: string; sessionSecret: string; botToken?: string; clientId?: string; clientSecret?: string; version: string }
+export interface Config { baseUrl: string; sessionSecret: string; botToken?: string; clientId?: string; clientSecret?: string; version: string; trustProxy?: boolean }
 export interface Transport {
   jwks: JWTVerifyGetKey;
   exchange: (code: string, verifier: string, config: Config) => Promise<string>;
@@ -51,7 +51,7 @@ export class Auth {
   constructor(readonly store: Store, readonly config: Config, readonly remote: Transport = transport) {}
   hash(raw: string) { return createHmac('sha256',this.config.sessionSecret).update(raw).digest('hex'); }
   create(owner: string|null, old?: string) {
-    const raw=random(), csrf=random(), expires=Math.floor(Date.now()/1000)+43200;
+    const raw=random(), csrf=random(), expires=Math.floor(Date.now()/1000)+(owner?43200:300);
     this.store.db.transaction(()=>{
       if (owner) this.store.player(owner);
       if (old) this.store.db.prepare('DELETE FROM sessions WHERE hash=?').run(this.hash(old));
@@ -59,6 +59,14 @@ export class Auth {
       this.store.db.prepare('INSERT INTO sessions VALUES (?,?,?,?,NULL)').run(this.hash(raw),owner,csrf,expires);
     }).immediate();
     return {raw,csrf};
+  }
+  cancel(raw: string, state: unknown) {
+    requireThat(typeof state==='string','LOGIN_FAILED',401);
+    const s=this.store.session(this.hash(raw),Math.floor(Date.now()/1000));
+    requireThat(s?.flow,'LOGIN_FAILED',401);
+    const flow=JSON.parse(s.flow) as Flow;
+    requireThat(flow.state===state && flow.expires>Math.floor(Date.now()/1000),'LOGIN_FAILED',401);
+    this.store.db.prepare('DELETE FROM sessions WHERE hash=?').run(s.hash);
   }
   start(old?: string) {
     const c=this.config; requireThat(c.clientId && c.clientSecret,'LOGIN_UNAVAILABLE',503);

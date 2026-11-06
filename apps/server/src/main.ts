@@ -13,6 +13,6 @@ requireThat(!enabled || (process.env.SESSION_SECRET && process.env.SESSION_SECRE
 requireThat(!enabled || process.env.NODE_ENV!=='production' || url.protocol==='https:','HTTPS_REQUIRED');
 requireThat(!!process.env.TELEGRAM_OIDC_CLIENT_ID===!!process.env.TELEGRAM_OIDC_CLIENT_SECRET,'INCOMPLETE_OIDC_CONFIG');
 const store=new Store(databasePath);
-const server=await app(store,{baseUrl,sessionSecret:process.env.SESSION_SECRET??random(),botToken:process.env.TELEGRAM_BOT_TOKEN,clientId:process.env.TELEGRAM_OIDC_CLIENT_ID,clientSecret:process.env.TELEGRAM_OIDC_CLIENT_SECRET,version:process.env.BUILD_SHA??'development'});
+const server=await app(store,{baseUrl,sessionSecret:process.env.SESSION_SECRET??random(),botToken:process.env.TELEGRAM_BOT_TOKEN,clientId:process.env.TELEGRAM_OIDC_CLIENT_ID,clientSecret:process.env.TELEGRAM_OIDC_CLIENT_SECRET,version:process.env.BUILD_SHA??'development',trustProxy:process.env.TRUST_PROXY==='1'});
 for (const signal of ['SIGINT','SIGTERM']) process.once(signal,()=>{ void server.close().finally(()=>{store.close();process.exit(0);}); });
 await server.listen({port:Number(process.env.PORT??3000),host:'0.0.0.0'});
