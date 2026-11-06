@@ -23,6 +23,8 @@ const explanations:Record<string,string> = {
   SERVER_ERROR:'Ошибка сервера. Изменения не подтверждены. Повторите ту же команду.',
   COMMAND_EXPIRED:'Срок хранения ответа команды истёк. Повторного применения не было; загрузите актуальные данные.',
   UNAUTHORIZED:'Сессия завершилась. Войдите через Telegram заново.',
+  EXPIRED_INIT_DATA:'Данные входа Telegram устарели. Закройте Mini App и откройте его заново.',
+  INVALID_INIT_DATA:'Telegram не подтвердил вход. Откройте Mini App заново.',
 };
 function explain(error:unknown) {return error instanceof Error ? explanations[error.message]??'Не удалось выполнить действие. Проверьте данные и соединение.' : 'Не удалось выполнить действие.';}
 async function api<T>(url:string, options:RequestInit = {}):Promise<T> {
@@ -69,7 +71,7 @@ function App() {
       let s:Session|undefined;
       try {s=await api<Session>('/api/session');} catch(e) {if (!(e instanceof ApiError && e.status===401)) throw e;}
       const initData=webApp()?.initData;
-      if (!s && initData && c.mini) {
+      if (!s && initData && c.mini && !new URLSearchParams(location.search).has('logged_out')) {
         await api('/auth/mini',post({initData}));s=await api<Session>('/api/session');
       }
       if (s) {
@@ -99,6 +101,7 @@ function App() {
       await load();setMessage('Все изменения сохранены');return true;
     } catch(e) {
       if (committed) {setConflict(true);setMessage('Изменения сохранены');setProblem('Не удалось загрузить обновлённый набор. Загрузите сохранённые данные перед следующим действием.');return true;}
+      if (e instanceof ApiError && e.status===401) {setSession(undefined);setState(undefined);setMessage(explain(e));setProblem('После входа можно безопасно подтвердить прежнюю команду.');return false;}
       if (e instanceof ApiError && e.status<500) {
         remember();setMessage('Изменения не сохранены');
         if (e.status===409 || e.status===410) {setConflict(true);setProblem(e.status===410?explain(e):'Данные изменились в другом окне. Загрузите сохранённую версию, затем повторите действие.');}
@@ -136,9 +139,9 @@ function App() {
   let preview:ReturnType<typeof craft>|undefined;
   try {preview=craft(selection.flatMap(s=>Array.from({length:Number(s.quantity)},()=>byId.get(s.id)!)));} catch { /* Incomplete selections have no preview. */ }
   const disabled=busy||!!pending||conflict;
-  if (!session || !state) return <main className="login"><p className="eyebrow">CHEAPSHOT MODS</p><h1>Ваш инвентарь.<br/>Ваш эксперимент.</h1><p className="mods" aria-hidden="true">🅾 💢 💚 🧿</p><p role="status">{loading?'Проверяем вход…':message}</p>{problem&&<p role="alert">{problem}</p>}{!loading&&config?.oidc&&<a className="button" href="/auth/oidc/start">Войти через Telegram</a>}{!loading&&<button className="secondary" onClick={()=>location.reload()}>Повторить подключение</button>}<p className="note">Внесите моды, примерьте экипировку и рассчитайте крафт. Личная работа сохраняется после входа.</p></main>;
+  if (!session || !state) return <main className="login"><p className="eyebrow">CHEAPSHOT MODS</p><h1>Ваш инвентарь.<br/>Ваш эксперимент.</h1><p className="mods" aria-hidden="true">🅾 💢 💚 🧿</p><p role="status">{loading?'Проверяем вход…':message}</p>{problem&&<p role="alert">{problem}</p>}{!loading&&config?.oidc&&<a className="button" href="/auth/oidc/start">Войти через Telegram</a>}{!loading&&config?.mini&&webApp()?.initData&&<button onClick={()=>{location.href='/';}}>Войти в Mini App</button>}{!loading&&<button className="secondary" onClick={()=>location.reload()}>Повторить подключение</button>}<p className="note">Внесите моды, примерьте экипировку и рассчитайте крафт. Личная работа сохраняется после входа.</p></main>;
   return <main>
-    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {await api('/auth/logout',post({},session.csrf));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/';}catch(e){setProblem(explain(e));}})()}>Выйти</button></header>
+    <header><div><p className="eyebrow">CHEAPSHOT MODS</p><h1>Мастерская модов</h1></div><button className="secondary" disabled={busy||!!pending} onClick={()=>void(async()=>{try {await api('/auth/logout',post({},session.csrf));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){setProblem(explain(e));}})()}>Выйти</button></header>
     <div className="save" role="status">{message}</div>
     {problem&&<div className="notice" role="alert">{problem}</div>}
     {pending&&<button disabled={busy} onClick={()=>void send(pending.action,pending)}>Повторить ту же команду</button>}

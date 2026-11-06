@@ -1,4 +1,4 @@
-name: TASK-001 checks
+name: Cheapshot Mods checks
 on:
   pull_request:
   push:
@@ -23,6 +23,13 @@ jobs:
       - run: bash scripts/verify.sh
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-${{ github.event.pull_request.head.sha || github.sha }}
+          path: test-results
+          if-no-files-found: error
+          retention-days: 14
       - run: bash scripts/check-measure-pipeline.sh
       - name: Measure capacity
         run: |

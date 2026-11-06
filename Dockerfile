@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM node:24.22.1-bookworm AS build
+FROM node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea AS build
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 COPY packages/rules/package.json packages/rules/package.json
@@ -13,7 +13,7 @@ COPY packages packages
 COPY apps apps
 RUN npm run build && npm prune --omit=dev --ignore-scripts --no-audit --no-fund
 
-FROM node:24.22.1-bookworm-slim
+FROM node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c
 ARG BUILD_SHA
 RUN node -e "if (!/^[a-f0-9]{40}$/.test(process.argv[1] || '')) process.exit(1)" "$BUILD_SHA"
 LABEL org.opencontainers.image.revision=$BUILD_SHA
