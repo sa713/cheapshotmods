@@ -1,6 +1,6 @@
 # TASK-001 — техническая основа и проверяемые механизмы калькулятора
 
-- Статус: ready — возврат developer на корректировку подтверждённого G1 и небольших N1/N2 по поручению ниже. Анализ Claude исправлений F1–F6 принят в своей области; общая техническая приёмка и независимый native-прогон ещё не завершены. Слияние и выпуск не разрешены.
+- Статус: review — Codex выполнил корректировку G1/N1/N2 и вернул результат management. Самопроверка не является независимой приёмкой; следующий этап — отдельный reviewer на новой native-версии. Слияние и выпуск не разрешены.
 - Риск: повышенный — авторизация, разделение данных игроков и атомарное изменение инвентаря; реальные данные/секреты пока не используются.
 - Требования: [PRODUCT.md](../../PRODUCT.md), S-01–S-06; [технические решения](../TECHNICAL.md); [полномочия](../PROJECT.md).
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -334,3 +334,66 @@ try {
 4. **N2 — явный pipefail в самом шаге замера.** Сделать pipeline замера независимым от workflow defaults, сохранив ненулевой отказ первого звена. В изолированной копии воспроизвести соответствующий шаг с отрицательным measure и без defaults shell; он обязан завершиться ненулевым кодом, tee не скрывает отказ. Не редактировать продуктовые файлы проверяемой ветки ради probe и не выдавать синтетический probe за реальный замер.
 5. **Самопроверка developer.** Закреплённые Node24.22.1/npm11.9.0 и native better-sqlite3 13.0.3, без shim/подмены зависимостей/отключения install scripts. Чистый `bash scripts/verify.sh`, `npm run test:browser`, полный `bash scripts/container-smoke.sh`, обязательные CI jobs нового HEAD без skipped/подавления отказов. Подтвердить F1 и F2 на настоящих jose/Fastify и сохранение F3–F6; restored volume должен пройти HTTP health/version/состояние/undo/craft. Количество тестов после новых регрессий может вырасти, старые22 не должны исчезнуть. Если среда чего-то не позволяет — точный блокер и непроверенный критерий, а не accepted.
 6. **Передача.** Продолжить существующие ветку и PR №1. Сохранить исходные отчёты, обновить TASK-001/RUNBOOK и PR фактическими изменениями G1/N1/N2, SHA, своими командами/результатами/CI и ограничениями. Не менять исторический пакет FIXES-R2 на новый код под тем же SHA. Вернуть management статус review; accepted/done самостоятельно не выставлять. Своё исполнение developer не называть независимым. Следующий этап после этой передачи — отдельный reviewer с native-средой для новой версии, включая целевые регрессии G1 и исправления N1/N2.
+
+## Результат Codex: G1/N1/N2 — 2026-11-06 (UTC)
+
+- Получен и проверен ожидаемый HEAD `b2cdb86607d64c8bec8625b5b628f765c9573502`, рабочее дерево было чистым; выполнен обычный fast-forward. Последние три management-коммита меняли только документы. Прочитаны закреплённый стандарт, паспорт, актуальное поручение, PRODUCT/RUNBOOK и полный FIXES-R2. Исходные отзывы и исторический пакет не менялись.
+- Исправленный функциональный SHA: `f1406bcd364f19f87651be2b2e6ac28b0c0d1dde`. G1/N1/N2 находятся в этом коде. После него добавляются только материалы передачи; финальные HEAD/CI читать в PR №1. Схема/математика, nonce, F1–F6 и корректные пути не переписывались.
+- **G1:** общая validateDatabasePath проверяет непустую строку и равенство исходному String.trim() без нормализации. Store вызывает её до mkdir/new Database; main — для DATABASE_PATH; backup CLI проверяет оба SOURCE/TARGET до exists/open/mkdir/target. Backup helper использует ту же проверку. Точное :memory: разрешено для Store/тестового сервера, но не для файловых аргументов backup. Предыдущие exclusive0600/cleanup гарантии сохранены.
+- **Регрессии G1 на реальном драйвере:** 6 новых тестов, старые22 сохранены, всего28. Leading/trailing space/tab/NBSP и empty/whitespace-only отвергаются Store и настоящим main до появления каталога/БД. В CLI проверены distinct trimmed/literal файлы и only-literal без trimmed для каждого из трёх символов с обоих краёв: hash обоих источников и список файлов прежние, target/новый trimmedSOURCE не появляются. Literal не открывался через драйвер для проверки: проверялись байты. Неверный TARGET отвергается до SOURCE, который иначе включил бы WAL/мигрировал sentinel-БД; её hash неизменен. Обычные пути с внутренними пробелами работают в Store, main/HTTP и CLI; :memory: сохранён. Ранее принятые F1/F2 (реальные jose/Fastify), F3–F6 и HTTP restore исполнялись в полном наборе.
+- **N1:** npm test теперь сам выполняет `tsc -b --force` через pretest: собираются актуальные rules/server outputs, без доверия старым tsbuildinfo. В отдельной полной git archive-копии f1406bc с собственной `npm ci` команда прошла **28/28** в трёх сценариях: (1) clean checkout без dist/metadata; (2) изменённый src при оставшемся stale dist; (3) удалённые оба dist при сохранённых tsbuildinfo. В (2) перед npm test наблюдался старый CLI, затем в (2)/(3) настоящий compiled backup CLI выполнил новую версию исходника с временным marker. Это проверка поведения команды, а не поиска pretest в package.json. Менялась только временная копия; после проверки удалена. Исходник исполнявшейся диагностики приведён ниже.
+- **N2:** непосредственно в шаге Measure capacity стоит `set -o pipefail`. Probe извлекает фактическое run-тело из workflow и исполняет в изолированном каталоге под bash -e без workflow defaults/унаследованного pipefail; временный measure exit17 → шаг exit17. Контрольная копия без явной строки →exit0. Таким образом, удаление защиты из workflow проваливает probe, а defaults не объясняют его зелёный результат. Синтетический probe не выдаётся за реальный замер; product-файлы ветки им не меняются.
+- **Собственная среда:** Node v24.22.1, npm11.9.0, better-sqlite3 13.0.3, реально загружен `prebuilds/linux-x64.node`, SQLite3.53.4. Обычная установка из lock с install scripts; shim/Node22 и подмена зависимостей не применялись. Первый избыточно конкретный диагностический поиск имени `better_sqlite3.node` не нашёл prebuild; после чтения штатного binding loader подтверждён фактический linux-x64.node, источник приложения/зависимости по этому поводу не менялись.
+- **Свои команды f1406bc:** `NPM_CONFIG_CACHE=/tmp/chm-npm XDG_CACHE_HOME=/tmp/chm-cache bash scripts/verify.sh` →exit0,28/28, типы/lint/build. `PLAYWRIGHT_BROWSERS_PATH=/tmp/chm-browsers npm run test:browser` →exit0,1/1, Chromium360×800. `bash scripts/check-measure-pipeline.sh` →exit0 с наблюдаемыми17/0. `npm run measure` →exit0. В промежуточном c0988da lint обнаружил URL/no-regex-spaces в новом диагностическом скрипте; исправлено в f1406bc без отключения правил. Ошибки не скрываются и промежуточный SHA не объявляется финальным зелёным кодом.
+- **Полный локальный контейнер:** `env -u DOCKER_CONTEXT -u DOCKER_TLS -u DOCKER_TLS_VERIFY -u DOCKER_CERT_PATH DOCKER_HOST=unix:///var/run/docker.sock bash scripts/container-smoke.sh` на f1406bc →exit0. Собран image `sha256:0a20b4e365c42164224ab2e5b809c7dec3ba9059b007cf2d782463f28ebbec4b`, revision f1406bc. Non-root/health/version/401/persistence,0600 backup, восстановленный сервер/состояние/HTTP undo/craft passed. Скрипт исполнен целиком, синтетические секреты переданы только тестовому контейнеру. Trap убрал временные container/volume; старый собственный image/cache очищаются после сборки, текущий image остаётся локальным. Registry upload/внешнего стенда нет.
+- **Ограниченный собственный замер:** Linux x64, Intel Xeon Platinum8573C,5 logical CPU/18 008MiB; batchSetup10 000 групп670,8мс;100 отдельных HTTP-команд218,5мс,p95 3,34мс; отказ на миллионе цифр18,6мс; peak RSS119,5MiB, БД+WAL14 337 120bytes. Это выборка без жёсткого лимита1vCPU/512MiB, не SLA и не предел инвентаря.
+- **CI функционального SHA:** [run42184373070](https://github.com/sa713/cheapshotmods/actions/runs/42184373070): container-smoke127781113659 success; verify127781113335 успешно выполнил clean verify, но на момент записи остаётся in_progress на установке Chromium, live log вернул404 BlobNotFound. Непрошедшие/будущие шаги этого run не засчитываются. Оба jobs окончательного документационного HEAD будут проверены отдельно и сохранены в PR; старый run не переименовывается в них.
+- PRODUCT,45 управляемых файлов и все исходные отзывы/исторический FIXES-R2 пакет сохранены. Эта передача — самопроверка developer. Management должен организовать отдельную native-приёмку новой версии, включая G1 и N1/N2; scoped accepted старого кода не переносится на изменения. Живые Telegram/nonce/callback/WebView и полный мобильный UI не подтверждены. Merge/release/новые расходы/инфраструктура/бот-настройки не выполнялись.
+
+### Воспроизведение N1, выполненное Codex
+
+Запуск из корня: `NPM_CONFIG_CACHE=/tmp/chm-npm XDG_CACHE_HOME=/tmp/chm-cache bash check-n1-behavior.sh f1406bcd364f19f87651be2b2e6ac28b0c0d1dde`. Все изменения ниже — только в собственной временной копии. Три npm test дали28/28; итоговый JSON: cleanCheckout/changedSourceWithStaleDist/removedDistWithTsbuildinfo/runtimeCliFreshness = passed.
+
+~~~~~~bash
+#!/usr/bin/env bash
+set -euo pipefail
+revision="$1"
+probe_dir=$(mktemp -d /tmp/chm-n1.XXXXXX)
+trap 'rm -rf "$probe_dir"' EXIT
+git archive "$revision" | tar -x -C "$probe_dir"
+cd "$probe_dir"
+npm ci --no-audit --no-fund > /tmp/chm-n1-install.log 2>&1
+# No dist or tsbuildinfo is present in this clean checkout.
+npm test > /tmp/chm-n1-clean.log 2>&1
+python3 - <<'PY'
+from pathlib import Path
+p=Path('apps/server/src/database-path.ts')
+s=p.read_text();assert 'surrounding whitespace' in s
+p.write_text(s.replace('surrounding whitespace','surrounding whitespace N1_SRC_FRESHNESS'))
+PY
+# Observe that the compiled CLI is still stale before npm test runs.
+node --input-type=module <<'JS'
+import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+const r=spawnSync(process.execPath,['apps/server/dist/backup.js','','unused.sqlite'],{encoding:'utf8'});
+assert.equal(r.status,1);assert.ok(!r.stderr.includes('N1_SRC_FRESHNESS'));
+JS
+npm test > /tmp/chm-n1-changed-source.log 2>&1
+check_fresh_cli() {
+node --input-type=module <<'JS'
+import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {existsSync} from 'node:fs';
+const r=spawnSync(process.execPath,['apps/server/dist/backup.js','','unused.sqlite'],{encoding:'utf8'});
+assert.equal(r.status,1);assert.ok(r.stderr.includes('N1_SRC_FRESHNESS'));assert.equal(existsSync('unused.sqlite'),false);
+JS
+}
+check_fresh_cli
+# Keep incremental metadata but remove outputs, then require npm test to repair them.
+test -f apps/server/tsconfig.tsbuildinfo
+test -f packages/rules/tsconfig.tsbuildinfo
+rm -rf apps/server/dist packages/rules/dist
+npm test > /tmp/chm-n1-removed-dist.log 2>&1
+check_fresh_cli
+printf '{"source":"%s","cleanCheckout":"passed","changedSourceWithStaleDist":"passed","removedDistWithTsbuildinfo":"passed","runtimeCliFreshness":"passed"}\n' "$revision"
+
+~~~~~~
+
+Следующий исполнитель — management: проверить передачу/финальный SHA и назначить отдельного reviewer. Текущий статус review не означает самостоятельный accepted/done или разрешение на слияние.
