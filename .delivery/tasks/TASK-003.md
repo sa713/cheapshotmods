@@ -1,6 +1,7 @@
 # TASK-003 — установка на Debian за существующим IP-прокси
 
-- Статус: accepted
+- Статус: changes_required
+- Текущее допзадание developer: R6 — переносимая проверка Docker-образов, последний раздел этой карточки. Приёмка cf0 сохранена как история; на целевом containerd install не прошёл.
 - Риск: повышенный — TLS, граница доверия proxy и сохранение работающих сервисов общего хоста.
 - Основание: решение владельца об установке без домена по IP:порту и предоставленная диагностика; [.delivery/PROJECT.md](../PROJECT.md), раздел размещения без домена. Продуктовые требования [PRODUCT.md](../../PRODUCT.md) сохраняются.
 - Репозиторий: https://github.com/sa713/cheapshotmods
@@ -198,3 +199,45 @@ Management прочитал полный отдельный отчёт TASK-003-
 Management прочитал exact cf0 deploy/chm.sh и scripts/bundle.sh: manifest app_image_id/proxy_image_id берутся из builder docker inspect .Id, затем напрямую сравниваются с target .Id. Обе проверки выполняются и в external-режиме. Docker/Moby maintainer подтверждает, что classic image store использует config digest, containerd — manifest/index digest, поэтому .Id не является переносимым межэтими stores: https://github.com/moby/moby/issues/51934. Это обоснованная гипотеза для данного отказа, не уже прочитанный backend владельца.
 
 Следующий операторский шаг read-only: docker info Driver/DriverStatus, выбранные docker image inspect поля (Id/Os/Architecture/org.opencontainers.image.revision и RepoTags) только для cheapshotmods:cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb и caddy:2.10.2-alpine. По выводу подтвердить конкретное расхождение и подготовить developer-исправление переносимой проверки без отключения идентичности/подмены manifest или смены общего Docker storage. Продуктовый код management не меняет. Секреты/полный inspect/env не выводить; повторно скачивать и очищать images/volumes сейчас не требуется.
+
+## R6 — переносимая проверка Docker-образов: текущее допзадание
+
+- Статус исправления: ready; задача TASK-003 возвращена в changes_required после отказа на целевом хосте. Изолированная приёмка cf0a793 сохранена как историческое доказательство, не приёмка нового кода.
+- База исправления: ветка `chm-003-external-proxy`, полный SHA `d4eabf608d8a9e86bc2c3f38accce95401069597`; её runtime/installer совпадают с cf0a793, последующие изменения — management-документы. Текущая постановка также doc-only, безопасное продвижение проверить без reset/force. Продолжать в том же PR №3 с base chm-001-foundation, без параллельной реализации/слияния в main.
+- Цель: новый неизменяемый комплект проходит установку на существующем Docker29/containerd владельца и сохраняет надёжную проверку содержимого образов; сервер не подстраивается под установщик.
+
+### Подтверждённое воспроизведение
+
+Владелец выполнил принятый curl-маршрут: ZIP, tar и все12 внутренних entries OK; install отказал `loaded image IDs differ from manifest`. Загрузка образов прошла, до mkdir ROOT/БД/сети/app/ingress код не дошёл. Последующая read-only диагностика:
+
+```text
+DRIVER=overlayfs
+DriverStatus=[["driver-type","io.containerd.snapshotter.v1"]]
+app tag=cheapshotmods:cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb
+actual .Id=sha256:224b715b65e63febfde0a3934f864440a824d9a8dacbf7ce4c9a206abcd6d425
+platform=linux/amd64
+revision=cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb
+packaged proxy tag=caddy:2.10.2-alpine
+actual .Id=sha256:5bf74fd0ea8316ea9934240b594242392bcc0e4f2678d4e06d5c5d3fb9f5932d
+platform=linux/amd64
+proxy revision label отсутствует
+```
+
+Принятый cf0 manifest ожидал app_id `sha256:cfdcc939fdc357b5478772a5c836f35819baba1f069691e99ba3636e80095a92`, proxy_id `sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510`.
+
+В `scripts/bundle.sh` оба ID берутся из builder `docker image inspect .Id`; `deploy/chm.sh:load_images` прямо сравнивает с target .Id. Такая проверка непереносима: classic store идентифицирует image по config digest, containerd — по manifest/index digest. Источник maintainer: https://github.com/moby/moby/issues/51934, описание backend: https://docs.docker.com/engine/storage/containerd/. Platform/revision совпадают, но сами по себе не доказывают тождество содержимого — защиту требуется исправить, а не убрать.
+
+### Объём и критерии исправления
+
+1. **Переносимая идентичность.** Проверить алгоритм на фактическом cf0 архиве и исправить bundle/manifest/load/проверки версии там, где ошибочно смешаны builder и target ID. Определять и проверять точный ожидаемый linux/amd64 image по криптографически связанному содержимому config/слоёв или эквивалентному переносимому доказательству. Mutable tag, одна revision label, совпавший platform или разрешение любых IDs на containerd недостаточны. Runtime-native ID можно сохранять отдельно как наблюдение этого daemon, не универсальную идентичность. Способ и формат выбирает developer; совместимость schema/update/rollback объяснить и проверить. Shared ingress guards для actual running image/env/process не ослаблять.
+2. **Реальная матрица двух stores.** В изолированной среде воспроизвести старый отказ на одном и том же kit при переносе classic → containerd. Новый точный kit проходит проверку и install на обоих реальных stores, в том числе Docker29/containerd; проверить и обратный перенос containerd → classic. Совпадение ожидаемого содержимого и различие native .Id отразить в доказательствах. Две независимые сборки каждая в своём backend или mocks не заменяют перенос одного архива между разными stores. Для daemon использовать только выделенные тестовые среды; не переключать backend/не перезапускать Docker на общем сервере владельца.
+3. **Отрицательные сценарии.** Подменённый image при том же tag/platform/revision отклоняется; неверные config/слои/platform и повреждённый kit отклоняются. Ошибки дают понятный вывод с безопасными метаданными ожидаемого/фактического значения и типа идентификатора, без env/secrets. До верификации не создавать app/БД/edge и не менять ingress. Проверку нельзя обходить редактированием ожидаемых IDs, пересчётом SHA256SUMS старого архива или отключением guard.
+4. **Регрессии доставки.** Профиль external запускает app без публичного порта/своего proxy, через прежний один hop. Standalone, external shared-ingress, сохранение соседей/HTTP-01 и restart/backup/restore/update/rollback остаются работоспособны. Просмотреть обращения к image ID/digest во всех связанных production/installer/test местах, но исправлять только необходимую для R6 область. Полный PRODUCT/авторизация/UI не меняются.
+5. **Проверки и комплект.** Обязательные verify/browser/container-smoke, standalone и external installation checks проходят на фактическом новом SHA; добавить реальную cross-store регрессию в CI. Собрать новый полный приватный kit с SHA/manifest/image proof/checksums. Старый cf0 архив сохраняется неизменным, его code review/CI нельзя перенести на новый код автоматически. Отдельный reviewer в новом контексте проверяет R6, отрицательные случаи и доказательство двух stores на exact kit; findings исправляет автор.
+6. **Маршрут владельца.** Передать точные source SHA/run/artifact ID/ZIP и tar hashes и команды через curl с уже имеющимся `/root/.config/cheapshotmods/github.curl`. Никаких обязательных gh/повторного выпуска ключа/git clone/сборки на Debian. Для новой попытки извлекать новый kit в отдельный private каталог и запускать install/stage/apply/check. Учитывать, что старые cf0 images уже загружены, но ROOT по выполненному пути не создавался. Не чистить общие images/cache/volumes, не менять Docker daemon/storage и рабочие конфигурации соседей ради этого отказа. При обнаружении неожиданной существующей установки не перезаписывать её.
+
+### Полномочия, результат и граница
+
+Это исправление внутри TASK-003 и согласованной цели готовой установки, нового бизнес-сбора/нового отдельного проекта не требуется. Developer продолжает самостоятельно до нового проверенного комплекта и независимого заключения. Изолированные Docker/CI/private artifacts в доступной квоте разрешены. Management не реализует код. Merge/main, реальный сервер/ACME/BotFather и новые расходы не делегируются. Реальная установка/Telegram остаются у владельца после приёмки комплекта.
+
+Передать описание причины/исправления, exact SHA/kit, CI и native cross-store proof, независимый verdict, команды скачивания/продолжения через curl и точные внешние ограничения. Актуализировать TASK-003/STATE/TASKS/RUNBOOK, не переписывая старые доказательства под новый SHA. При недостатке среды для реальной матрицы честно сохранить конкретный блокер; самопроверку/моки не называть выполненной cross-store проверкой.
