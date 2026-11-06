@@ -52,6 +52,8 @@ try:
     host=url.hostname or ''
     if url.scheme!='https' or url.path or url.query or url.fragment or url.username or url.password or base!=base.strip(): raise ValueError()
     if not re.fullmatch(r'[A-Za-z0-9.-]+',host) or not 1<=http<=65535 or not 1<=https<=65535 or http==https or (url.port or 443)!=https: raise ValueError()
+    canonical_origin='https://'+host+((':'+str(url.port)) if url.port not in (None,443) else '')
+    if base!=canonical_origin: raise ValueError()
     bind=values.get('CHM_BIND_ADDRESS','0.0.0.0')
     if bind not in ('0.0.0.0','127.0.0.1'): raise ValueError()
     email=values.get('CADDY_EMAIL','')

@@ -79,6 +79,39 @@ chmod 644 "$work/config.env"
 if inside install "$work/rejected-mode" "$work/config.env" --internal-tls; then echo 'Public secrets file accepted' >&2; exit 1; fi
 [[ ! -e "$work/rejected-mode" ]]
 chmod 600 "$work/config.env"
+# Match main's canonical origin guard before image import or persistent changes.
+mkdir "$work/preflight-bin"
+cat > "$work/preflight-bin/docker" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ ( "${1:-}" == image && "${2:-}" == load ) || ( "${1:-}" == volume && "${2:-}" == create ) ]]; then
+  printf 'unexpected mutation\n' > "$CHM_PREFLIGHT_MARKER"
+  exit 97
+fi
+exec /usr/local/bin/docker "$@"
+SH
+chmod +x "$work/preflight-bin/docker"
+url_case=0
+for bad_origin in https://EXAMPLE.com https://example.com:443; do
+  url_case=$((url_case+1))
+  invalid_config="$work/invalid-url-$url_case.env"
+  python3 - "$work/config.env" "$invalid_config" "$bad_origin" <<'PY'
+import sys
+lines=open(sys.argv[1]).read().splitlines()
+with open(sys.argv[2],'w') as out:
+    for line in lines:
+        if line.startswith('PUBLIC_BASE_URL='): line='PUBLIC_BASE_URL='+sys.argv[3]
+        elif line.startswith('CHM_HTTPS_PORT='): line='CHM_HTTPS_PORT=443'
+        out.write(line+'\n')
+PY
+  chmod 600 "$invalid_config"
+  invalid_root="$work/rejected-url-$url_case"
+  if docker exec -e "PATH=$work/preflight-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" -e "CHM_PREFLIGHT_MARKER=$work/preflight-side-effect" "$container" bash "$bundle/chm.sh" install "$invalid_root" "$invalid_config" --internal-tls > "$work/invalid-url-$url_case.log" 2>&1; then
+    echo 'Noncanonical origin accepted' >&2; exit 1
+  fi
+  grep -q 'CONFIG rejected before changes' "$work/invalid-url-$url_case.log"
+  [[ ! -e "$invalid_root" && ! -e "$work/preflight-side-effect" ]]
+done
 inside install "$root" "$work/config.env" --internal-tls
 [[ "$(stat -c %a "$root/config.env")" == 600 ]]
 # No secret text is printed: verify generated session secret only as a boolean.
