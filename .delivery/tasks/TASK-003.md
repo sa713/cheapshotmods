@@ -190,3 +190,11 @@ Management прочитал полный отдельный отчёт TASK-003-
 ```
 
 Следующий шаг после подтверждения доступа — curl-скачивание принятого архива в новый private каталог и продолжение install/stage/apply/check. gh/git clone/сборка на сервере для скачивания готового artifact не требуются. Источники: GitHub REST Actions artifacts / Download an artifact (Actions read), документация fine-grained PAT.
+
+## Операторская попытка: сверка Docker image IDs — 2026-11-06
+
+Владелец предоставил результат curl-маршрута: kit.zip OK, tar.gz OK, все12 внутренних entries OK; затем `Cheapshot Mods: loaded image IDs differ from manifest`. Это новый доказанный отказ installer на целевом Debian. Он находится в load_images после docker image load, до mkdir ROOT/создания тома/сети и запуска app/изменения ingress. Могли загрузиться/переназначиться image tags; пересоздание работающих контейнеров этой веткой не выполнялось. Внешняя установка failed до запуска; прежняя изолированная приёмка сохраняется как история, фактическая совместимость с хостом не подтверждена.
+
+Management прочитал exact cf0 deploy/chm.sh и scripts/bundle.sh: manifest app_image_id/proxy_image_id берутся из builder docker inspect .Id, затем напрямую сравниваются с target .Id. Обе проверки выполняются и в external-режиме. Docker/Moby maintainer подтверждает, что classic image store использует config digest, containerd — manifest/index digest, поэтому .Id не является переносимым межэтими stores: https://github.com/moby/moby/issues/51934. Это обоснованная гипотеза для данного отказа, не уже прочитанный backend владельца.
+
+Следующий операторский шаг read-only: docker info Driver/DriverStatus, выбранные docker image inspect поля (Id/Os/Architecture/org.opencontainers.image.revision и RepoTags) только для cheapshotmods:cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb и caddy:2.10.2-alpine. По выводу подтвердить конкретное расхождение и подготовить developer-исправление переносимой проверки без отключения идентичности/подмены manifest или смены общего Docker storage. Продуктовый код management не меняет. Секреты/полный inspect/env не выводить; повторно скачивать и очищать images/volumes сейчас не требуется.
