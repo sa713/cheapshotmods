@@ -181,17 +181,19 @@ m=json.load(open(sys.argv[1]));print(m['app_image']);print(m['proxy_image'])
 PY
 )
 mkdir "$work/update-bundle"
-cp "$bundle/"{chm.sh,compose.yml,compose.external.yml,ingress.py,Caddyfile,Caddyfile.internal,env.example,env.external.example,README.md,EXTERNAL-PROXY.md} "$work/update-bundle/"
+cp "$bundle/"{chm.sh,compose.yml,compose.external.yml,ingress.py,image-proof.py,Caddyfile,Caddyfile.internal,env.example,env.external.example,README.md,EXTERNAL-PROXY.md} "$work/update-bundle/"
 printf 'FROM %s\nENV BUILD_SHA=%s\nLABEL org.opencontainers.image.revision=%s\n' "${images[0]}" "$fixture_sha" "$fixture_sha" > "$work/Dockerfile"
 docker build -q -t "$fixture_image" - < "$work/Dockerfile" >/dev/null
 docker image save "$fixture_image" "${images[1]}" | gzip -1 > "$work/update-bundle/images.tar.gz"
 fixture_id="$(docker image inspect --format '{{.Id}}' "$fixture_image")"
 python3 - "$bundle/manifest.json" "$work/update-bundle/manifest.json" "$fixture_sha" "$fixture_image" "$fixture_id" <<'PY'
 import json,sys
-m=json.load(open(sys.argv[1]));m.update(source_sha=sys.argv[3],app_image=sys.argv[4],app_image_id=sys.argv[5],test_fixture=True)
+m=json.load(open(sys.argv[1]));m.update(source_sha=sys.argv[3],app_image=sys.argv[4],test_fixture=True)
+m['builder_observations']['app_native_id']=sys.argv[5]
 json.dump(m,open(sys.argv[2],'w'),indent=2)
 PY
-(cd "$work/update-bundle"; sha256sum chm.sh compose.yml compose.external.yml ingress.py Caddyfile Caddyfile.internal env.example env.external.example README.md EXTERNAL-PROXY.md manifest.json images.tar.gz > SHA256SUMS)
+python3 "$bundle/image-proof.py" record "$work/update-bundle/manifest.json" "$work/update-bundle/images.tar.gz"
+(cd "$work/update-bundle"; sha256sum chm.sh compose.yml compose.external.yml ingress.py image-proof.py Caddyfile Caddyfile.internal env.example env.external.example README.md EXTERNAL-PROXY.md manifest.json images.tar.gz > SHA256SUMS)
 # A failed offline helper after freeze must recover the old image+volume.
 mkdir "$work/failure-bin"
 cat > "$work/failure-bin/docker" <<'SH'

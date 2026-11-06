@@ -132,25 +132,23 @@ kit_check() {
   mapfile -t manifest_fields < <(python3 - "$bundle/manifest.json" <<'PY'
 import json,sys,re
 m=json.load(open(sys.argv[1]))
-assert m['format']==1 and m['platform']=='linux/amd64' and re.fullmatch('[a-f0-9]{40}',m['source_sha'])
+assert m['format']==2 and m['platform']=='linux/amd64' and re.fullmatch('[a-f0-9]{40}',m['source_sha'])
 assert m['app_image']=='cheapshotmods:'+m['source_sha']
-for key in ['source_sha','app_image','app_image_id','proxy_image','proxy_image_id']:
+for key in ['source_sha','app_image','proxy_image']:
     value=m[key]; assert re.fullmatch('[A-Za-z0-9:._/@-]+',value); print(value)
 PY
   )
-  [[ ${#manifest_fields[@]} == 5 ]] || fail 'invalid manifest'
-  version="${manifest_fields[0]}"; app_image="${manifest_fields[1]}"; app_id="${manifest_fields[2]}"
-  proxy_image="${manifest_fields[3]}"; proxy_id="${manifest_fields[4]}"
+  [[ ${#manifest_fields[@]} == 3 ]] || fail 'invalid manifest; use the incoming format-2 installer'
+  version="${manifest_fields[0]}"; app_image="${manifest_fields[1]}"; proxy_image="${manifest_fields[2]}"
 }
 load_images() {
+  python3 "$bundle/image-proof.py" archive "$bundle/manifest.json" "$bundle/images.tar.gz" || fail 'archive image proof failed before import'
   gzip -dc "$bundle/images.tar.gz" | docker image load >/dev/null
-  [[ "$(docker image inspect --format '{{.Id}}' "$app_image")" == "$app_id" && "$(docker image inspect --format '{{.Id}}' "$proxy_image")" == "$proxy_id" ]] || fail 'loaded image IDs differ from manifest'
-  [[ "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$app_image")" == linux/amd64 && "$(docker image inspect --format '{{.Os}}/{{.Architecture}}' "$proxy_image")" == linux/amd64 ]] || fail 'loaded images must be Linux amd64'
-  [[ "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "$app_image")" == "$version" ]] || fail 'image revision mismatch'
+  python3 "$bundle/image-proof.py" loaded "$bundle/manifest.json" || fail 'loaded image proof failed before installation/transition'
 }
 release_copy() {
   mkdir -p "$root/releases/$version"
-  cp "$bundle/"{chm.sh,compose.yml,compose.external.yml,ingress.py,Caddyfile,Caddyfile.internal,env.example,env.external.example,README.md,EXTERNAL-PROXY.md,manifest.json} "$root/releases/$version/"
+  cp "$bundle/"{chm.sh,compose.yml,compose.external.yml,ingress.py,image-proof.py,Caddyfile,Caddyfile.internal,env.example,env.external.example,README.md,EXTERNAL-PROXY.md,manifest.json} "$root/releases/$version/"
   chmod -R go-rwx "$root/releases/$version"
 }
 write_metadata() {
@@ -264,6 +262,7 @@ switch_up() {
   cp "$root/releases/$CHM_VERSION/chm.sh" "$root/chm.sh.new"
   mv "$root/chm.sh.new" "$root/chm.sh"
   if [[ -f "$root/releases/$CHM_VERSION/ingress.py" ]]; then cp "$root/releases/$CHM_VERSION/ingress.py" "$root/ingress.py"; fi
+  if [[ -f "$root/releases/$CHM_VERSION/image-proof.py" ]]; then cp "$root/releases/$CHM_VERSION/image-proof.py" "$root/image-proof.py"; fi
   echo "Running candidate $CHM_VERSION; run check after DNS/TLS configuration."
 }
 platform_check

@@ -67,6 +67,7 @@ ports = [free_port() for _ in range(5)]
 config = work/'config.env'
 write(config, f'CHM_PROXY_MODE=external\nPUBLIC_BASE_URL={origin}\nSESSION_SECRET=isolated-external-fixture-session-secret\n')
 config.chmod(0o600)
+run('python3', '/fixtures/proof-rejection-fixture.py', str(bundle), str(work))
 chm('install', root, config)
 meta = dict(line.split('=', 1) for line in (root/'current.env').read_text().splitlines())
 app = json.loads(docker('inspect', project+'-app-1'))[0]
@@ -313,11 +314,13 @@ new_image = 'cheapshotmods:'+new_sha
 write(work/'update-image', new_image)
 run('docker', 'build', '-q', '-t', new_image, '-', input=f'FROM {app_image}\nENV BUILD_SHA={new_sha}\nLABEL org.opencontainers.image.revision={new_sha}\n'.encode())
 manifest = json.loads((bundle/'manifest.json').read_text())
-manifest.update(source_sha=new_sha, app_image=new_image, app_image_id=json.loads(docker('image', 'inspect', new_image))[0]['Id'])
+manifest.update(source_sha=new_sha, app_image=new_image)
+manifest['builder_observations']['app_native_id'] = json.loads(docker('image', 'inspect', new_image))[0]['Id']
 write(update/'manifest.json', manifest)
 saved_tar = run('docker', 'image', 'save', new_image, manifest['proxy_image']).stdout
 import gzip
 (update/'images.tar.gz').write_bytes(gzip.compress(saved_tar, compresslevel=1))
+run('python3', str(bundle/'image-proof.py'), 'record', str(update/'manifest.json'), str(update/'images.tar.gz'))
 write(update/'SHA256SUMS', ''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in sorted(update.iterdir()) if p.is_file() and p.name != 'SHA256SUMS'))
 before_update = state()
 chm('update', root, update)

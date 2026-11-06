@@ -2,41 +2,39 @@
 
 Для выбранного общего Debian и IP `https://94.228.170.13:9443` используйте **[EXTERNAL-PROXY.md](EXTERNAL-PROXY.md)** и `env.external.example`. Инструкция ниже сохраняет standalone-режим с собственным Caddy; его не запускать на занятых80/443 общего хоста.
 
-Один приватный комплект привязан к полному source SHA: `manifest.json` содержит версии Node/npm, Linux/amd64, image IDs и digest полученного Caddy 2.10.2. `SHA256SUMS` проверяет содержимое, отдельный `.tar.gz.sha256` — внешний архив. Это кандидат TASK-002, не выполненная установка владельцу и не подтверждение живого Telegram.
+Один приватный комплект привязан к полному source SHA: `manifest.json` содержит версии Node/npm, Linux/amd64, переносимые config/layer proofs, native IDs builder как observations и digest полученного Caddy 2.10.2. `SHA256SUMS` проверяет содержимое, отдельный `.tar.gz.sha256` — внешний архив. Это кандидат TASK-002, не выполненная установка владельцу и не подтверждение живого Telegram.
 
 Поддержка installer: **Debian 12/13, Linux amd64**, локальный Docker Engine **>=24** и Docker Compose **>=2.30**. Неизвестная ОС/архитектура, отсутствие зависимостей, занятые TCP-порты или менее 4 GiB свободного диска останавливают установку до загрузки образов/создания каталога/volumes. Рекомендуемый запас диска — 10 GiB плюс место для данных и нескольких backup; память runtime/нагрузка измерены отдельно, без обещания SLA. Порты 80/443 должны быть доступны хосту и направлены на него; DNS A/AAAA домена должен указывать на этот Debian. Для IPv6 требуется отдельная проверка сети; комплект публикует IPv4. Для публичной установки используйте стандартные 80/443. Нестандартные loopback-порты в тесте работают по прямому HTTPS URL; автоматический HTTP redirect Caddy при нестандартном HTTPS-порте остаётся на 443, поэтому переход через HTTP в этом режиме не проверен и не предлагается.
 
-## Получение
+## Получение готового комплекта
 
-В приватном репозитории откройте Actions → **Debian installation kit** → успешный run для нужного SHA → artifact `cheapshotmods-<SHA>-linux-amd64`. Скачайте ZIP, распакуйте его и находящийся внутри `.tar.gz` на Debian. Или используйте GitHub CLI с доступом к этому приватному репозиторию:
-
-Если GitHub CLI ещё не настроен на Debian, установите его и Git, затем войдите своим аккаунтом с доступом к приватному репозиторию. Авторизация интерактивная; токены не вводятся в Git или аргументы команд. Альтернатива — скачать artifact через авторизованный браузер, как описано выше.
+Для выбранного сервера используйте curl с уже настроенным проектным credential-файлом `/root/.config/cheapshotmods/github.curl` (0600, каталог0700). Ни gh, ни git clone, ни новый ключ, ни сборка на сервере не нужны. Точные ARTIFACT_ID, source SHA, ZIP/tar SHA256 опубликованы в последнем разделе TASK-003 и PR. Команды выполняются от root в subshell с остановкой при первой ошибке; не применять `--location-trusted` и не печатать credential-файл.
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y gh git
-gh auth login --hostname github.com --git-protocol https --web
-gh run download RUN_ID --repo sa713/cheapshotmods --name cheapshotmods-SHA-linux-amd64 --dir kit
-cd kit
-sha256sum --check cheapshotmods-SHA-linux-amd64.tar.gz.sha256
-tar -xzf cheapshotmods-SHA-linux-amd64.tar.gz
-cd cheapshotmods-SHA-linux-amd64
-sha256sum --check SHA256SUMS
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  test -r /root/.config/cheapshotmods/github.curl
+  CHM_SHA=FULL_SOURCE_SHA
+  CHM_DOWNLOAD=$(mktemp -d /root/cheapshotmods-kit-XXXXXX)
+  cd "$CHM_DOWNLOAD"
+  curl --config /root/.config/cheapshotmods/github.curl --fail --silent --show-error --location --output kit.zip https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/ARTIFACT_ID/zip
+  printf '%s  kit.zip\n' ZIP_SHA256 | sha256sum --check -
+  python3 -m zipfile -e kit.zip .
+  printf '%s  cheapshotmods-%s-linux-amd64.tar.gz\n' TAR_SHA256 "$CHM_SHA" | sha256sum --check -
+  tar -xzf "cheapshotmods-$CHM_SHA-linux-amd64.tar.gz"
+  cd "cheapshotmods-$CHM_SHA-linux-amd64"
+  sha256sum --check SHA256SUMS
+  printf 'Проверенный комплект: %s\n' "$PWD"
+)
 ```
 
-Подставьте полный SHA и run ID из передачи TASK-002, не буквальные `SHA`/`RUN_ID`. Artifact хранится 30 дней; исходники и workflow остаются в Git. После истечения срока доступно точное воспроизведение из приватного Git (нужны Git/GitHub CLI с доступом к репозиторию, Docker и зависимости ниже; Node/npm на хосте не нужны — сборка внутри закреплённого Docker builder):
+Продолжить из напечатанного каталога по EXTERNAL-PROXY для выбранного общего хоста либо по standalone-инструкции ниже. При неожиданно существующем `/opt/cheapshotmods` не перезаписывать его: проверить сохранённую установку и выбрать update отдельно.
 
-```bash
-source_sha=FULL_ACCEPTED_SOURCE_SHA
-# При отсутствии авторизации: gh auth login --hostname github.com --git-protocol https --web
-gh repo clone sa713/cheapshotmods cheapshotmods-src
-cd cheapshotmods-src
-git fetch origin "$source_sha"
-git checkout --detach "$source_sha"
-bash scripts/bundle.sh "$PWD/artifacts"
-```
+Формат manifest2 содержит image_proofs: SHA-256 точных bytes config и ordered SHA-256 uncompressed layers, связанные с rootfs.diff_ids. Installer сверяет архив до import, затем повторно фактически экспортированное Docker-содержимое до создания ROOT/БД/edge/app. Native `.Id` в builder_observations — наблюдение конкретного daemon, а не переносимая идентичность. Config/platform/source revision проверяются вместе; одна метка или tag доказательством не являются.
 
-`workflow_dispatch` с полем `source_sha` также предусмотрен, но кнопка **Run workflow** становится доступна только после регистрации файла workflow в default branch. Этот PR не слит, поэтому такой способ сейчас не гарантируется. Основная передача — готовый скачиваемый CI artifact; Git-сборка выше остаётся доступной независимо от его retention. Повторная сборка использует исходный SHA, pinned lock-файл и Node/Caddy digests; побайтовое равенство image archives не обещается. Образы не публикуются в registry.
+Для обновления установки с format1 запускайте **входящий новый** `bash /absolute/path/to/NEW_BUNDLE/chm.sh update /opt/cheapshotmods /absolute/path/to/NEW_BUNDLE`. Новый installer не принимает старый format1 kit как новый вход; нельзя менять ожидаемые IDs или checksums прежнего архива. Rollback использует сохранённую локальную пару image+volume и её прежний installer; повторного импорта старого архива нет. После rollback на старый installer следующее обновление опять запускается входящим новым. В новых format2 установках обычный lifecycle сохраняется.
 
 ## Зависимости чистого Debian
 

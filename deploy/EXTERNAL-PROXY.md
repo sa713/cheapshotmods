@@ -6,22 +6,15 @@
 
 ## Получить комплект без сборки на сервере
 
-Скачать приватный artifact для принятого SHA по ссылке в передаче TASK-003. ZIP содержит tar.gz и его checksum. При использовании gh (команды установки/авторизации — вREADME):
+Скачать новый приватный artifact принятого SHA по curl-маршруту [README комплекта](README.md#получение-готового-комплекта), с уже существующим `/root/.config/cheapshotmods/github.curl`. Конкретные source SHA/artifact ID/ZIP и tar hashes — в текущей передаче R6 TASK-003/PR. Выполнять от root, в отдельном private каталоге, с `set -euo pipefail`; при первой ошибке зависимые шаги не продолжать. gh, новый ключ, clone и build не требуются.
 
-```bash
-gh run download RUN_ID --repo sa713/cheapshotmods --name cheapshotmods-SHA-linux-amd64 --dir kit
-cd kit
-sha256sum --check cheapshotmods-SHA-linux-amd64.tar.gz.sha256
-tar -xzf cheapshotmods-SHA-linux-amd64.tar.gz
-cd cheapshotmods-SHA-linux-amd64
-sha256sum --check SHA256SUMS
-```
+Старые8f3dd8a/cf0 не использовать для новой попытки на containerd: прежняя изолированная приёмка сохранена как история. Образы cf0 уже могли загрузиться, но по диагностике ROOT ещё не создавался; ничего общего не чистить. Если ROOT неожиданно существует, install его не перезапишет — сначала проверить состояние.
 
-Используйте полные RUN_ID/SHA из передачи, не старый8f3dd8a. Готовые app/standalone-proxy images уже в архиве; Docker build на общем хосте не выполнять. Дополнительный proxy image в архиве нужен только для standalone-режима и не запускается во внешнем режиме. Фактический общий proxy сохраняет свой установленный image; его источник и ID записываются операторской транзакцией, не заменяются образом из комплекта.
+Формат2 проверяет exact config SHA256 и ordered uncompressed layer SHA256 как до import, так и на фактическом Docker-export после load. Native ID может различаться между classic и containerd без различия содержимого. Править manifest/checksums или отключать guard нельзя. App/standalone-proxy images уже в архиве; Docker build на общем хосте не выполнять. Дополнительный proxy image в архиве нужен standalone и не запускается в external. Общий proxy сохраняет actual image и same-daemon running guard, не заменяется образом из комплекта.
 
 ## Установка и подготовка ingress
 
-На выбранном Debian 13.7 amd64 уже Docker 29.8.0/Compose 5.5.1. Требуются python3, openssl, curl, iproute2/ss и coreutils, доступны root/sudo и локальный Docker socket. Около 4.5G свободно: сначала проверьте `df -h / /var/lib/docker`; скрипт требует 2 GiB запаса плюс два размера images из manifest и два размера данных (при restore учитывает и backup). Проверяется файловая система установки и локальное Docker storage. Ничего глобально не чистится. Если места мало — остановитесь, сохраните свои backups на отдельный носитель; не удаляйте чужие images/volumes/cache. Порты 80/443,444/713/888/8443 и loopback 8088/8092 заняты другими сервисами и не переназначаются.
+На выбранном Debian 13.7 amd64 уже Docker 29.8.0/Compose 5.5.1. Требуются python3, openssl, curl, iproute2/ss и coreutils, нужны права root и локальный Docker socket. Около 4.5G свободно: сначала проверьте `df -h / /var/lib/docker`; скрипт требует 2 GiB запаса плюс два размера images из manifest и два размера данных (при restore учитывает и backup). Проверяется файловая система установки и локальное Docker storage. Ничего глобально не чистится. Если места мало — остановитесь, сохраните свои backups на отдельный носитель; не удаляйте чужие images/volumes/cache. Порты 80/443,444/713/888/8443 и loopback 8088/8092 заняты другими сервисами и не переназначаются.
 
 Из каталога извлечённого комплекта:
 
@@ -30,8 +23,8 @@ umask 077
 cp env.external.example config.env
 chmod 600 config.env
 nano config.env
-sudo bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
-sudo python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
+bash ./chm.sh install /opt/cheapshotmods "$PWD/config.env"
+python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
 ```
 
 В config уже выбран `CHM_PROXY_MODE=external` и точный PUBLIC_BASE_URL. Telegram-поля можно оставить пустыми до создания **выделенного** бота. Пустой SESSION_SECRET installer приватно сгенерирует; не передавайте его через argv/чат/Git. На этом шаге app доступен только внутри своей сети, личные API закрыты, публичный маршрут ещё не изменён.
@@ -51,8 +44,8 @@ sudo python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
 ## Применить и проверить
 
 ```bash
-sudo python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
-sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 openssl s_client -connect 127.0.0.1:9443 -verify_ip 94.228.170.13 -verify_return_error -CApath /etc/ssl/certs -brief
 curl --fail --silent --show-error https://94.228.170.13:9443/health
 curl --fail --silent --show-error https://94.228.170.13:9443/version
@@ -74,19 +67,19 @@ curl --silent --show-error --output /dev/null --write-out '%{http_code}\n' https
 - origin: `https://94.228.170.13:9443`
 - redirect/callback: `https://94.228.170.13:9443/auth/oidc/callback`
 
-Main Mini App URL и `/setmenubutton`: `https://94.228.170.13:9443/`. Алгоритм RS256, scope приложения `openid profile`; nonce/state/PKCE не отключать. Заполнить **TELEGRAM_BOT_TOKEN**, **TELEGRAM_OIDC_CLIENT_ID**, **TELEGRAM_OIDC_CLIENT_SECRET** только в `/opt/cheapshotmods/config.env`, chmod600, затем `sudo bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods` и `check`.
+Main Mini App URL и `/setmenubutton`: `https://94.228.170.13:9443/`. Алгоритм RS256, scope приложения `openid profile`; nonce/state/PKCE не отключать. Заполнить **TELEGRAM_BOT_TOKEN**, **TELEGRAM_OIDC_CLIENT_ID**, **TELEGRAM_OIDC_CLIENT_SECRET** только в `/opt/cheapshotmods/config.env`, chmod600, затем `bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods` и `check`.
 
 Принятие числового IP:порта самим BotFather и живые Login/Mini App ещё не подтверждены. Если интерфейс Telegram отвергает точный URL, сохраните обезличенную причину и передайте management; не меняйте способ входа, не выключайте HTTPS/Secure/CSRF. Существующие боты/интеграции не перенастраивать. После настройки проверить сайт/Mini App одного ID, двух реальных пользователей и cookie на телефоне.
 
 ## Эксплуатация и откат
 
 ```bash
-sudo bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods
-sudo bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods
-sudo bash /opt/cheapshotmods/chm.sh restore /opt/cheapshotmods /opt/cheapshotmods/backups/backup-FULL_NAME.sqlite
-sudo bash /opt/cheapshotmods/chm.sh update /opt/cheapshotmods /absolute/path/to/NEW_BUNDLE
-sudo bash /opt/cheapshotmods/chm.sh rollback /opt/cheapshotmods
-sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh restart /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh backup /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh restore /opt/cheapshotmods /opt/cheapshotmods/backups/backup-FULL_NAME.sqlite
+bash /absolute/path/to/NEW_BUNDLE/chm.sh update /opt/cheapshotmods /absolute/path/to/NEW_BUNDLE
+bash /opt/cheapshotmods/chm.sh rollback /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 ```
 
 Это только Cheapshot lifecycle. Режим/origin/сеть/alias сохраняются; их изменение требует отдельной миграции и отклоняется. Update останавливает только свой app до snapshot, старый image+volume сохраняется. Во время app-перехода его маршрут временно недоступен; соседи продолжают обслуживаться. Restore/rollback возвращают согласованную точку данных, последующие изменения остаются в отложенном volume.
@@ -94,8 +87,8 @@ sudo bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
 Для удаления только добавления ingress:
 
 ```bash
-sudo python3 /opt/cheapshotmods/ingress.py rollback /opt/cheapshotmods
-sudo bash /opt/cheapshotmods/chm.sh stop /opt/cheapshotmods
+python3 /opt/cheapshotmods/ingress.py rollback /opt/cheapshotmods
+bash /opt/cheapshotmods/chm.sh stop /opt/cheapshotmods
 ```
 
 Восстанавливается исходный полный stack только для ip-proxy, новый override удаляется только при совпадении своего hash. Если после подключения кто-то изменил общий конфиг, автоматический rollback откажется его затирать; сначала согласовать drift. Ни volumes, ни certificate stores, ни чужие ресурсы автоматически не удаляются. Снимок private operator-транзакции не включать в Git/CI artifact.
