@@ -144,7 +144,17 @@ class Ingress:
             else:
                 desired_env[key] = str(value)
         require(desired_env == environment(container['Config'].get('Env')), 'effective proxy environment differs; reproduce the original env-file/shell inputs before staging')
-        require(service.get('command', container['Config']['Cmd']) == container['Config']['Cmd'], 'proxy command differs from running service')
+        entrypoint = service.get('entrypoint')
+        effective_entrypoint = image['Config'].get('Entrypoint') if entrypoint is None else entrypoint
+        command = service.get('command')
+        effective_command = (image['Config'].get('Cmd') if entrypoint is None else []) if command is None else command
+        require((effective_entrypoint or []) == (container['Config'].get('Entrypoint') or []), 'proxy entrypoint differs from reproducible source/image defaults')
+        require((effective_command or []) == (container['Config'].get('Cmd') or []), 'proxy command differs from reproducible source/image defaults')
+        for key, source in (('User', 'user'), ('WorkingDir', 'working_dir')):
+            effective = service.get(source) if service.get(source) is not None else image['Config'].get(key, '')
+            require(str(effective or '') == str(container['Config'].get(key) or ''), 'proxy user/working directory differs from running configuration')
+        argv = (effective_entrypoint or []) + (effective_command or [])
+        require(isinstance(argv, list) and argv[:2] == ['caddy', 'run'] and ('--config' in argv and argv[argv.index('--config')+1:argv.index('--config')+2] == ['/etc/caddy/Caddyfile'] or '--config=/etc/caddy/Caddyfile' in argv), 'supported proxy must run Caddy using the mounted /etc/caddy/Caddyfile')
 
     def validation(self, cfg, plan, caddy_file, name):
         # Resolve actual env/mounts through Compose; no host secrets are printed.

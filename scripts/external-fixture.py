@@ -160,6 +160,13 @@ refused = ingress('stage', ok=False)
 assert refused.returncode != 0 and b'effective proxy environment differs' in refused.stderr
 assert caddy.read_bytes() == original and not (caddy.parent/'compose.cheapshotmods.yaml').exists()
 files[0].write_bytes(base_bytes)
+# Validation must not hide a different runtime entrypoint with an idle process.
+changed = json.loads(base_bytes)
+changed['services']['ip-proxy']['entrypoint'] = ['/bin/sh', '-c', 'exec sleep infinity', '--']
+write(files[0], changed)
+refused = ingress('stage', ok=False)
+assert refused.returncode != 0 and b'entrypoint differs' in refused.stderr
+files[0].write_bytes(base_bytes)
 ingress('stage')
 plan = json.loads((root/'ingress'/'plan.json').read_text())
 assert plan['files'] == list(map(str, files))
