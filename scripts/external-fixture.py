@@ -89,8 +89,8 @@ write(base/'front.Caddyfile', ':80 {\n reverse_proxy ip-proxy:80\n}\n')
 files = [base/'compose.yaml']+[base/'deploy'/('compose.'+x+'.yaml') for x in ('ip', 'portfolio', 'anjie', 'gtd')]
 write(files[0], {'services': {
     'neighbour': {'image': app_image, 'user': '0', 'container_name': neighbour_name, 'command': ['node', '-e', 'require("http").createServer((q,r)=>r.end(require("fs").readFileSync("/neighbour/sentinel"))).listen(3000,"0.0.0.0")'], 'volumes': [str(base/'neighbour')+':/neighbour:ro']},
-    'front': {'image': fixture_caddy, 'ports': ['127.0.0.1:'+str(ports[4])+':80'], 'volumes': [str(base/'front.Caddyfile')+':/etc/caddy/Caddyfile:ro']},
-    'ip-proxy': {'image': fixture_caddy, 'container_name': proxy_name, 'ports': ['127.0.0.1:'+str(ports[0])+':8443'], 'volumes': [str(caddy)+':/etc/caddy/Caddyfile:ro', 'ip_caddy_data:/data', 'ip_caddy_config:/config'], 'environment': {'PRIVATE_LITERAL': 'fixture-$$-literal'}}}, 'volumes': {'ip_caddy_data': {}, 'ip_caddy_config': {}}})
+    'front': {'image': fixture_caddy, 'ports': ['127.0.0.1:'+str(ports[4])+':80'], 'volumes': [str(base/'front.Caddyfile')+':/etc/caddy/Caddyfile:ro', 'front_data:/data', 'front_config:/config']},
+    'ip-proxy': {'image': fixture_caddy, 'container_name': proxy_name, 'ports': ['127.0.0.1:'+str(ports[0])+':8443'], 'volumes': [str(caddy)+':/etc/caddy/Caddyfile:ro', 'ip_caddy_data:/data', 'ip_caddy_config:/config'], 'environment': {'PRIVATE_LITERAL': 'fixture-$$-literal'}}}, 'volumes': {'ip_caddy_data': {}, 'ip_caddy_config': {}, 'front_data': {}, 'front_config': {}}})
 write(files[1], {'services': {'ip-proxy': {'ports': ['127.0.0.1:'+str(ports[1])+':444'], 'networks': {'default': {}, 'other': {}}}}, 'networks': {'other': {}}})
 write(files[2], {'services': {'ip-proxy': {'ports': ['127.0.0.1:'+str(ports[2])+':713'], 'volumes': [str(base/'portfolio')+':/srv/anjie-portfolio:ro']}}})
 write(files[3], {'services': {'ip-proxy': {'volumes': [str(base/'anjie')+':/var/www/shewashere:ro']}}})

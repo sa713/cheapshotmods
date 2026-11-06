@@ -8,6 +8,12 @@ host="chm-external-host-$(openssl rand -hex 5)"
 project="chm-$(printf '%s' "$work/install" | sha256sum | cut -c1-12)"
 shared="$host-shared"
 cleanup() {
+  local status=$?
+  docker exec "$host" chown -R "$(id -u):$(id -g)" "$work" >/dev/null 2>&1 || true
+  if [[ "$status" != 0 && -d "$work/install/ingress" ]]; then
+    mkdir -p /tmp/chm-003-evidence
+    cp -R "$work/install/ingress" "/tmp/chm-003-evidence/$(basename "$work")" || true
+  fi
   for owner in "$project" "$shared" "$shared-chm-validation"; do
     mapfile -t ids < <(docker ps -aq --filter "label=com.docker.compose.project=$owner")
     if ((${#ids[@]})); then docker rm -f "${ids[@]}" >/dev/null 2>&1 || true; fi
@@ -19,7 +25,6 @@ cleanup() {
   mapfile -t ids < <(docker volume ls -q --filter "label=cheapshotmods.root=$project")
   if ((${#ids[@]})); then docker volume rm "${ids[@]}" >/dev/null 2>&1 || true; fi
   docker network rm "$project-edge" >/dev/null 2>&1 || true
-  docker exec "$host" chown -R "$(id -u):$(id -g)" "$work" >/dev/null 2>&1 || true
   docker rm -f "$host" >/dev/null 2>&1 || true
   if [[ -f "$work/update-image" ]]; then docker image rm "$(cat "$work/update-image")" >/dev/null 2>&1 || true; fi
   rm -rf "$work"
