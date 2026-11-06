@@ -183,7 +183,8 @@ installed() {
   CHM_PROXY_MODE="${CHM_PROXY_MODE:-standalone}"
   CHM_ORIGIN="${CHM_ORIGIN:-https://$CHM_DOMAIN}"
   if [[ "$CHM_ORIGIN" == "https://$CHM_DOMAIN" && "$CHM_HTTPS_PORT" != 443 ]]; then CHM_ORIGIN="$CHM_ORIGIN:$CHM_HTTPS_PORT"; fi
-  tls_mode=public; [[ "$CHM_CADDYFILE" == *.internal ]] && tls_mode=internal
+  tls_mode=public
+  if [[ "$CHM_CADDYFILE" == *.internal ]]; then tls_mode=internal; fi
 }
 compose() {
   local file=compose.yml
