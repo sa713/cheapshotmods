@@ -68,10 +68,15 @@ def archive_proofs(stream):
                     document.extend(chunk)
                 if decoder:
                     while chunk:
+                        require(not decoder.eof, 'trailing compressed layer data')
                         unpacked = decoder.decompress(chunk, 1024*1024)
                         layer_hash.update(unpacked)
                         layer_size += len(unpacked)
-                        chunk = decoder.unconsumed_tail
+                        tail = decoder.unconsumed_tail
+                        if decoder.eof:
+                            require(not decoder.unused_data and not tail, 'trailing compressed layer data')
+                        require(len(tail) < len(chunk) or unpacked, 'compressed layer decoder made no progress')
+                        chunk = tail
                 else:
                     layer_hash.update(chunk)
                     layer_size += len(chunk)

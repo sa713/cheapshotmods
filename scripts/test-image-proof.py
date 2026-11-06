@@ -1,5 +1,6 @@
 """Offline negative archive regressions; real store transfers run separately."""
 import hashlib
+import gzip
 import io
 import json
 from pathlib import Path
@@ -70,7 +71,7 @@ class ArchiveTests(unittest.TestCase):
                 target.addfile(entry, io.BytesIO(self.files['app.json']))
         meta = self.root/'manifest.json'
         meta.write_text(json.dumps(manifest or self.manifest))
-        return subprocess.run(['python3', str(SCRIPT), 'archive', str(meta), str(archive)], capture_output=True, text=True)
+        return subprocess.run(['python3', str(SCRIPT), 'archive', str(meta), str(archive)], capture_output=True, text=True, timeout=10)
 
     def test_valid(self):
         self.assertEqual(self.run_proof().returncode, 0)
@@ -94,6 +95,31 @@ class ArchiveTests(unittest.TestCase):
         entries = json.loads(self.files['manifest.json'])
         entries[0]['Layers'].reverse()
         self.files['manifest.json'] = json.dumps(entries).encode()
+        self.assertNotEqual(self.run_proof().returncode, 0)
+
+    def compressed_large_layer(self):
+        raw = layer(b'x'*(3*1024*1024))
+        cfg = json.loads(self.files['app.json'])
+        cfg['rootfs']['diff_ids'][0] = hashed(raw)
+        self.files['app.json'] = json.dumps(cfg).encode()
+        self.manifest['image_proofs']['app']['config_digest'] = hashed(self.files['app.json'])
+        self.manifest['image_proofs']['app']['diff_ids'][0] = hashed(raw)
+        self.files['app0.tar'] = gzip.compress(raw)
+
+    def test_compressed_layer_larger_than_decoder_chunk(self):
+        self.compressed_large_layer()
+        self.assertEqual(self.run_proof().returncode, 0)
+
+    def test_trailing_compressed_stream_is_bounded_rejection(self):
+        self.compressed_large_layer()
+        self.files['app0.tar'] += gzip.compress(b'extra')
+        result = self.run_proof()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('trailing compressed layer data', result.stderr)
+
+    def test_truncated_compressed_stream_is_rejected(self):
+        self.compressed_large_layer()
+        self.files['app0.tar'] = self.files['app0.tar'][:-5]
         self.assertNotEqual(self.run_proof().returncode, 0)
 
     def test_wrong_platform(self):
