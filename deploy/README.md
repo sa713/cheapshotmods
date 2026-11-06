@@ -17,7 +17,19 @@ cd cheapshotmods-SHA-linux-amd64
 sha256sum --check SHA256SUMS
 ```
 
-Подставьте полный SHA и run ID из передачи TASK-002, не буквальные `SHA`/`RUN_ID`. Artifact хранится 30 дней; исходники и workflow остаются в Git. Для повторного получения после истечения срока: Actions → TASK-002 Debian kit → Run workflow → branch `chm-001-foundation`, поле `source_sha` — принятый полный SHA. Workflow извлечёт именно его и снова проверит/загрузит комплект. Самостоятельная сборка с pinned lock-файлом: checkout этого SHA, `bash scripts/bundle.sh artifacts` в Linux amd64 с Docker/build toolchain. Образы не публикуются в registry.
+Подставьте полный SHA и run ID из передачи TASK-002, не буквальные `SHA`/`RUN_ID`. Artifact хранится 30 дней; исходники и workflow остаются в Git. После истечения срока доступно точное воспроизведение из приватного Git (нужны Git/GitHub CLI с доступом к репозиторию, Docker и зависимости ниже; Node/npm на хосте не нужны — сборка внутри закреплённого Docker builder):
+
+```bash
+source_sha=FULL_ACCEPTED_SOURCE_SHA
+# При отсутствии авторизации: gh auth login --hostname github.com --web
+gh repo clone sa713/cheapshotmods cheapshotmods-src
+cd cheapshotmods-src
+git fetch origin "$source_sha"
+git checkout --detach "$source_sha"
+bash scripts/bundle.sh "$PWD/artifacts"
+```
+
+`workflow_dispatch` с полем `source_sha` также предусмотрен, но кнопка **Run workflow** становится доступна только после регистрации файла workflow в default branch. Этот PR не слит, поэтому такой способ сейчас не гарантируется. Основная передача — готовый скачиваемый CI artifact; Git-сборка выше остаётся доступной независимо от его retention. Повторная сборка использует исходный SHA, pinned lock-файл и Node/Caddy digests; побайтовое равенство image archives не обещается. Образы не публикуются в registry.
 
 ## Зависимости чистого Debian
 
@@ -66,7 +78,7 @@ nano config.env
 1. В официальном **@BotFather** выполнить `/newbot`, задать имя и свободный username для Cheapshot Mods; сохранить выданный API token только в `TELEGRAM_BOT_TOKEN`. Не использовать ботов других продуктов. Приложению не нужны polling, webhook, рассылки, phone или разрешение отправлять сообщения.
 2. Открыть mini app **@BotFather**, выбрать этого бота → **Login Widget** → **Allowed URLs**. Добавить **оба** значения: `PUBLIC_BASE_URL` и `PUBLIC_BASE_URL/auth/oidc/callback`. Для примера это `https://mods.example.com` и `https://mods.example.com/auth/oidc/callback`.
 3. В этом разделе получить **Client ID** и **Client Secret**, записать в соответствующие env-поля. В **Login Widget → Advanced → Algorithm** оставить **RS256**. Используется scope `openid profile`, профильный подписанный `id`; EdDSA/ES256K в текущей документации несовместимы с profile. `nonce`, state и PKCE оставлены обязательными; если живой провайдер их не возвращает, не отключать защиту для обхода, сохранить обезличенный факт и передать management.
-4. `/mybots` → бот → **Bot Settings → Configure Mini App → Enable Mini App / Edit Main Mini App**: указать Web App URL `PUBLIC_BASE_URL/`. При названиях меню иной версии BotFather ориентироваться на поле **Main Mini App URL**. Для кнопки меню: `/setmenubutton` → этот бот → URL `PUBLIC_BASE_URL/`, подпись «Cheapshot Mods». Ссылку `https://t.me/<bot_username>?startapp` можно использовать после включения Main Mini App.
+4. В mini app **@BotFather** выбрать бота и настроить **Main Mini App**: включить основной Mini App и указать его Web App URL `PUBLIC_BASE_URL/`. Официальная документация называет эту функцию **Main Mini App**; расположение экрана зависит от версии клиента BotFather. Для кнопки меню: `/setmenubutton` → этот бот → URL `PUBLIC_BASE_URL/`, подпись «Cheapshot Mods». Ссылку `https://t.me/<bot_username>?startapp` можно использовать после включения Main Mini App.
 5. После DNS/сертификата проверить вход сайта, отказ пользователя, затем Mini App с телефона и тот же Telegram ID. Убедиться в общих данных, Secure cookie, повторном входе и изоляции другого настоящего игрока. Эти наблюдения **не выполнены** в изолированных тестах и остаются операторской приёмкой.
 
 Источники: https://core.telegram.org/bots/telegram-login и https://core.telegram.org/bots/webapps. Публичный origin, callback и URL Mini App должны совпадать с настройками. Не отправляйте bot/client/session secrets и сырые initData в чат или отчёт.
