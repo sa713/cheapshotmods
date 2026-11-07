@@ -1,5 +1,7 @@
 # Существующий Debian и IP-прокси — TASK-003
 
+Для существующего app **fbe82ae**, у которого полный update остановился на проверке свободного места, актуален [отдельный helper](#отдельная-установка-helper-для-существующего-fbe). Эта проверенная компонентная пара — app fbe + helper b008; используйте её отдельный путь во всех ingress-командах.
+
 Цель владельца: **https://94.228.170.13:9443**. Здесь одна точка TLS — существующий `uek-radar-ip-proxy-1`, Caddy2.11.4. App не имеет host port, не получает чужие volumes/секреты и подключается только к своей выделенной Docker-сети. Собственный Caddy Cheapshot не запускается. `TRUST_PROXY=1` означает ровно один hop; перед app не добавляется ещё один proxy.
 
 Проверки изолированной модели и конкретный принятый SHA/CI/artifact — в TASK-003/PR. Это не наблюдение сервера владельца. На реальном хосте пока не подтверждены9443/firewall, сертификат этого listener, продление IP-сертификата, BotFather и живой Telegram. Доверенная цепочка на8443 была проверена владельцем, её не подменяем private CA. Не используйте `--internal-tls` на реальном сервере.
@@ -94,3 +96,95 @@ bash /opt/cheapshotmods/chm.sh stop /opt/cheapshotmods
 ```
 
 Восстанавливается исходный полный stack только для ip-proxy, новый override удаляется только при совпадении своего hash. Если после подключения кто-то изменил общий конфиг, автоматический rollback откажется его затирать; сначала согласовать drift. Ни volumes, ни certificate stores, ни чужие ресурсы автоматически не удаляются. Снимок private operator-транзакции не включать в Git/CI artifact.
+
+
+## Отдельная установка helper для существующего fbe
+
+Этот маршрут предназначен для текущей установки: app/source **fbe82aef6008d292515c0efce2fde601c221f3d2**, helper/source **b008807fa1873de4fd6d926be42bc6bf515d6a66**, отдельный файл `/opt/cheapshotmods/ingress-b008807.py`. App/game/auth/UI/package/Dockerfile между этими SHA побайтово одинаковы; изменился только необходимый operator и связанные tests/docs. Полный app update остановился до load_images/release_copy/stop/SQLite writes на корректном reserve preflight. Этот отдельный operator route не вызывает app update, не меняет/не обходит его disk guard.
+
+Helper берётся из уже скачанного и проверенного b008 kit/artifact13572814453; его точный SHA256 `884aad4f03bc774add681c228e6e7345641c6c074bb07b2f1b604d4f0b4d8011`. Новые images не импортируются, новая app/data пара не создаётся, app не перезапускается. Managed `ingress.py`, `current.env`, releases/config и SQLite сохраняются. Установка helper/private snapshots/diagnostics/Docker metadata всё же использует небольшой объём диска, validation logs — bounded tmpfs1MiB. Никакой shared очистки/prune или открытия чужих volumes RW нет.
+
+От root выполните следующий блок. Он проверяет существующий fbe/external ROOT без плана, находит authentic helper в уже извлечённых каталогах скачивания, атомарно создаёт **отдельный** root-owned файл0600 через temp+fsync+no-clobber link, затем выполняет stage. При существующем целевом файле разрешено только повторное использование точных bytes/mode/owner, symlink/другая версия отвергаются. Python `-I` обязателен: inherited PYTHONOPTIMIZE не должен отключать inline guards. Повторное скачивание/распаковка/полный install/update не нужны:
+
+```bash
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  python3 -I - <<'PY_SETUP'
+from pathlib import Path
+import hashlib
+import os
+import tempfile
+
+root = Path('/opt/cheapshotmods')
+assert root.is_dir() and root.resolve() == root
+assert root.stat().st_uid == os.geteuid() and root.stat().st_mode & 0o022 == 0
+assert (root / '.cheapshotmods').is_file()
+meta = dict(line.split('=', 1) for line in (root / 'current.env').read_text().splitlines())
+assert meta['CHM_VERSION'] == 'fbe82aef6008d292515c0efce2fde601c221f3d2'
+assert meta['CHM_PROXY_MODE'] == 'external'
+assert not (root / 'ingress/plan.json').exists()
+expected = '884aad4f03bc774add681c228e6e7345641c6c074bb07b2f1b604d4f0b4d8011'
+target = root / 'ingress-b008807.py'
+if target.exists() or target.is_symlink():
+    assert not target.is_symlink() and target.is_file()
+    assert target.stat().st_uid == os.geteuid() and target.stat().st_mode & 0o777 == 0o600
+    assert hashlib.sha256(target.read_bytes()).hexdigest() == expected
+else:
+    pattern = 'cheapshotmods-ingress-*/cheapshotmods-b008807fa1873de4fd6d926be42bc6bf515d6a66-linux-amd64/ingress.py'
+    source = next((p for p in Path('/root').glob(pattern) if p.is_file() and hashlib.sha256(p.read_bytes()).hexdigest() == expected), None)
+    assert source is not None, 'Verified downloaded helper not found; nothing installed'
+    fd, temporary = tempfile.mkstemp(prefix='.ingress-b008807-', dir=root)
+    try:
+        with os.fdopen(fd, 'wb') as out:
+            out.write(source.read_bytes())
+            out.flush()
+            os.fchmod(out.fileno(), 0o600)
+            os.fsync(out.fileno())
+        assert hashlib.sha256(Path(temporary).read_bytes()).hexdigest() == expected
+        os.link(temporary, target)
+    finally:
+        os.unlink(temporary)
+print('Operator b008807 installed and verified; app remains fbe82ae')
+PY_SETUP
+  python3 -I /opt/cheapshotmods/ingress-b008807.py stage /opt/cheapshotmods
+)
+```
+
+При успешном stage просмотрите `changes.diff` **локально**. Для применения используйте новый helper; не используйте прежний `/opt/cheapshotmods/ingress.py` в этой компонентной установке. Apply кратко пересоздаёт только shared ip-proxy, со всеми исходными ordered overrides; рабочие соседи не пересоздаются:
+
+```bash
+(
+  set -euo pipefail
+  test "$(sed -n 's/^CHM_VERSION=//p' /opt/cheapshotmods/current.env)" = fbe82aef6008d292515c0efce2fde601c221f3d2
+  CHM_HELPER=/opt/cheapshotmods/ingress-b008807.py
+  test -f "$CHM_HELPER" && test ! -L "$CHM_HELPER"
+  test "$(stat -c '%u:%a' "$CHM_HELPER")" = 0:600
+  printf '%s  %s\n' 884aad4f03bc774add681c228e6e7345641c6c074bb07b2f1b604d4f0b4d8011 "$CHM_HELPER" | sha256sum --check -
+  python3 -I "$CHM_HELPER" apply /opt/cheapshotmods
+  bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+  openssl s_client -connect 127.0.0.1:9443 \
+    -verify_ip 94.228.170.13 -verify_return_error \
+    -CApath /etc/ssl/certs -brief </dev/null
+)
+```
+
+Ожидаемая **app version остаётся fbe82aef6008d292515c0efce2fde601c221f3d2**. Это установленная пара app=fbe/helper=b008, а не выполненное обновление app до b008. `chm.sh check` сверяет app с его собственной текущей metadata; success требует health/version/401 и TLS. Публичную доступность/renewal/HTTP-01/соседей и живой Telegram проверяет владелец отдельно.
+
+Откат применённого shared ingress выполняется тем же отдельным helper:
+
+```bash
+(
+  set -euo pipefail
+  CHM_HELPER=/opt/cheapshotmods/ingress-b008807.py
+  test -f "$CHM_HELPER" && test ! -L "$CHM_HELPER"
+  test "$(stat -c '%u:%a' "$CHM_HELPER")" = 0:600
+  printf '%s  %s\n' 884aad4f03bc774add681c228e6e7345641c6c074bb07b2f1b604d4f0b4d8011 "$CHM_HELPER" | sha256sum --check -
+  python3 -I "$CHM_HELPER" rollback /opt/cheapshotmods
+)
+```
+
+App/data в этом маршруте не переключались, поэтому app rollback ради отдельного helper не нужен. Файл `ingress-b008807.py` сохраняйте для дальнейших stage/apply/rollback; обычные app restart/restore/update/rollback перезаписывают только managed `ingress.py`, а отдельный operator остаётся. При отсутствующем плане rollback применять нечего; сохраняйте private diagnostics, не удаляйте ROOT/данные.
+
+Изолированная совместимость проверена exact fbe kit + exact b008 helper: full HTTPS/CA/signed SQLite, file logger/RO sentinels, guards/negatives, stage/apply/rollback/recovery, restart/restore/update/rollback и сохранение отдельного operator. Этот дополнительный полный pairing-run — local classic Docker29.9.2/vfs и Caddy2.11.4. Сам b008 helper/immutable kit ранее проверен полным CI на обоих real Docker29.8 stores; новый pairing-run не выдаётся за новый собственный containerd run. Для воспроизведения developer в выделенном Docker: `python3 -I scripts/test-operator-compat.py OLD_FBE_KIT NEW_B008_KIT NEW_EVIDENCE_DIR`. Скрипт не запускать на общем сервере владельца.
