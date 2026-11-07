@@ -85,7 +85,7 @@ for name in ('portfolio', 'anjie', 'gtd'):
     write(base/name/'sentinel', name+'-private-fixture')
 caddy = base/'deploy'/'Caddyfile.ip'
 addresses = ', '.join('https://94.228.170.13:'+str(p) for p in (8443, 444, 713, 888))
-write(caddy, '{\n default_sni 94.228.170.13\n}\nhttp://:80 {\n respond /.well-known/acme-challenge/* "challenge-kept"\n}\n'+addresses+' {\n tls internal\n reverse_proxy neighbour:3000\n}\n')
+write(caddy, '{\n default_sni 94.228.170.13\n}\nhttp://:80 {\n respond /.well-known/acme-challenge/* "challenge-kept"\n}\n'+addresses+' {\n tls internal\n log {\n output file /data/access.log {\n roll_size 2MiB\n roll_keep 3\n }\n }\n reverse_proxy neighbour:3000\n}\n')
 write(base/'front.Caddyfile', ':80 {\n reverse_proxy ip-proxy:80\n}\n')
 files = [base/'compose.yaml']+[base/'deploy'/('compose.'+x+'.yaml') for x in ('ip', 'portfolio', 'anjie', 'gtd')]
 write(files[0], {'services': {
@@ -158,7 +158,7 @@ fake = work/'bin'
 fake.mkdir()
 wrapper = fake/'docker'
 real_docker = '/usr/local/bin/docker'
-write(wrapper, '#!/usr/bin/env python3\nimport subprocess,sys,json,os\na=sys.argv[1:]\nr=subprocess.run(["'+real_docker+'"]+a,stdout=subprocess.PIPE)\nif os.environ.get("DROP_OVERRIDE") and a[:1]==["inspect"]:\n x=json.loads(r.stdout); k="com.docker.compose.project.config_files"; x[0]["Config"]["Labels"][k]=",".join(x[0]["Config"]["Labels"][k].split(",")[:-1]); print(json.dumps(x))\nelif not r.returncode: sys.stdout.buffer.write(r.stdout)\nsys.exit(r.returncode)\n')
+write(wrapper, '#!/usr/bin/env python3\nimport subprocess,sys,json,os\na=sys.argv[1:]\nr=subprocess.run(["'+real_docker+'"]+a,stdout=subprocess.PIPE)\nif os.environ.get("DROP_OVERRIDE") and a[:1]==["inspect"]:\n x=json.loads(r.stdout); k="com.docker.compose.project.config_files"; x[0]["Config"]["Labels"][k]=",".join(x[0]["Config"]["Labels"][k].split(",")[:-1]); print(json.dumps(x))\nelif os.environ.get("BAD_LOG_MODE") and "adapt" in a and not r.returncode:\n x=json.loads(r.stdout); logs=x["logging"]["logs"]; writer=next(v["writer"] for v in logs.values() if v.get("writer",{}).get("output")=="file"); writer["mode"]="invalid-mode"; print(json.dumps(x))\nelif not r.returncode: sys.stdout.buffer.write(r.stdout)\nsys.exit(r.returncode)\n')
 wrapper.chmod(0o700)
 env = {**os.environ, 'PATH': str(fake)+':'+os.environ['PATH'], 'DROP_OVERRIDE': '1'}
 assert ingress('stage', ok=False, env=env).returncode != 0
@@ -179,7 +179,35 @@ write(files[0], changed)
 refused = ingress('stage', ok=False)
 assert refused.returncode != 0 and b'entrypoint differs' in refused.stderr, (refused.returncode, refused.stderr.decode())
 files[0].write_bytes(base_bytes)
+# The RO validation must still provision the whole config: missing certificate
+# material is rejected before plan/shared writes, even with writable scratch logs.
+caddy.write_bytes(original.replace(b'tls internal', b'tls /data/missing-certificate.crt /data/missing-key.pem'))
+refused = ingress('stage', ok=False)
+assert refused.returncode != 0 and b'before Caddy validation failed' in refused.stderr
+assert not (root/'ingress'/'plan.json').exists()
+assert not (caddy.parent/'compose.cheapshotmods.yaml').exists()
+caddy.write_bytes(original)
+# An invalid file-writer option must still reach native Caddy provisioning after
+# filename redirection. Inject it into adapt output only inside this fixture.
+refused = ingress('stage', ok=False, env={**os.environ, 'PATH': str(fake)+':'+os.environ['PATH'], 'BAD_LOG_MODE': '1'})
+assert refused.returncode != 0 and b'before Caddy validation failed' in refused.stderr
+assert not (root/'ingress'/'plan.json').exists() and caddy.read_bytes() == original
+assert not (caddy.parent/'compose.cheapshotmods.yaml').exists()
+# Caddy's access writer is provisioned during validate. Existing data/logs must
+# remain untouched while stage validates both original and proposed configs.
+time.sleep(0.2)  # allow the last fixture request's access entry to finish
+log_before = docker('exec', proxy_name, 'cat', '/data/access.log')
+docker('exec', proxy_name, 'sh', '-c', 'printf synthetic-storage-sentinel > /data/validation-sentinel')
 ingress('stage')
+assert docker('exec', proxy_name, 'cat', '/data/access.log') == log_before
+assert docker('exec', proxy_name, 'cat', '/data/validation-sentinel') == b'synthetic-storage-sentinel'
+for name in ('before', 'staged'):
+    validation = json.loads((root/'ingress'/(name+'.validation.json')).read_text())['services']['validate']
+    assert validation['network_mode'] == 'none' and not validation.get('ports')
+    assert all(m.get('read_only') for m in validation['volumes'] if m['type'] != 'tmpfs')
+    scratch = [m for m in validation['volumes'] if m['type'] == 'tmpfs' and m['target'].startswith('/tmp/cheapshotmods-validation-')]
+    assert len(scratch) == 1 and scratch[0]['tmpfs']['size'] == 1048576
+    assert not docker('ps', '-aq', '--filter', 'label=com.docker.compose.project='+shared+'-chm-validation').strip()
 plan = json.loads((root/'ingress'/'plan.json').read_text())
 assert plan['files'] == list(map(str, files))
 assert (root/'ingress'/'changes.diff').stat().st_mode & 0o777 == 0o600

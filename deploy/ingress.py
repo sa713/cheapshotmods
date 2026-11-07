@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 import time
 import urllib.parse
+import uuid
 
 os.umask(0o077)
 
@@ -54,6 +55,20 @@ def encoded(value):
     return (json.dumps(value, sort_keys=True, indent=2)+'\n').encode()
 
 
+def validation_config(adapted, log_directory):
+    """Provision the full config without opening the running proxy's log files."""
+    config = json.loads(json.dumps(adapted))
+    filenames = {}
+    for logger in config.get('logging', {}).get('logs', {}).values():
+        writer = logger.get('writer', {})
+        if writer.get('output') == 'file':
+            require(isinstance(writer.get('filename'), str) and bool(writer['filename']), 'file log writer requires a filename')
+            filename = writer['filename']
+            filenames.setdefault(filename, f'{log_directory}/{len(filenames)}.log')
+            writer['filename'] = filenames[filename]
+    return config
+
+
 def metadata(root):
     require(root.is_absolute() and root.resolve() == root and root.is_dir(), 'ROOT must be a canonical existing installation')
     require((root/'.cheapshotmods').is_file(), 'not a Cheapshot installation')
@@ -76,12 +91,12 @@ class Ingress:
         self.directory.chmod(0o700)
         self.plan_file = self.directory/'plan.json'
 
-    def run(self, args):
-        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def run(self, args, input=None, phase=None):
+        result = subprocess.run(args, input=input, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         with (self.directory/'diagnostics.log').open('ab') as f:
             f.write(result.stderr)
         if result.returncode:
-            raise RuntimeError('command failed; inspect private ingress/diagnostics.log locally (do not send secrets)')
+            raise RuntimeError((phase+' failed' if phase else 'command failed')+'; inspect private ingress/diagnostics.log locally (do not send secrets)')
         return result.stdout
 
     def docker(self, *args):
@@ -181,7 +196,8 @@ class Ingress:
 
     def validation(self, cfg, plan, caddy_file, name):
         # Resolve actual env/mounts through Compose; no host secrets are printed.
-        # All existing mounts are read-only and there is no network for validation.
+        # Original mounts stay read-only. Only disposable log files are writable;
+        # Caddy provisions file writers even when validating without starting apps.
         service = json.loads(json.dumps(cfg['services'][plan['service']]))
         service['image'] = plan['image']
         for key in ('ports', 'networks', 'container_name', 'depends_on', 'restart', 'healthcheck'):
@@ -193,8 +209,10 @@ class Ingress:
             if mount['target'] == '/etc/caddy/Caddyfile':
                 mount.update(type='bind', source=str(caddy_file))
                 mount.pop('volume', None)
+        log_directory = '/tmp/cheapshotmods-validation-'+uuid.uuid4().hex
+        service.setdefault('volumes', []).append({'type': 'tmpfs', 'target': log_directory, 'tmpfs': {'size': 1048576, 'mode': 0o1777}})
         service['entrypoint'] = ['caddy']
-        test_cfg = {'name': plan['project']+'-chm-validation', 'services': {'validate': service}, 'volumes': cfg.get('volumes', {})}
+        test_cfg = {'name': plan['project']+'-chm-validation', 'services': {'validate': service}, 'volumes': json.loads(json.dumps(cfg.get('volumes', {})))}
         for volume in test_cfg['volumes'].values():
             volume['external'] = True
             volume.pop('labels', None)
@@ -203,8 +221,11 @@ class Ingress:
         # Keep that representation; escaping it again changes the runtime env.
         private(path, encoded(test_cfg))
         command = ['docker', 'compose', '--project-directory', plan['working_dir'], '-f', str(path), 'run', '--rm', '--no-deps', '-T', 'validate']
-        adapted = json.loads(self.run(command+['adapt', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile']))
-        self.run(command+['validate', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile'])
+        adapted = json.loads(self.run(command+['adapt', '--config', '/etc/caddy/Caddyfile', '--adapter', 'caddyfile'], phase=name+' Caddyfile adaptation'))
+        # Keep the original adaptation for the TLS-policy comparison. In a copy,
+        # redirect only standard file-writer filenames; retain writer options and
+        # all other modules, credentials, certificate paths and policy checks.
+        self.run(command+['validate', '--config', '-'], input=encoded(validation_config(adapted, log_directory)), phase=name+' Caddy validation')
         return adapted
 
     def stage(self, container_name, internal=False):

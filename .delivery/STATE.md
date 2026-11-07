@@ -1,6 +1,8 @@
 # Состояние управления
 
-Последнее подтверждение: 2026-11-07, владелец установил R6 kit; image proof и запуск app прошли, подключение ingress остановилось на stage. Причина subprocess-отказа пока не получена.
+Последнее подтверждение: 2026-11-07, владелец установил R6 kit; image proof и запуск app прошли. Подтверждённый отказ baseline validation — открытие file log writer внутри принудительно read-only /data. Developer исправляет изолированную проверку, новый kit/review ещё не приняты.
+
+- Текущее продолжение TASK-003: **implementing**. Полный Caddyfile адаптируется с actual image/env/RO mounts, validate проверяет копию полного JSON с единственным исключением: file-writer filenames направлены в bounded ephemeral tmpfs. Оригинальные logs/certificates не копируются/не открываются RW; остальные writer options/modules/TLS и ingress guards сохранены. Native repro отказа и этого решения прошёл; далее регрессии, CI обоих stores, exact новый kit и отдельный reviewer. Владелец затем выполняет обычный update существующего Cheapshot и stage/diff/apply, повторный install не нужен. Записи о предыдущих попытках ниже — история.
 
 - [TASK-002](tasks/TASK-002.md): accepted в границах полного устанавливаемого кандидата. Management прочитал отдельное ревью, проверил актуальность кода, зелёные CI jobs и доступность принятого artifact. Подробные доказательства — в последнем разделе карточки.
 - [Комплект TASK-002 8f3dd8a](https://github.com/sa713/cheapshotmods/actions/runs/42207656789/artifacts/13497906207) остаётся принятым standalone-кандидатом. Для выбранного общего IP-прокси подготовлен новый комплект TASK-003 ниже; старые fedb417/1d17a64/8f3dd8a на него не устанавливать.

@@ -24,8 +24,10 @@ jobs:
         with:
           ref: ${{ env.REQUESTED_SHA }}
           fetch-depth: 0 # exact historic installer for schema compatibility fixture
-      - name: Test portable proof archive negatives
-        run: python3 scripts/test-image-proof.py
+      - name: Test operator validation and portable proof negatives
+        run: |
+          python3 scripts/test-ingress-config.py
+          python3 scripts/test-image-proof.py
       - name: Build versioned private kit
         run: bash scripts/bundle.sh artifacts
       - name: Extract kit
