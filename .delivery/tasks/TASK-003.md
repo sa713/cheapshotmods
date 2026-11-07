@@ -1,7 +1,7 @@
 # TASK-003 — установка на Debian за существующим IP-прокси
 
-- Статус: implementing
-- Текущее продолжение: [исправление изолированной проверки file logs](#исправление-изолированной-проверки-file-logs--2026-11-07). App из R6 уже установлен владельцем; предыдущие комплекты/отзывы/попытки сохранены как история. Новый комплект и команды продолжения будут переданы после проверок/отдельного review.
+- Статус: review
+- Текущая передача: [исправленный комплект и update существующей установки](#передача-исправления-проверки-file-logs). App из R6 уже установлен владельцем. Предыдущие комплекты/отзывы/попытки сохранены как история; для продолжения использовать новый exact b008807 kit, повторный install не нужен.
 - Риск: повышенный — TLS, граница доверия proxy и сохранение работающих сервисов общего хоста.
 - Основание: решение владельца об установке без домена по IP:порту и предоставленная диагностика; [.delivery/PROJECT.md](../PROJECT.md), раздел размещения без домена. Продуктовые требования [PRODUCT.md](../../PRODUCT.md) сохраняются.
 - Репозиторий: https://github.com/sa713/cheapshotmods
@@ -345,3 +345,80 @@ Developer проверил локально закреплённый Caddy2.11.4
 На actual pinned Caddy2.11.4 без сети воспроизведено: исходный synthetic IP/ACME/Caddyfile с `output file /data/logs/access.log`, существующими log/cert sentinels и RO bind `/data`: adapt exit0, validate exit1 (`log writer`/read-only filesystem). Полный adapted JSON с единственным filename, перенаправленным в bounded1MiB tmpfs, проходит validate через stdin exit0; исходные sentinels неизменны. Это воспроизведение класса подтверждённого отказа, не чтение настоящего Caddyfile/данных владельца.
 
 План и граница исправления: адаптировать оригинальный Caddyfile с фактическими image/env и RO mounts; provision/validate копию всего JSON, перенаправляя только стандартные file-writer filenames в disposable bounded tmpfs, сохраняя shared filename mapping и все остальные options/modules/credentials/пути сертификатов. Для TLS comparison возвращается оригинальный adapted JSON; ни рабочий Caddyfile, ни compose, ни log/certificate volumes эта проверка не пишет/не копирует. Нативные регрессии: действующий file access logger, неизменность оригинальных логов/sentinel и RO mounts; missing certificate и invalid writer option по-прежнему отказ до plan/shared writes. Сохраняются R1–R6 guards и существующие lifecycle/CI/store tests. После exact SHA/kit — отдельный reviewer, исправления замечаний, новый artifact и команды `update` существующей установки, затем stage/diff/apply; повторный install/удаление ROOT не нужны. Реальный сервер и BotFather developer не меняет.
+
+
+### Передача исправления проверки file logs
+
+Developer возвращает management **review**. Независимый [новый отчёт](../reviews/TASK-003-ingress-log-review.md) — **accepted** exact code/kit **b008807fa1873de4fd6d926be42bc6bf515d6a66**, без открытых blocking findings. SHA256 перенесённого побайтово отчёта `31026de349485145a7421bcfd1a391eef9a14b01196bc3818c2cd8b7ed481c09`. Это отдельная актуальная приёмка; прежние cf0/R6 отзывы и требования не переписаны, их hashes590cbe...1d20/d2a507...5093d сохранены.
+
+| Передаваемый объект | Значение |
+| --- | --- |
+| Версия | `b008807fa1873de4fd6d926be42bc6bf515d6a66`, linux/amd64, manifest format2 |
+| Kit CI | [42368926383/job128392801611](https://github.com/sa713/cheapshotmods/actions/runs/42368926383/job/128392801611) — все обязательные steps success, не skipped |
+| Artifact | [13572814453](https://github.com/sa713/cheapshotmods/actions/runs/42368926383/artifacts/13572814453), ZIP131891605bytes; доступен до2026-12-07T11:52:12Z |
+| ZIP SHA256 | `4e1fa4d7e100c8b86468d6155231620ba3cbe3cc6b4c838c1a58eae1295bce45` |
+| Tar.gz SHA256 | `735dc319220db69837aa3a79a6e558cc213a7dc638152288a7a9124795fd6f45` |
+| images.tar.gz SHA256 | `111d6623df63cf22f2ad66d54b8d61a88713608a7b97e65134896464ff389d02` |
+| Store evidence | [13573128033](https://github.com/sa713/cheapshotmods/actions/runs/42368926383/artifacts/13573128033), ZIP35599bytes, SHA256 `fb7cb87d9611fd66c7bb9a23783e0f9a2956a8d2dd3c4639da47e35866424bd4` |
+
+Изменение ограничено изолированной validation, её регрессиями/CI и operator/delivery документацией. App/game/UI/auth/PRODUCT/Node/npm/lock-файл, pinned standard45files, `chm.sh`, builder и переносимый image checker не изменены этим исправлением. Source/reviewer проверили, что возвращается оригинальный adapted JSON для TLS comparison, одноимённые file writers сохраняют общую scratch цель, остальные writer options/modules/certificate paths остаются. Writable только уникальный disposable tmpfs1MiB, исходные mounts RO, network none, ports отсутствуют. Содержимое чужих log/certificate volumes не копируется; доступность исходного log path по записи намеренно не утверждается изолированной проверкой. Фиксированная фаза ошибки не выводит private stderr/конфиг.
+
+Проверки exact b008807:
+
+- [Checks42368926414](https://github.com/sa713/cheapshotmods/actions/runs/42368926414): verify33/33, skipped0; browser12/12 на настоящем сервере/SQLite с изолированными подписанными данными; container-smoke/backup/restored volume; явный measure pipefail и capacity — success. Node24.22.1/npm11.9.0/native better-sqlite3 13.0.3.
+- Kit CI:4helper+14proof negatives, build/extract/13checksums, standalone Debian и внешний ingress — success. Внешняя fixture теперь включает настоящий file access logger, неизменность исходного log/sentinel, RO mounts/1MiB tmpfs, missing TLS certificate и invalid writer mode отказ до plan/shared writes; остальные R1–R6/lifecycle/соседи/HTTP-01/drift/idempotence/rollback/recovery не ослаблены.
+- Тот же exact images archive без rebuild прошёл полный external/lifecycle/negative сценарий в обоих настоящих Docker29.8.0 stores — classic/vfs и containerd/native (`io.containerd.snapshotter.v1`). Config/8+5orderedlayers совпали; app native ID classic=`sha256:9157e5b795f7249150522e3484e88109a6c0da2e3383ceb26e5f78e08722780a`, containerd=`sha256:fa5e443abd8fa8e2255f802ba9490b57e59d702a5e67948a110eb0aa95e16290`. Packaged Caddy2.10.2 portable config/IDs прежниеaac61.../5bf74...; внешний Caddy не заменяется. Containerd export SHA `abefb0e84168f58a698256faf1a2c56c1d69583c5eaba4d81430648600a0b349` импортирован в fresh classic без переписывания proof, native IDs вернулись. Legacy format1→incoming2→old pair rollback также passed.
+- Автор и reviewer отдельно выполнили native regression на actual pinned Caddy2.11.4: исходная source validation exit1 (file writer/RO), новый production helper exit0, исходные cfg/adapted/log/cert hashes сохранены; missing TLS и malformed writer mode нативно отказаны. Reviewer независимо проверил env literal$, shared loggers и полное совпадение outer resource IDs до/после.
+- Reviewer самостоятельно скачал ZIP/evidence, проверил API digests/bytes, tar/13sums/11packaged source и собственным streaming parser без импорта author checker — raw config SHA/13orderedlayers. Автор повторно сверил эти же bytes с exact Git blobs.
+- Дополнительный author execution на **неизменённых exact** fbe и b008 CI kits: isolated Debian, normal install fbe, synthetic signed Mini auth и SQLite level300, входящий b008 `chm.sh update`, данные300 и новый helper сохранены; запись400, штатный rollback вернул fbehelper+300, restart300. Proof `/tmp/chm-fbe-update-proof/proof.json`, script/log рядом, reviewer прочитал и явно отделил от own execution. Это проверенный путь продолжения владельческой установки, не synthetic predecessor image. Fixture удалена; baseline images/tags восстановлены, containers/volumes0→0.
+
+Локальная полная пересборка остановилась на ENOSPC в cloud vfs на COPY, не служит выдаваемым комплектом/доказательством. Канонический архив выше успешно построен CI и проверен отдельно. После неудачи очищены только собственные новые build-cache IDs по времени/явному фильтру (54baseline IDs сохранены;4новых internal refs остались), generated reverse-export scratch предыдущего теста удалён с сохранением hash/proof/logs/исходного cf0 archive. Daemon/backend/рабочие образы/сервисы владельца не перенастраивались, global prune не выполнялся.
+
+Команды продолжения для **текущей уже установленной fbe** от root. Существующие credential/config используются как есть; новый ключ/gh/build/clone/повторный install не нужны. Preguards останавливают блок при неожиданной версии или уже существующем плане. Сначала проверяется весь новый kit, затем обычное обновление только Cheapshot с backup/новой парой image+volume; его app кратко перезапустится, shared proxy этим шагом не меняется. При любой ошибке остановиться:
+
+```bash
+(
+  set +x
+  set -euo pipefail
+  umask 077
+  test -r /root/.config/cheapshotmods/github.curl
+  test -f /opt/cheapshotmods/.cheapshotmods
+  test ! -e /opt/cheapshotmods/ingress/plan.json
+  test "$(sed -n 's/^CHM_VERSION=//p' /opt/cheapshotmods/current.env)" = fbe82aef6008d292515c0efce2fde601c221f3d2
+
+  CHM_SHA=b008807fa1873de4fd6d926be42bc6bf515d6a66
+  CHM_DOWNLOAD=$(mktemp -d /root/cheapshotmods-ingress-XXXXXX)
+  cd "$CHM_DOWNLOAD"
+  curl --disable --config /root/.config/cheapshotmods/github.curl \
+    --fail --silent --show-error --location --output kit.zip \
+    https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13572814453/zip
+  printf '%s  kit.zip\n' 4e1fa4d7e100c8b86468d6155231620ba3cbe3cc6b4c838c1a58eae1295bce45 | sha256sum --check -
+  python3 -m zipfile -e kit.zip .
+  printf '%s  cheapshotmods-%s-linux-amd64.tar.gz\n' 735dc319220db69837aa3a79a6e558cc213a7dc638152288a7a9124795fd6f45 "$CHM_SHA" | sha256sum --check -
+  tar -xzf "cheapshotmods-$CHM_SHA-linux-amd64.tar.gz"
+  CHM_BUNDLE="$CHM_DOWNLOAD/cheapshotmods-$CHM_SHA-linux-amd64"
+  cd "$CHM_BUNDLE"
+  sha256sum --check SHA256SUMS
+
+  bash ./chm.sh update /opt/cheapshotmods "$CHM_BUNDLE"
+  python3 /opt/cheapshotmods/ingress.py stage /opt/cheapshotmods
+  cat /opt/cheapshotmods/ingress/changes.diff
+)
+```
+
+Если stage успешно завершился, просмотрите diff **локально**. Не присылайте resolved configs/raw diagnostics. При ожидаемом добавлении только маршрута/порта/выделенной сети применить отдельно (краткое пересоздание только ip-proxy и перерыв его маршрутов):
+
+```bash
+(
+  set -euo pipefail
+  python3 /opt/cheapshotmods/ingress.py apply /opt/cheapshotmods
+  bash /opt/cheapshotmods/chm.sh check /opt/cheapshotmods
+  openssl s_client -connect 127.0.0.1:9443 \
+    -verify_ip 94.228.170.13 -verify_return_error \
+    -CApath /etc/ssl/certs -brief </dev/null
+)
+```
+
+Ожидаемая app version — полный **b008807fa1873de4fd6d926be42bc6bf515d6a66**, `/health` ok, до входа `/api/state`401 и системная TLS-цепочка/IP verification OK. Публичную доступность9443 и действующие соседние маршруты/HTTP-01 дополнительно проверяет владелец снаружи; cloud этого не утверждает.
+
+Штатное восстановление после успешно применённого ingress: сначала `python3 /opt/cheapshotmods/ingress.py rollback /opt/cheapshotmods`, затем при необходимости `bash /opt/cheapshotmods/chm.sh rollback /opt/cheapshotmods` для прежней app/data пары. Второй шаг возвращает состояние до update, новые записи остаются в сохранённом новом volume; автоматического слияния данных нет. Если stage не создал plan, откатывать shared ingress нечего — сохранить private diagnostics, не удалять ROOT/данные. Полные backup/restore/stop и Telegram origin/callback/Mini App/секреты — [EXTERNAL-PROXY](../../deploy/EXTERNAL-PROXY.md), [RUNBOOK](../RUNBOOK.md). Настоящие BotFather/Login/Mini App/телефон, новый real stage/apply и production verified остаются pending у владельца. delivery нового **комплекта verified**, external_installation **pending (операторский update/new stage/apply)**, product_acceptance pending. Merge/внешнее размещение/новые расходы не выполнялись и не делегированы.

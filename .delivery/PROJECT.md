@@ -1,6 +1,6 @@
 # Паспорт Cheapshot Mods
 
-Последнее содержательное подтверждение: 2026-11-06, передача developer TASK-003 на review с комплектом для выбранного Debian и существующего IP-прокси. Разделение management и отдельной сессии developer сохраняется.
+Последнее содержательное подтверждение: 2026-11-07, передача developer TASK-003 на review с исправлением изолированной Caddy validation и новым комплектом для update уже установленного fbe. Разделение management и отдельной сессии developer сохраняется.
 
 ## Продукт и источники
 
@@ -109,3 +109,9 @@
 ## Передача исправления R6 — 2026-11-06
 
 Developer подготовил новый format2 kit sourcefbe82aef6008d292515c0efce2fde601c221f3d2, crypto config/layer proof вместо сравнения builder/target native IDs. CI и real classic↔Docker29/containerd matrix выполнены на одном exact archive; предыдущий cf0 сохранён как история отказа/изолированной приёмки. [TASK-003](tasks/TASK-003.md#итоговая-передача-r6) возвращается management в review с доступным kit, отдельным reviewer и точными curl-командами. Существующий проектный credential-файл используется локально владельцем, новый ключ/CLI не требуются. Реальный Docker/backend/сервисы не менялись developer; actual host/live Telegram остаются проверками владельца после передачи.
+
+## Продолжение установленного fbe после отказа validation — 2026-11-07
+
+Владелец подтвердил checksums/format2 proof и работающий fbe app на настоящем containerd. Новый отказ был в baseline Caddy validate: file log writer открывал путь внутри принудительно RO /data. [Exact b008807 kit и команды](tasks/TASK-003.md#передача-исправления-проверки-file-logs) переданы на review после CI/обоих real stores/отдельного reviewer accepted. Изменение сохраняет actual env/RO mounts, полные module/options/TLS checks и перенаправляет только file-writer filenames во временный bounded tmpfs; данных certificate/log volumes не копирует/не меняет. Штатный exact fbe→b008 update/rollback/restart с SQLite отдельно проверен.
+
+Текущий маршрут владельца — existing credential/config → download/checksums → incoming new kit update существующего ROOT → stage/private diff → отдельные apply/check. Повторный install/удаление ROOT/смена Docker backend не нужны. На реальном сервере новый update/stage/apply/HTTPS и живой Telegram ещё не проверены; прежние отзывы/архивы/факты не переписаны. Полномочия merge, реального сервера/BotFather и расходов не расширяются.
