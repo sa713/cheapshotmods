@@ -67,3 +67,13 @@ Management подготовил материалы и очередь, основ
 2. Перенести палитру/sidebar/workspace/character column, мод-карточки и тройку крафта в React/CSS. Mobile navigation и формы доступны с клавиатуры, диалоги удерживают focus и блокируют фон, числа переносятся полностью. Никаких Sites моделей/серверных изменений.
 3. Пройти41native/прежние14browser и нужные visual/navigation/dialog checks; получить одинаковый synthetic dataset/снимки эталона и приложения, измерить44px targets/overflow и состояния ошибок/пустоты.
 4. Отдельный reviewer, исправления подтверждённых blockers, exactCI/новый immutablekit и root/curl ownerhandoff. Настоящий Debian/BotFather/публичныйSites/merge не выполняются.
+
+## Самопроверка frontend
+
+Production diff к интегрированной базе05e4caf ограничен main.tsx/style.css/newpresentation.tsx. Backend/rules/auth/API/DB/installer/ingress/CI/package/lock не менялись. Transport/load/send/choose/validation handlers сохранены; новые состояния — только view/filter/help/forms. Frozen reference4files и прежние reviews/команды сохранены побайтово. Все14прежних browser assertions и locators сохранены без переписывания.
+
+- На Node24.22.1/npm11.9.0 с native better-sqlite3: `NPM_CONFIG_CACHE=/tmp/chm-npm XDG_CACHE_HOME=/tmp/chm-cache bash scripts/verify.sh` — npmci/typecheck/lint/41native41pass0fail0skip/build успешны.
+- Полный `PLAYWRIGHT_BROWSERS_PATH=/tmp/chm-002-browsers npm run test:browser`:20/20pass,1.4m. Существующие14 плюс6 новых визуальных/modal/offpageequipment/filter/pagination/exactnumbers. Реальный HTTP/SQLite, protocol fixtures с signed synthetic Telegram, не живая интеграция.
+- Исправлены собственные presentation defects: декоративный псевдоэлемент создавал17px mobile overflow (сдвинут внутрь, без overflow-hidden маскировки); нативный Tab мог временно увести focus вbody (явный цикл по active controls). CSSorder:-1 крафта удалён, DOM/visual order согласованы с эталоном; «Крафт» фокусирует/прокручивает существующую панель без записи данных.
+- [Визуальное сравнение](../design/TASK-004-VISUAL-COMPARISON.md): одинdataset/21парасостояний на1440/360/390 плюс длинные числа; comparison.html иPNG входят в browser artifact. Reset/error referenceDOM дополнены только для демонстрации frozenCSS и честно отмечены; app не подменяется. Передача такого представления не является приёмкой физического WebView/телефона.
+- После полного прогона уточнено только кадрирование визуальных тестов: scroll0, viewport дляmodal. Повтор затронутых visualcases проходит отдельно; CI проверит exact candidate целиком. Независимый reviewer привлечён отдельным контекстом; финальные own runs/CI/kit — следующие шаги.
