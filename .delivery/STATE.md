@@ -1,5 +1,7 @@
 # Состояние управления
 
+Решение о дизайне 2026-11-07: подготовлена [TASK-004](tasks/TASK-004.md), ready. Владелец выбрал оформление Sites v1; облачный Codex переносит только представление в основное приложение, сохраняя действующие функции и интеграции. Эталон доступен локально в .delivery/design/sites-v1 без доступа к Sites-аккаунту. Рабочая frontend-база прочитана на a709f5d4dea4946373ea0e7c1f606c5b0a792a5b; перед новой реализацией проверить актуальную базу и завершить конфликтующую работу. Сам перенос/новый выпуск пока не выполнялись. Состояние серверной установки TASK-003 ниже сохраняется.
+
 Последнее подтверждение: 2026-11-07, владелец установил отдельный b008 helper к app fbe, выполнил stage/apply/check. Получены HTTPS health/version expectedfbe и OpenSSL TLS1.3/IP+chain Verification:OK. Проверки выполнены на сервере владельцем; внешняя сеть/телефон, соседние маршруты/renewal и живой Telegram ещё pending.
 
 - Текущее продолжение TASK-003: **review**. [Реальное owner подтверждение](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07): app=fbe82ae/helper=b008807, отдельный ROOT/ingress-b008807.py root600/exacthash. Setup/stage/apply/host-side health/version/TLS verified; полный app update не делался, disk guard сохранён. Повторять install/update/helper setup/apply не нужно. Следующий шаг владельца — сайт с телефона/внешняя сеть и привычные соседи, затем BotFather/private config/restart/оба живых входа. delivery kit verified, product_acceptance pending; прежние записи ниже — история.
