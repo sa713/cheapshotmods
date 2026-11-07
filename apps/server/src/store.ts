@@ -3,10 +3,10 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { validateDatabasePath } from './database-path.js';
-import { craft, integer, inputInteger, keys, mod, record, requireThat, stats, type Equipped, type Group } from '@chm/rules';
+import { craft, integer, inputInteger, keys, mod, record, requireThat, stats, type Equipped, type Group, type Mod } from '@chm/rules';
+import {migrateModStacks, type Undo} from './mod-stacks.js';
 
 interface Player { owner: string; revision: string; level: string; experiment: string; started: number; spent: string; equipment: string }
-interface Undo { consumed: Group[]; output: Group; equipment: Equipped[]; price: string }
 export interface Session { hash: string; owner: string | null; csrf: string; expires: number; flow: string | null }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return '['+value.map(canonical).join(',')+']';
@@ -26,25 +26,30 @@ export class Store {
     if (path !== ':memory:') mkdirSync(dirname(path), {recursive:true});
     this.db = new Database(path);
     this.db.pragma('journal_mode = WAL'); this.db.pragma('foreign_keys = ON'); this.db.pragma('busy_timeout = 5000');
-    const version = this.db.pragma('user_version', {simple:true});
-    requireThat(version === 0 || version === 1 || version === 2, 'UNKNOWN_DATABASE_VERSION', 503);
-    if (version === 0) this.db.transaction(()=>this.db.exec(`
-      CREATE TABLE players(owner TEXT PRIMARY KEY, revision TEXT NOT NULL, level TEXT NOT NULL, experiment TEXT NOT NULL, started INTEGER NOT NULL, spent TEXT NOT NULL, equipment TEXT NOT NULL);
-      CREATE TABLE groups(owner TEXT NOT NULL REFERENCES players(owner), scope TEXT NOT NULL CHECK(scope IN ('original','work')), id TEXT NOT NULL, kind TEXT NOT NULL, tier INTEGER NOT NULL, value TEXT NOT NULL, quantity TEXT NOT NULL, PRIMARY KEY(owner,scope,id));
-      CREATE TABLE history(seq INTEGER PRIMARY KEY, owner TEXT NOT NULL REFERENCES players(owner), body TEXT NOT NULL);
-      CREATE INDEX history_owner ON history(owner,seq);
-      CREATE TABLE commands(owner TEXT NOT NULL REFERENCES players(owner), key TEXT NOT NULL, payload TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(owner,key));
-      CREATE TABLE sessions(hash TEXT PRIMARY KEY, owner TEXT REFERENCES players(owner), csrf TEXT NOT NULL, expires INTEGER NOT NULL, flow TEXT);
-      CREATE INDEX session_expiry ON sessions(expires);
-      CREATE TABLE oidc_codes(hash TEXT PRIMARY KEY, expires INTEGER NOT NULL);
-      PRAGMA user_version = 1;
-    `)).immediate();
-    if (version !== 2) this.db.transaction(()=>this.db.exec(`
-      ALTER TABLE commands ADD COLUMN created INTEGER NOT NULL DEFAULT 0;
-      UPDATE commands SET created=unixepoch();
-      CREATE INDEX command_expiry ON commands(created) WHERE result<>'';
-      PRAGMA user_version = 2;
-    `)).immediate();
+    try {
+      const version = this.db.pragma('user_version', {simple:true});
+      requireThat(version === 0 || version === 1 || version === 2 || version === 3, 'UNKNOWN_DATABASE_VERSION', 503);
+      if (version === 0) this.db.transaction(()=>this.db.exec(`
+        CREATE TABLE players(owner TEXT PRIMARY KEY, revision TEXT NOT NULL, level TEXT NOT NULL, experiment TEXT NOT NULL, started INTEGER NOT NULL, spent TEXT NOT NULL, equipment TEXT NOT NULL);
+        CREATE TABLE groups(owner TEXT NOT NULL REFERENCES players(owner), scope TEXT NOT NULL CHECK(scope IN ('original','work')), id TEXT NOT NULL, kind TEXT NOT NULL, tier INTEGER NOT NULL, value TEXT NOT NULL, quantity TEXT NOT NULL, PRIMARY KEY(owner,scope,id));
+        CREATE TABLE history(seq INTEGER PRIMARY KEY, owner TEXT NOT NULL REFERENCES players(owner), body TEXT NOT NULL);
+        CREATE INDEX history_owner ON history(owner,seq);
+        CREATE TABLE commands(owner TEXT NOT NULL REFERENCES players(owner), key TEXT NOT NULL, payload TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(owner,key));
+        CREATE TABLE sessions(hash TEXT PRIMARY KEY, owner TEXT REFERENCES players(owner), csrf TEXT NOT NULL, expires INTEGER NOT NULL, flow TEXT);
+        CREATE INDEX session_expiry ON sessions(expires);
+        CREATE TABLE oidc_codes(hash TEXT PRIMARY KEY, expires INTEGER NOT NULL);
+        PRAGMA user_version = 1;
+      `)).immediate();
+      if (version === 0 || version === 1) this.db.transaction(()=>this.db.exec(`
+        ALTER TABLE commands ADD COLUMN created INTEGER NOT NULL DEFAULT 0;
+        UPDATE commands SET created=unixepoch();
+        CREATE INDEX command_expiry ON commands(created) WHERE result<>'';
+        PRAGMA user_version = 2;
+      `)).immediate();
+      if (version !== 3) this.db.transaction(()=>{
+        if (this.db.pragma('user_version',{simple:true})!==3) migrateModStacks(this.db);
+      }).immediate();
+    } catch(error) {this.db.close();throw error;}
   }
   // Results last 30 days. Compact permanent receipts prevent an old key from
   // ever applying twice, including after reset, restore and session rotation.
@@ -73,6 +78,18 @@ export class Store {
     if (quantity === 0n) this.sql("DELETE FROM groups WHERE owner=? AND scope='work' AND id=?").run(owner,id);
     else this.sql("UPDATE groups SET quantity=? WHERE owner=? AND scope='work' AND id=?").run(quantity.toString(),owner,id);
   }
+  private workStack(owner:string, m:Mod) {
+    return this.sql("SELECT id,kind,tier,value,quantity FROM groups WHERE owner=? AND scope='work' AND kind=? AND tier=? AND value=?").get(owner,m.kind,m.tier,m.value) as Group|undefined;
+  }
+  private adjustWork(owner:string, m:Mod, delta:bigint, preferredId?:string): string {
+    const current=this.workStack(owner,m), quantity=BigInt(current?.quantity??'0')+delta;
+    requireThat(quantity>=0n,'INCONSISTENT_MOD_HISTORY',503);
+    if (current) {this.quantity(owner,current.id,quantity);return current.id;}
+    requireThat(quantity>0n,'INCONSISTENT_MOD_HISTORY',503);
+    const occupied=preferredId && this.sql("SELECT 1 FROM groups WHERE owner=? AND scope='work' AND id=?").get(owner,preferredId);
+    const id=preferredId&&!occupied?preferredId:randomUUID();
+    this.put(owner,'work',{...m,id,quantity:quantity.toString()});return id;
+  }
   inventory(owner: string, scope: string, after = '', limit = 100) {
     requireThat(['original','work'].includes(scope) && Number.isInteger(limit) && limit >= 1 && limit <= 200, 'INVALID_PAGE');
     return this.sql('SELECT id,kind,tier,value,quantity FROM groups WHERE owner=? AND scope=? AND id>? ORDER BY id LIMIT ?').all(owner,scope,after,limit) as Group[];
@@ -85,7 +102,8 @@ export class Store {
   }
   copyOriginal(owner: string) {
     this.sql("DELETE FROM groups WHERE owner=? AND scope='work'").run(owner);
-    this.sql("INSERT INTO groups SELECT owner,'work',id,kind,tier,value,quantity FROM groups WHERE owner=? AND scope='original'").run(owner);
+    const originals=this.sql("SELECT id,kind,tier,value,quantity FROM groups WHERE owner=? AND scope='original' ORDER BY id").all(owner) as Group[];
+    for (const g of originals) this.adjustWork(owner,g,integer(g.quantity),g.id);
   }
   command(owner: string, raw: unknown) {
     const c = record(raw); keys(c,['key','revision','experiment','action']);
@@ -116,18 +134,24 @@ export class Store {
         case 'original.put': {
           keys(a,['type','id','kind','tier','value','quantity']);
           inputInteger(a.value); inputInteger(a.quantity); const m = mod(a);
-          if (a.id !== undefined) this.group(owner,'original',a.id);
+          const previous=a.id!==undefined?this.group(owner,'original',a.id):undefined;
           const id = a.id as string | undefined ?? randomUUID();
           const group={...m,id,quantity:a.quantity as string};
           this.put(owner,'original',group); createdId = id;
-          if (!p.started) this.put(owner,'work',group);
+          if (!p.started) {
+            if (previous && (previous.kind!==m.kind || previous.tier!==m.tier || previous.value!==m.value)) {
+              this.adjustWork(owner,previous,-integer(previous.quantity));
+              this.adjustWork(owner,m,integer(group.quantity),id);
+            } else this.adjustWork(owner,m,integer(group.quantity)-BigInt(previous?.quantity??'0'),id);
+          }
           break;
         }
-        case 'original.delete':
-          keys(a,['type','id']); this.group(owner,'original',a.id);
+        case 'original.delete': {
+          keys(a,['type','id']); const previous=this.group(owner,'original',a.id);
           this.sql("DELETE FROM groups WHERE owner=? AND scope='original' AND id=?").run(owner,a.id as string);
-          if (!p.started) this.sql("DELETE FROM groups WHERE owner=? AND scope='work' AND id=?").run(owner,a.id as string);
+          if (!p.started) this.adjustWork(owner,previous,-integer(previous.quantity));
           break;
+        }
         case 'level': keys(a,['type','value']); inputInteger(a.value); p.level = a.value as string; break;
         case 'reset':
           keys(a,['type']); this.copyOriginal(owner); equipment=[]; p.spent='0'; p.started=1; p.experiment=randomUUID();
@@ -157,8 +181,8 @@ export class Store {
             this.quantity(owner,g.id,integer(g.quantity)-n);
             if (e) e.quantity=(equipped-worn).toString();
           }
-          const {result,price} = craft(inputs), output = {...result,id:randomUUID(),quantity:'1'};
-          this.put(owner,'work',output); this.afterMods?.();
+          const {result,price} = craft(inputs), id=this.adjustWork(owner,result,1n), output = {...result,id,quantity:'1'};
+          this.afterMods?.();
           const undo: Undo = {consumed,output,equipment:before,price};
           this.sql('INSERT INTO history(owner,body) VALUES (?,?)').run(owner,JSON.stringify(undo));
           p.spent=(BigInt(p.spent)+BigInt(price)).toString(); equipment=equipment.filter(e=>e.quantity!=='0'); p.started=1; createdId=output.id;
@@ -166,9 +190,10 @@ export class Store {
         }
         case 'undo': {
           keys(a,['type']);
-          const row = this.sql('SELECT seq,body FROM history WHERE owner=? ORDER BY seq DESC LIMIT 1').get(owner) as {seq:number;body:string}|undefined;
+          const row = this.sql('SELECT seq,body FROM history WHERE owner=? ORDER BY seq DESC LIMIT 1').safeIntegers().get(owner) as {seq:bigint;body:string}|undefined;
           requireThat(row,'NOTHING_TO_UNDO',409); const undo=JSON.parse(row.body) as Undo;
-          this.sql("DELETE FROM groups WHERE owner=? AND scope='work' AND id=?").run(owner,undo.output.id);
+          const output=this.group(owner,'work',undo.output.id);
+          this.quantity(owner,output.id,integer(output.quantity)-1n);
           for (const g of undo.consumed) {
             const current = this.sql("SELECT quantity FROM groups WHERE owner=? AND scope='work' AND id=?").get(owner,g.id) as {quantity:string}|undefined;
             this.put(owner,'work',{...g,quantity:(BigInt(current?.quantity??'0')+BigInt(g.quantity)).toString()});

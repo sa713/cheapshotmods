@@ -71,9 +71,10 @@ test('derived 129-digit mods remain exact, equippable, craftable and reversible'
     const id=add(s,'9','💚',2,'9'.repeat(128)),outputs:string[]=[];
     for(let i=0;i<3;i++)outputs.push(command(s,{type:'craft',items:[choice(id)]}).createdId!);
     const expected='14'+'9'.repeat(127);
+    assert.equal(new Set(outputs).size,1);assert.equal(s.group('111','work',outputs[0]).quantity,'3');
     for(const output of outputs)assert.equal(s.group('111','work',output).value,expected);
     command(s,{type:'equip',items:[{id:outputs[0],quantity:'1'}]});
-    const result=command(s,{type:'craft',items:outputs.map((id,i)=>choice(id,'1',i===0?'1':'0'))});
+    const result=command(s,{type:'craft',items:[choice(outputs[0]!,'3','1')]});
     assert.equal(s.group('111','work',result.createdId).value,'224'+'9'.repeat(126));assert.deepEqual(result.equipment,[]);
     command(s,{type:'equip',items:[{id:result.createdId,quantity:'1'}]});command(s,{type:'level',value:'200'});
     const undone=command(s,{type:'undo'});assert.equal(undone.level,'200');assert.deepEqual(undone.equipment,[{id:outputs[0],quantity:'1'}]);assert.equal(s.group('111','work',outputs[0]).value,expected);

@@ -7,6 +7,7 @@ import {app} from '../../apps/server/src/app.js';
 import {issuer,sha256,type Transport} from '../../apps/server/src/auth.js';
 import {Store} from '../../apps/server/src/store.js';
 import {config} from '../helpers.js';
+import {seedLegacy} from './legacy-v2.js';
 
 const directory=process.env.CHM_BROWSER_DIR!;mkdirSync(directory,{recursive:true});
 const pair=await generateKeyPair('RS256'),jwks=createLocalJWKSet({keys:[{...await exportJWK(pair.publicKey),kid:'browser-fixture',alg:'RS256'}]});
@@ -24,7 +25,9 @@ const provider=createServer((req,res)=>{void(async()=>{
   const url=new URL(req.url!,'http://localhost:3101');
   if(url.pathname==='/health'){res.end('ok');return;}
   if(url.pathname==='/restart'&&req.method==='POST'){
-    await server.close();store.close();store=new Store(directory+'/browser.sqlite');
+    await server.close();store.close();
+    if(url.searchParams.get('legacy')==='1')seedLegacy(directory+'/browser.sqlite',true);
+    store=new Store(directory+'/browser.sqlite');
     server=await app(store,{...config,baseUrl:'http://localhost:3100',trustProxy:true},remote);await server.listen({port:3100,host:'127.0.0.1'});res.end('ok');return;
   }
   if(url.pathname!=='/authorize'){res.writeHead(404);res.end();return;}

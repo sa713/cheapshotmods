@@ -83,8 +83,8 @@ test('S-04: mixed parameters, all 20 prices and tier6 cannot craft',async({page}
   for(const [kind,values] of Object.entries(prices))for(let tier=1;tier<=5;tier++){
     const value=tier===1?(kind==='🅾'?'10':kind==='💚'?'15':'8'):'15';
     await add(page,kind,String(tier),value,'3');await work(page);await reset(page);
-    // Duplicated source groups are possible; select the newest adequate group.
-    const candidates=group(page,kind,String(tier),value).filter({hasText:'В наборе: 3'});await choose(candidates.first());
+    // Source batches remain editable separately; work uses one combined stack.
+    const candidates=group(page,kind,String(tier),value);await expect(candidates).toHaveCount(1);await choose(candidates);
     await expect(page.getByTestId('craft-preview')).toContainText('Цена операции: '+values[tier-1]);
     if(tier===2)await expect(page.getByTestId('craft-preview')).toContainText('+23%');
     await apply(page);
@@ -165,4 +165,50 @@ test('stale Mini reload binds same identity only; invalid context and logged-out
     let reads=0;p.on('request',r=>{if(/\/api\/(state|inventory)/.test(r.url()))reads++;});
     await p.goto(url!);await expect(p.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();await expect(p.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);expect(reads).toBe(0);await p.close();
   }
+});
+
+test('identical crafted mods show one total through reload, worn craft, undo and reset',async({page},testInfo)=>{
+  await login(page);await level(page,'200');await add(page,'💢','3','18','9');await work(page);
+  for(let i=1;i<=3;i++){
+    await choose(group(page,'💢','3','18'));await apply(page);
+    await expect(group(page,'💢','4','27')).toHaveCount(1);
+    await expect(group(page,'💢','4','27')).toContainText('В наборе: '+i);
+  }
+  await equip(page,group(page,'💢','4','27'),'2');
+  await page.reload();await saved(page);
+  await expect(group(page,'💢','4','27')).toHaveCount(1);
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 3 · Надето: 2');
+  await page.screenshot({path:testInfo.outputPath('grouped-crafted-mods.png'),fullPage:true});
+  await choose(group(page,'💢','4','27'),2,true);await choose(group(page,'💢','4','27'),1);await apply(page);
+  await expect(group(page,'💢','4','27')).toHaveCount(0);await expect(group(page,'💢','5','41')).toHaveCount(1);
+  await expect(page.getByTestId('spent')).toHaveText('3564');
+  await page.getByRole('button',{name:/Отменить последний крафт/}).click();await saved(page);
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 3 · Надето: 2');
+  await page.getByRole('button',{name:/Отменить последний крафт/}).click();await saved(page);
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 2 · Надето: 0');
+  await page.reload();await saved(page);await expect(group(page,'💢','4','27')).toHaveCount(1);
+  await reset(page);await expect(group(page,'💢','3','18')).toContainText('В наборе: 9');
+  await expect(group(page,'💢','4','27')).toHaveCount(0);await expect(page.getByTestId('spent')).toHaveText('0');
+  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();
+  await expect(page.getByTestId('original-group')).toHaveCount(1);await expect(page.getByTestId('original-group')).toContainText('Количество: 9');
+});
+
+test('existing schema2 crafted duplicates migrate on real server and remain undoable in the browser',async({page},testInfo)=>{
+  expect((await page.request.post('http://localhost:3101/restart?legacy=1')).ok()).toBeTruthy();
+  await login(page,'111');await work(page);
+  await expect(group(page,'💢','4','27')).toHaveCount(1);
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 2 · Надето: 1');
+  await expect(page.getByTestId('spent')).toHaveText('3564');
+  await page.getByRole('button',{name:/Отменить последний крафт/}).click();await saved(page);
+  await expect(group(page,'💢','4','27')).toHaveCount(1);
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 5 · Надето: 3');
+  await page.reload();await saved(page);await expect(group(page,'💢','4','27')).toHaveCount(1);
+  await page.screenshot({path:testInfo.outputPath('migrated-existing-mods.png'),fullPage:true});
+  for(let i=0;i<3;i++){await page.getByRole('button',{name:/Отменить последний крафт/}).click();await saved(page);}
+  await expect(group(page,'💢','4','27')).toContainText('В наборе: 2 · Надето: 1');
+  await expect(group(page,'💢','3','18')).toContainText('В наборе: 9');await expect(page.getByTestId('spent')).toHaveText('0');
+  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();await expect(page.getByTestId('original-group')).toHaveCount(4);
+  await work(page);await reset(page);
+  await expect(group(page,'💢','4','27')).toHaveCount(1);await expect(group(page,'💢','4','27')).toContainText('В наборе: 2 · Надето: 0');
+  await expect(group(page,'💢','3','18')).toHaveCount(1);await expect(group(page,'💢','3','18')).toContainText('В наборе: 9');
 });

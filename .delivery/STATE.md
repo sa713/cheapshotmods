@@ -2,6 +2,8 @@
 
 Последнее подтверждение: 2026-11-07, владелец установил отдельный b008 helper к app fbe, выполнил stage/apply/check. Получены HTTPS health/version expectedfbe и OpenSSL TLS1.3/IP+chain Verification:OK. Проверки выполнены на сервере владельцем; внешняя сеть/телефон, соседние маршруты/renewal и живой Telegram ещё pending.
 
+- Активная разработка: [TASK-004](tasks/TASK-004.md), группировка одинаковых модов после крафта по screenshot владельца. Сохранённые дубли переносятся атомарно вместе с undo/equipment; оригинальные записи остаются редактируемыми. Следующий шаг developer — browser/CI/независимое review/проверенный kit и штатный update2→3 с rollback. TASK003 installation evidence ниже сохраняется; реальный app пока не обновлён.
+
 - Текущее продолжение TASK-003: **review**. [Реальное owner подтверждение](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07): app=fbe82ae/helper=b008807, отдельный ROOT/ingress-b008807.py root600/exacthash. Setup/stage/apply/host-side health/version/TLS verified; полный app update не делался, disk guard сохранён. Повторять install/update/helper setup/apply не нужно. Следующий шаг владельца — сайт с телефона/внешняя сеть и привычные соседи, затем BotFather/private config/restart/оба живых входа. delivery kit verified, product_acceptance pending; прежние записи ниже — история.
 - Текущий дисковый факт: новый kit ZIP/tar/13checksums прошли; preflight отказал `insufficient free disk before changes` до переключения app. Для этого дискового отказа не повторять full update/install/download и не делать Docker prune. Канонический helper b008 уже есть в извлечённом kit; устанавливается отдельным небольшим файлом, stage всё ещё пишет private snapshots/diagnostics.
 
