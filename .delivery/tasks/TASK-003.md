@@ -1,7 +1,7 @@
 # TASK-003 — установка на Debian за существующим IP-прокси
 
 - Статус: review
-- Текущая передача: [отдельный helper при нехватке места для app update](#продолжение-при-недостатке-места-для-update). Владелец подтвердил app fbe и новый b008 kit/13checksums; полный update остановлен disk preflight до изменений. Актуальная компонентная пара app=fbe/helper=b008 использует отдельный ingress-b008807.py. Предыдущие инструкции/отзывы/архивы сохранены как история.
+- Текущее подтверждение: [владелец применил ingress и проверил HTTPS](#фактическое-применение-владельцем--2026-11-07). Компонентная пара app=fbe/helper=b008 установлена, stage/apply и host-side health/version/TLS прошли. Внешняя доступность с телефона, живые соседи/renewal и Telegram остаются pending; повторная установка/helper setup не нужны. Прежние отказы/архивы/отзывы сохранены.
 - Риск: повышенный — TLS, граница доверия proxy и сохранение работающих сервисов общего хоста.
 - Основание: решение владельца об установке без домена по IP:порту и предоставленная диагностика; [.delivery/PROJECT.md](../PROJECT.md), раздел размещения без домена. Продуктовые требования [PRODUCT.md](../../PRODUCT.md) сохраняются.
 - Репозиторий: https://github.com/sa713/cheapshotmods
@@ -438,3 +438,27 @@ Developer возвращает management **review**. Независимый [н
 Независимый supplement [TASK-003-operator-only-review](../reviews/TASK-003-operator-only-review.md) отделяет авторский full pairing execution от own filesystem/dispatch/source checks. Предыдущие cf0/R6/ingress-log reviews и их byte hashes сохранены. Текущее состояние задачи **review**, доставка immutable code/kit verified, компонентный operator route подготовлен для владельца. Его новый setup/stage/apply, публичный HTTPS и живой Telegram остаются pending; production verified не заявляется. Реальный сервер/Docker/BotFather/расходы/merge не затрагивались.
 
 Независимый supplement **accepted** этой компонентной пары и точных команд; отчёт перенесён побайтово, SHA256 `6ae6d97113a9c415832c59f39663924fdb2c9fe5c609f658b58c7c1c291727c0`. Reviewer собственными filesystem/dispatch checks подтвердил guards/атомарность/отказ подмены; PYTHONOPTIMIZE обход устранён `python3 -I`, portable old-path shadowing устранён `install_call`. Авторский full native run не называется независимым native повтором; source/старые отзывы/archives сохранены.
+
+### Фактическое применение владельцем — 2026-11-07
+
+Источник — вывод реальных команд, выполненных **владельцем**, developer к серверу не подключался. Установлен отдельный `/opt/cheapshotmods/ingress-b008807.py` с проверенным exact SHA256884aad...8011/root0600; app/current.env остаются **fbe82aef6008d292515c0efce2fde601c221f3d2**. Владелец вернул `Operator b008807 installed and verified; app remains fbe82ae` и успешный `Staged: private backup, changes.diff, complete ordered compose and Caddy validation passed`.
+
+Затем выполнен отдельный reviewed apply/check/openssl блок; получено:
+
+```text
+/opt/cheapshotmods/ingress-b008807.py: OK
+Ingress applied. Run Cheapshot check and verify existing routes/TLS externally.
+HTTPS health/version OK: fbe82aef6008d292515c0efce2fde601c221f3d2
+Protocol version: TLSv1.3
+Ciphersuite: TLS_AES_128_GCM_SHA256
+Verification: OK
+DONE
+```
+
+OpenSSL подключался к127.0.0.1:9443 с `-verify_ip 94.228.170.13 -verify_return_error -CApath /etc/ssl/certs -brief </dev/null`; проверены системная цепочка и выбранный IP. Предшествующая строка `Can't use SSL_get_servername` не сопровождалась отказом — итог Verification:OK/DONE. `chm.sh check` обращался к установленному HTTPS origin и сверил точный app SHA с metadata. Это реальный owner-positive setup/stage/apply/host-side HTTPS на его ранее подтверждённом Docker29.8/containerd, отдельно от isolated tests; реальные negative/rollback/lifecycle проверки на общем сервере не выполнялись.
+
+Таким образом, установка этой компонентной пары и доступность health/version/TLS **из самого сервера подтверждены**. Это ещё не независимая внешняя проверка firewall9443/телефона, остальных действующих маршрутов, HTTP-01/renewal и живого Telegram. Повторные install/update/helper setup/apply для этого результата не требуются. Полный app update по-прежнему не выполнялся; его guard/старые отказы не переписаны. Managed helper может остаться старым; дальнейшие ingress операции — только отдельным b008 path.
+
+Следующие owner действия: открыть https://94.228.170.13:9443/ с телефона через внешнюю сеть, проверить привычные соседние сервисы; затем настроить выделенного бота с точными origin/callback/Mini App URL из EXTERNAL-PROXY, секреты только в private config.env, штатный app restart/check. При отказе BotFather на числовой IP:порт сохранить обезличенную причину; не подменять auth/TLS. Новый настоящий общий аккаунт сайта/Mini App и два пользователя проверяются после настройки, synthetic fixtures не называют живой интеграцией.
+
+Статус задачи остаётся **review** для management. delivery immutable code/kit verified, owner setup/stage/apply/host-side HTTPS verified в указанной области; external access/neighbours/renewal/Telegram/product_acceptance pending. Технические independent verdicts сохраняются со своими exact SHA, нового code change/source review здесь нет. PR открыт, merge/новых расходов/автоматического server deployment/BotFather actions developer не выполнял.

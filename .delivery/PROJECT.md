@@ -1,6 +1,6 @@
 # Паспорт Cheapshot Mods
 
-Последнее содержательное подтверждение: 2026-11-07, передача developer TASK-003 на review с исправлением изолированной Caddy validation и новым комплектом для update уже установленного fbe. Разделение management и отдельной сессии developer сохраняется.
+Последнее содержательное подтверждение: 2026-11-07, владелец подтвердил применение отдельного b008 helper к app fbe и успешный host-side HTTPS/TLS после stage/apply. Разделение management и отдельной сессии developer сохраняется.
 
 ## Продукт и источники
 
@@ -22,7 +22,7 @@
 - Техническая основа принята в TASK-001, полный устанавливаемый продукт — в TASK-002. Адаптация к существующему IP-прокси выполнена developer в TASK-003 и передаётся management на review; команды — в RUNBOOK, проверки конкретной версии — в карточке/PR. Живая интеграция проверяется после операторской установки.
 - Единая команда проверки: `bash scripts/verify.sh`. Обязательные jobs TASK-001: `verify` и `container-smoke`; их успешный запуск требуется подтвердить ссылками на реальные GitHub Actions runs. Наличие workflow не означает включённую branch protection.
 - Тестовые пользователи и данные создаются изолированными фикстурами, без реальных аккаунтов/секретов Telegram. Подмена пользователя через публичный заголовок, query-параметр или production dev-login не разрешается.
-- Целевой Debian и IP-origin выбраны по диагностике владельца; домен не используется. Реальное размещение/публичный HTTPS ещё не выполнены. Секреты владелец вводит после передачи комплекта локально в private config0600, вне Git/чата/argv. Отдельный preview не поднимался; Docker проверяется на изолированной модели/CI. Это не демонстрация живого Mini App и не блокер независимой разработки.
+- Целевой Debian и IP-origin выбраны по диагностике владельца; домен не используется. Владелец установил app fbe с отдельным b008 helper и подтвердил HTTPS health/version/TLS chain/IP из самого сервера; внешняя доступность с телефона и живой Telegram ещё не проверены. Секреты владелец вводит после передачи комплекта локально в private config0600, вне Git/чата/argv. Отдельный preview не поднимался; Docker проверяется на изолированной модели/CI. Это не демонстрация живого Mini App и не блокер независимой разработки.
 - Для реального входа нужны выделенный бот, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_OIDC_CLIENT_ID`, `TELEGRAM_OIDC_CLIENT_SECRET`, регистрация разрешённых origin/callback URL и Mini App URL у BotFather. `PUBLIC_BASE_URL`, `DATABASE_PATH`, серверный секрет сессий и версия сборки конфигурируются отдельно. Значения секретов в GitHub/чат не помещать.
 - Новая внешняя инфраструктура, платные API и бюджет не согласованы. Ресурсы других продуктов владельца сюда не переносятся. Планировочная цель — один небольшой Linux-хост с постоянным диском; фактическую память, объём и задержки измерить в TASK-001, назначение хоста решается до живого стенда.
 
@@ -121,3 +121,9 @@ Developer подготовил новый format2 kit sourcefbe82aef6008d292515c
 Владелец подтвердил oldapp fbe/helper e9c935 и отсутствие plan; новый b008 kit ZIP/tar/13checksums прошёл, но full update остановлен reserve guard до load_images/stop/DB writes. Требование сохранения рабочего Docker/соседей не меняется, очистка/новые расходы/ослабление guard не поручаются.
 
 Поддержанное продолжение — [отдельный helper](../deploy/EXTERNAL-PROXY.md#отдельная-установка-helper-для-существующего-fbe) из уже проверенного kit: app/source fbe, operator/source b008, exacthash884aad...8011, stableROOT/ingress-b008807.py600. Full local native pairing/negatives/lifecycle/recovery и отдельная проверка команд завершены; app/managedhelper/current.env приstage/applyнепереключаются. Этот маршрут не выполняет полное app update и не импортирует images/новую data pair; expectedappversion остаётсяfbe. Приёмка b008 immutablekit/прежниеотзывы сохраняются, текущий supplement явно отделяет компонентную область и ограничения. Owner выполняет setup/stage/diff/apply/check этимотдельнымhelper; реальный сервер/Telegram ещёpending.
+
+## Подтверждённое применение владельцем — 2026-11-07
+
+После отдельной установки helper/checkhash и успешного stage владелец выполнил apply/check/openssl. `Ingress applied`, HTTPShealth/version exactfbe и TLS1.3/IP+chain Verification:OK/DONE подтверждены его выводом. [Фактическая запись](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07). App=fbe/helper=b008, полный app update не делался. Общая очистка не проводилась; Docker daemon/storage и disk guard не перенастраивались. Общий ip-proxy адресно пересоздал владелец штатным apply. Developer не подключался к серверу, действия выполнил владелец.
+
+Следующие owner проверки: внешняя сеть/телефон и прежние сервисы/HTTP-01/renewal, затем выделенный BotFather и настоящие Login/Mini App/общий аккаунт. Host-side TLS не выдаётся за эти наблюдения. TASK-003 остаётсяreview, technical immutablekit/component verdictsaccepted в своейобласти, product_acceptance pending, PRнеcлит.
