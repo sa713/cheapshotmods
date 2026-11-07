@@ -33,3 +33,7 @@
 Chromium эмулирует viewport; это не новая проверка настоящего Telegram WebView/физического телефона/owner Debian. Вымышленные signed данные не называются живой Telegram-интеграцией. Frontend и kit передаются без установки на сервер/изменения BotFather/Sites/merge. Продуктовое принятие оформления владельцем остаётся pending.
 
 Замороженные SHA256: preview.html985281d6fad7a4369f04f10c59064c6483d08854e16f2da6ff947ebe2201262d; sites.css566321b603585a5308664514d159413caa44c48b4c26672f651fce0778b6c350; tokens.jsondc6721ee20662416df255b2fe215e0644b888a30b0a191351e6b7254c399d4bb; README50d3da726cb5b82b2bedd60afce0da3c86e46d58b9a8ac18aa0ed1529bb0507f.
+
+## Переданный набор
+
+Exact frontend/source6dc8021e58daa9aa16a93a9265315bb810fe9d0a. [Browserartifact13583313770](https://github.com/sa713/cheapshotmods/actions/runs/42396981634/artifacts/13583313770) содержит все снимки/HTML сравнения; CI20/20 и отдельное ревью выполнялись на этой версии. [Установочныйkit13583903966](https://github.com/sa713/cheapshotmods/actions/runs/42396981568/artifacts/13583903966), команды — [TASK-004-SITES-NEXT-STEPS.md](../TASK-004-SITES-NEXT-STEPS.md). Будущие docs-only SHA не подменяют этот immutable candidate.

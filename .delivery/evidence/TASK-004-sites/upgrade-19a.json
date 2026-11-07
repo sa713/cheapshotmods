@@ -1,0 +1,28 @@
+{
+  "predecessor_sha": "19a6fdde785eb90b01bd78318deeab1a539dde7b",
+  "incoming_sha": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+  "platform": "Debian13-slim/linux-amd64; cloud Docker29.9.2 vfs; real pinned Node/better-sqlite3",
+  "old_assets": {
+    "css_sha256": "0c93266d7ede7d8ece86e19d8fe4a82348659ae1de954618c61ca3aa3f627b07",
+    "js_sha256": "4bd06a3383ce75cbaa697787c7ab45b4402f2e733e3a37cd393d03883918ac17",
+    "sites": false
+  },
+  "new_assets": {
+    "css_sha256": "56392be793e25c2c181850ca748dfbb29d4a256ffd6b4600e119ade025889a42",
+    "js_sha256": "c5ed587526a4840a284d1be405724bccc5bd544b8b2338cf3c2715edbe4f8e86",
+    "sites": true
+  },
+  "asset_rollback_exact": true,
+  "old_schema": 3,
+  "new_schema": 3,
+  "separate_new_volume": true,
+  "old_image_schema_compatibility_probe": "accepted_copy3",
+  "config_and_separate_operator_unchanged": true,
+  "migration": "passed",
+  "new_crafts_worn_and_all_legacy_undo": "passed",
+  "reset": "passed",
+  "receipts_and_stale_revision": "passed",
+  "rollback_old_image_and_volume_exact_state": "passed",
+  "restart_after_rollback": "passed",
+  "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+}

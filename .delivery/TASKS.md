@@ -7,7 +7,7 @@
 
 3. [TASK-003 — установка за существующим IP-прокси](tasks/TASK-003.md): **review**, PR3. [Owner подтвердил](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07) отдельный b008helper к fbeapp, stage/apply и HTTPShealth/version/TLS Verification:OK с самого сервера. Independent native/kit/component reviews и обеstoreCI сохранены; полный app update не выполнялся, disk guard не ослаблялся. Повторные install/update/apply не нужны. Остались внешний телефон/действующие соседние маршруты/renewal и настоящий Telegram; developer не исполнял серверные команды/BotFather/merge.
 
-4. [TASK-004 — дизайн Sites без изменения функционала](tasks/TASK-004.md): **implementing**, отдельная ветка chm-004-sites-design. Эталон из d7cc4d7, завершённое исправление группировки сохранено как зависимость; переносится только представление, Telegram/API/данные/расчёты/действия сохраняются. Проверка, визуальное сравнение и отдельный reviewer обязательны; сервер/Sites/BotFather/main не меняются.
+4. [TASK-004 — дизайн Sites без изменения функционала](tasks/TASK-004.md): **review**, PR5, отдельная ветка chm-004-sites-design. Эталон d7cc4d7 перенесён, прежняя группировка сохранена как зависимость.41native/20browser/визуальноесравнение/CI+bothstores/отдельноеревью и обаoldkitupdate/rollback пройдены; immutablekit и root/curl команды в карточке. Установка/продуктовоепринятие владельцемpending; сервер/Sites/BotFather/main developer не менял.
 
 Предыдущее [исправление группировки одинаковых модов](tasks/TASK-004-mod-stacks.md): **review**, PR4. Исторически developer также назвал его TASK004; карточка сохранена отдельно из-за коллизии с management-заданием дизайна. Immutable19a6fdd kit, прежние review/команды не изменены; установка владельцем пока не подтверждена.
 
