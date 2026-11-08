@@ -1,6 +1,6 @@
 # TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки
 
-- Статус: **implementing**.
+- Статус: **review** — реализация, CI и устанавливаемый комплект готовы; передача management, установка владельцем pending.
 - Риск: **повышенный** — меняются точные вычисления, идентичность групп, миграция SQLite и история отмены; потеря/дублирование модов недопустимы.
 - Основание: [PRODUCT.md](../../PRODUCT.md#собираемый-патч--2026-11-08), П-01–П-04; владелец завершил сбор фразой «патч собран» 2026-11-08. Обычные решения management явно отделены там от игровых правил владельца.
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -110,9 +110,9 @@ Management проверил актуальную базу и реализуем�
 Developer возвращает PR/точный runtime SHA, состав изменений, доказательства критериев и native/browser/CI/kit, ограничения и готовые owner-команды. После reviewer — исправления подтверждённых blockers и актуальная приёмка затронутой области. Функциональный результат не закрывать как доставленный только по коммиту документов.
 
 - product_acceptance: **pending**.
-- delivery: **pending**.
-- Следующий шаг: developer читает актуальный HEAD ветки задания и реализует TASK-005 целиком; затем отдельный reviewer и management.
-- Последнее подтверждение: 2026-11-08, сообщение владельца «патч собран»; исходная версия и содержание проверены management, реализация ещё не запускалась.
+- delivery: **verified_candidate_available** — immutable artifact13624905831; production installation pending.
+- Следующий шаг: management получает PR6/точный runtime SHA/комплект/доказательства и отдельное review; владелец устанавливает кандидат и проверяет настоящий Telegram.
+- Основание постановки:2026-11-08, сообщение владельца «патч собран»; исходная версия и содержание проверены management. Фактическая реализация и передача описаны ниже.
 
 ## План developer до реализации — 2026-11-08
 
@@ -132,3 +132,16 @@ Developer возвращает PR/точный runtime SHA, состав изм�
 Самопроверка перед runtime-коммитом: полный `bash scripts/verify.sh` прошёл (58/58 native tests, typecheck/lint/build, genuine better-sqlite3); отдельные Python проверки4/4 ingress и14/14 image proof прошли. Chromium25/25 на реализации прошёл; завершающий прогон на финальной сборке выполняется. Pipeline negative probe прошёл с exit17 против0 безpipefail. Новый measure: preview≈3,07ms/commit≈1,46ms/undo≈1,95ms для10^24 tier3 результатов, heap delta273648bytes,1work_lot/1history/1099bytes plan; Node24.22.1/npm11.9.0, Linuxamd64, Xeon8573C,5vCPU/host18GiB; цифры этой изолированной среды, не SLA Debian владельца.
 
 Предварительная отдельная core-проверка reviewer:5000 small random differential против независимого поэкземплярного oracle, native schema2/3→4/late-fault/receipt/history/refine+add+undo прошли. Это ещё не итоговая приёмка runtime SHA/kit. Замечания о видимости крита одиночных входов и подробностях промежуточных переходов учтены до кандидата. PR, CI, canonical kit и настоящие installer/update/restore/rollback ещё предстоит подтвердить. Владелец/production/liveTelegram не затронуты.
+
+## Передача developer management — 2026-11-08
+
+- Runtime/kit source **feb6a1bf82e70474c482c6a2e1fb0e77c4e20586**; [PR6](https://github.com/sa713/cheapshotmods/pull/6), head chm-005-batch-fuse, base chm-004-sites-design/bd8108c. Старт6ab подтверждён. Последующий HEAD передачи содержит документы/команды и3assertions в developer-only upgrade fixture; app/packages/Dockerfile/исполняемые установщики от runtime source не изменены.
+- Весь согласованный функционал TASK-005 реализован. Подробный контракт: [IMPLEMENTATION](../TASK-005-IMPLEMENTATION.md). Неизвестный старый крит сохраняется отдельно от0, миграция schema2/3→4 атомарна, receipts/history/equipment/поздние пополнения сохранены; код корректных прежних auth/точных damage/health правил не заменён.
+- Самопроверка:58/58native и25/25Chromium на exact runtime, Node24.22.1/npm11.9.0/genuinebetter-sqlite3;4/4ingress и14/14image-proof. [VALIDATION](../TASK-005-VALIDATION.md) сопоставляет все15критериев, физические среды, время/память и limitations. Большое количество10^24 даёт1lot/1history/1099bytes plan; отдельные ceiling каждого перехода подтверждены, игровой cap не вводился.
+- [CIchecks42498204955](https://github.com/sa713/cheapshotmods/actions/runs/42498204955): verify/container-smoke success; [kit42498204953](https://github.com/sa713/cheapshotmods/actions/runs/42498204953): debian-kit success, installation/external-ingress/realclassic/containerd/reverse-export, без skipped checks.
+- Canonical **artifact13624905831**, sourcefeb, expires **2026-12-08T16:19:39Z**. ZIPSHA256 **0d7f1c83d417cb362c345b8ab32431362377128c87fad3cfe63431293a333731**, tarSHA256 **30d5703a59ee734b5094291bf2ae83e4b46fb5039614753309f13a7037909e50**. Скачан автором,13/13SHA256SUMS иarchive proof прошли; independently byte-verified reviewer. [Метаданные](../evidence/TASK-005/kit.json).
+- Реальные Debian13/linuxamd64 install/update/restart/backup/restore/rollback **FBE2→new4,6dc3→new4 и19a3→new4** прошли. Проверены все old undo, new batch/refine/add/undo/reset, receipts/stale/equipment, exact previous image+volume+state/schema/assets и сохранностьconfig/b008. Старые binaries отвергают отдельную копиюschema4; active migrated volume ими не открывается. [FBEproof](../evidence/TASK-005/fbe-upgrade.json), [6dc](../evidence/TASK-005/6dc-upgrade.json), [19a](../evidence/TASK-005/19a-upgrade.json).
+- Independent session reviewer: собственныеverify/native58/browser25/oracle5000/five-tier huge probes иarchive proof прошли. Собственный полный FBE installer repeat прошёл; [заключение](../reviews/TASK-005-review.md) — **accepted в области устанавливаемого кандидата**, открытых блокеров нет. [Reviewer evidence](../evidence/TASK-005/reviewer-fbe-upgrade.json); автор не подменяет отдельное review самоприёмкой. Замечания reviewer об отображенииcrit во входах/полном intermediate preview закрыты доruntime; дополнительная проверка changed data послеrestore→rollback добавлена вfixture SHA11a6215df246a2a429aad15a60d7f34fee5c48652f715c1543977c57343f1db3, реальные author routes с ней прошли.
+- Готовые [NEXT-STEPS](../TASK-005-NEXT-STEPS.md), [update script](../TASK-005-update.sh) и [rollback script](../TASK-005-rollback.sh): root/curl, существующий private project credential, безsudo/gh/git/build; guardedFBE/19a/6dc. Disk guard/format2 не ослаблены. Первый local повторsecond-update остановился наместе, затем пройден полностью после cleanup только собственных caches/проверенных ZIP; owner resources не затронуты.
+
+Ограничения: owner текущий installed SHA после прежних команд не подтверждён; новый патч ещё не установлен на настоящий Debian/телефон и с настоящими Telegram credentials. Signed fixtures не считаются живым Telegram. Установка владельцем и product_acceptance pending, что не блокирует завершение developer candidate по TASK-005. Послеschema4 старый app не читает новыйvolume; rollback возвращает прежнюю пару и не переносит туда post-update записи. Main/merge, BotFather, Sites, внешний deployment и расходы не выполнялись.

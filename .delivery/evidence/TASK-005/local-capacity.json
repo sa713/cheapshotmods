@@ -1,0 +1,48 @@
+{
+  "runtime_source_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+  "note": "Exact runtime code; separate working-tree correction affects only installer test assertion. Isolated environment, not the owner host SLA.",
+  "node": "v24.22.1",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "logicalCpus": 5,
+  "hostMemoryMiB": 18008,
+  "compactHugeBatch": {
+    "inputUnits": "9000000000000000000000000",
+    "resultCount": "1000000000000000000000000",
+    "price": "504000000000000000000000000",
+    "previewMs": 2.402135000000044,
+    "commitMs": 3.202709000000027,
+    "undoMs": 1.540883000000008,
+    "heapDeltaBytes": 281744,
+    "physicalWorkLots": 1,
+    "historyRows": 1,
+    "planJsonBytes": 1099
+  },
+  "dataset": {
+    "distinctGroups": 10000,
+    "millionGroup": "1000000",
+    "exactQuantity": "9007199254740993"
+  },
+  "batchSetup": {
+    "groups": 10000,
+    "outerTransaction": true,
+    "elapsedMs": 1047.489966
+  },
+  "sequentialHttp": {
+    "sampleSize": 100,
+    "commitPerRequest": true,
+    "totalMs": 214.21012700000392,
+    "p95Ms": 3.055695999999898
+  },
+  "oversizedInteger": {
+    "digits": 1000000,
+    "rejectMs": 18.72203300000001
+  },
+  "resetMs": 228.68105000000014,
+  "paginatedLoadMs": 14.718086000000085,
+  "tenSameRevisionInjectedRequestsMs": 262.1213309999998,
+  "dbAndWalBytes": 21760000,
+  "rssMiB": 172.88671875,
+  "peakRssMiB": 176.71875
+}

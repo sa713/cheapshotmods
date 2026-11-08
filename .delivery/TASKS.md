@@ -9,7 +9,7 @@
 
 4. [TASK-004 — дизайн Sites без изменения функционала](tasks/TASK-004.md): **review**, PR5, отдельная ветка chm-004-sites-design. Эталон d7cc4d7 перенесён, прежняя группировка сохранена как зависимость.41native/20browser/визуальноесравнение/CI+bothstores/отдельноеревью и обаoldkitupdate/rollback пройдены; immutablekit и root/curl команды в карточке. Установка/продуктовоепринятие владельцемpending; сервер/Sites/BotFather/main developer не менял.
 
-5. [TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки](tasks/TASK-005.md): **ready**. Сбор владельцем завершён 2026-11-08. Задание и базовая версия проверены management; следующий шаг — отдельный Codex developer в chm-005-batch-fuse на основе завершённого frontend TASK-004. Повышенный риск: миграция schema3→4, новые параметры групп и история отмены. Реализация/новые CI/приёмка/установка пока не выполнялись.
+5. [TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки](tasks/TASK-005.md): **review**, [PR6](https://github.com/sa713/cheapshotmods/pull/6). Runtime/kitfeb6a1bf,58native/25browser/всеCI/bothstores и canonicalFBE/19a/6dc install/update/restore/rollback прошли; separate review и owner-команды в карточке. Artifact13624905831 до2026-12-08. Установка/schema4 на владельческом Debian и product_acceptance pending; developer передаёт готовый кандидат, main/сервер/BotFather не менял.
 
 Предыдущее [исправление группировки одинаковых модов](tasks/TASK-004-mod-stacks.md): **review**, PR4. Исторически developer также назвал его TASK004; карточка сохранена отдельно из-за коллизии с management-заданием дизайна. Immutable19a6fdd kit, прежние review/команды не изменены; установка владельцем пока не подтверждена.
 

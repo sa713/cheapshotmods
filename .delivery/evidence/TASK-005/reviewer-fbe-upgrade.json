@@ -1,0 +1,105 @@
+{
+  "executor": "independent reviewer /root/batch_fuse_review",
+  "reviewed_at": "2026-11-08T16:46:30.889133+00:00",
+  "runtime_source_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+  "fixture_sha256": "11a6215df246a2a429aad15a60d7f34fee5c48652f715c1543977c57343f1db3",
+  "harness_sha256": {
+    "run.sh": "fd939f0357e66a8c3b738b8c7ea001a6ee3638914358f62eafd016e92a9e848a",
+    "api.mjs": "22df0d8ac54a38df03eae68b841a3ebe55a64b2c906a221f016e603f52580851"
+  },
+  "own_checks": {
+    "verify": "typecheck/lint/build and 58/58 native passed",
+    "chromium": "25/25 passed; real HTTP/SQLite, widths360/390/1440; screenshots visually reviewed",
+    "differential_oracle": {
+      "cases": 5000,
+      "successful_plans": 4832,
+      "insufficient_cases": 168,
+      "compared": "ordered inputs/outputs at every tier, price, final outputs, per-source consumed/remaining and actual worn"
+    },
+    "native_probes": "schema2/3 atomic migration, all owners and retained undo, old receipts, partial refinement, post-start additions and nested undo/reopen passed",
+    "five_tier_probe": {
+      "input_quantity_digits": 128,
+      "result_count": "10^125",
+      "derived_crit_digits": 132,
+      "derived_price_digits": 130,
+      "preview_commit_equip_undo_ms": 11
+    }
+  },
+  "docker": {
+    "server": "29.9.2",
+    "driver": "vfs",
+    "context": "default",
+    "owner_host_used": false,
+    "containers_before_after": [
+      0,
+      0
+    ],
+    "volumes_before_after": [
+      0,
+      0
+    ],
+    "cached_image_ids_preserved": true,
+    "cached_image_ids_sha256": "dc2e06862239d2ab773cbfba801a5f7d49024f0fa4a3907844a93c1d50b417ab",
+    "networks_after": [
+      "bridge",
+      "host",
+      "none"
+    ]
+  },
+  "logs": {
+    "verify": {
+      "local_path": "/tmp/task005-independent-verify.log",
+      "sha256": "ee550348df1c3a9f97a9a1f59bb207afcef943103b338aeb2929f556fe772798"
+    },
+    "native": {
+      "local_path": "/tmp/task005-independent-native.log",
+      "sha256": "4be7cad0b0858a1862e2f1981a37ab141ef825e67aa8d3993d88fe60f18b1bb9"
+    },
+    "browser": {
+      "local_path": "/tmp/task005-independent-browser.log",
+      "sha256": "311476195b1eaadf9bdf06dd95eadad3b311ebb53c286d2ff4922b22ef858a21"
+    },
+    "browser_archive": {
+      "local_path": "/tmp/task005-independent-browser-evidence.tar.gz",
+      "sha256": "e656615bcb1b403c07a0e53106e97baaa3512e8d4c1508bc1af49a30c365f11f"
+    },
+    "archive_proof": {
+      "local_path": "/tmp/task005-independent-kit-proof.log",
+      "sha256": "0bddd53299db48385823d6242059f9e05897d047f059cc4db666700ac6548893"
+    },
+    "installer": {
+      "local_path": "/tmp/task005-independent-fbe-upgrade.log",
+      "sha256": "4abab9905b276152de7765ce2ee53ebdcb244adf9887e77bce87f7b993cef08c"
+    }
+  },
+  "proof": {
+    "predecessor_sha": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+    "incoming_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+    "platform": "Debian13-slim/linux-amd64; cloud Docker29.9.2 vfs; real pinned Node/better-sqlite3",
+    "old_assets": {
+      "css_sha256": "0c93266d7ede7d8ece86e19d8fe4a82348659ae1de954618c61ca3aa3f627b07",
+      "js_sha256": "4bd06a3383ce75cbaa697787c7ab45b4402f2e733e3a37cd393d03883918ac17",
+      "sites": false
+    },
+    "new_assets": {
+      "css_sha256": "4e74e85e848e7b377545f77421b164994ce96f195850493cd8ef632cb7120b47",
+      "js_sha256": "7067d93ed47135db7596df6a8b3e0900d1c0a8c12d4c1f965b525072d05a991c",
+      "sites": true
+    },
+    "asset_rollback_exact": true,
+    "old_schema": 2,
+    "new_schema": 4,
+    "separate_new_volume": true,
+    "old_image_schema_compatibility_probe": "rejected_copy4",
+    "config_and_separate_operator_unchanged": true,
+    "new_image_restart_backup_restore": "passed",
+    "migration": "passed",
+    "new_crafts_worn_and_all_legacy_undo": "passed",
+    "batch_refine_add_undo_known_crit": "passed",
+    "reset": "passed",
+    "receipts_and_stale_revision": "passed",
+    "rollback_old_image_and_volume_exact_state": "passed",
+    "restart_after_rollback": "passed",
+    "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+  }
+}

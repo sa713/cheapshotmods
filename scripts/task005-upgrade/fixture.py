@@ -90,11 +90,14 @@ backup_output=chm(root/'chm.sh','backup',root).decode().strip()
 backup_path=Path(backup_output.splitlines()[-1])
 assert backup_path.is_file() and backup_path.parent==root/'backups'
 phase('change-after-backup')
+changed_checkpoint=json.loads(phase('snapshot'))
 before_restore=metadata()
 chm(root/'chm.sh','restore',root,backup_path)
 phase('check-checkpoint',checkpoint)
 chm(root/'chm.sh','rollback',root)
 assert metadata()==before_restore
+phase('check-checkpoint',changed_checkpoint)
+assert json.loads(phase('restarted'))['schema']==4
 assert hashlib.sha256(operator.read_bytes()).hexdigest()==operator_hash
 assert hashlib.sha256((root/'config.env').read_bytes()).hexdigest()==config_hash
 proof={'predecessor_sha':old_sha,'incoming_sha':m['source_sha'],'platform':'Debian13-slim/linux-amd64; cloud Docker29.9.2 vfs; real pinned Node/better-sqlite3','old_assets':old_assets,'new_assets':new_assets,'asset_rollback_exact':True,'old_schema':previous['schema'],'new_schema':4,'separate_new_volume':True,'old_image_schema_compatibility_probe':'rejected_copy4','config_and_separate_operator_unchanged':True,'new_image_restart_backup_restore':'passed',**results,'rollback_old_image_and_volume_exact_state':'passed','restart_after_rollback':'passed','test_data':'isolated synthetic signed Mini App; no owner/live Telegram'}

@@ -1,0 +1,8 @@
+{
+  "same_input_archive_sha256": "56bf824798f60583c083d738ddd0d8eeea0c92bf4199b718731daf40d7da429d",
+  "containerd_export_sha256": "75758a384c985b7396a93f2dc35ea965afec1aa2444cbd547f45da26abb83682",
+  "classic_to_containerd": "passed",
+  "containerd_to_fresh_classic": "passed",
+  "format1_to_format2_and_rollback": "passed",
+  "external_install_lifecycle_both_stores": "passed"
+}

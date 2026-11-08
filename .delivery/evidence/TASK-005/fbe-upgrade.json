@@ -1,0 +1,36 @@
+{
+  "executor": "developer",
+  "runtime_source_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+  "fixture_sha256": "11a6215df246a2a429aad15a60d7f34fee5c48652f715c1543977c57343f1db3",
+  "note": "Full successful rerun. An earlier additional second update was safely refused by unchanged disk guard; after project npm/header cache cleanup and duplicate ZIP removal this entire route passed. Owner host was not contacted.",
+  "proof": {
+    "predecessor_sha": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+    "incoming_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+    "platform": "Debian13-slim/linux-amd64; cloud Docker29.9.2 vfs; real pinned Node/better-sqlite3",
+    "old_assets": {
+      "css_sha256": "0c93266d7ede7d8ece86e19d8fe4a82348659ae1de954618c61ca3aa3f627b07",
+      "js_sha256": "4bd06a3383ce75cbaa697787c7ab45b4402f2e733e3a37cd393d03883918ac17",
+      "sites": false
+    },
+    "new_assets": {
+      "css_sha256": "4e74e85e848e7b377545f77421b164994ce96f195850493cd8ef632cb7120b47",
+      "js_sha256": "7067d93ed47135db7596df6a8b3e0900d1c0a8c12d4c1f965b525072d05a991c",
+      "sites": true
+    },
+    "asset_rollback_exact": true,
+    "old_schema": 2,
+    "new_schema": 4,
+    "separate_new_volume": true,
+    "old_image_schema_compatibility_probe": "rejected_copy4",
+    "config_and_separate_operator_unchanged": true,
+    "new_image_restart_backup_restore": "passed",
+    "migration": "passed",
+    "new_crafts_worn_and_all_legacy_undo": "passed",
+    "batch_refine_add_undo_known_crit": "passed",
+    "reset": "passed",
+    "receipts_and_stale_revision": "passed",
+    "rollback_old_image_and_volume_exact_state": "passed",
+    "restart_after_rollback": "passed",
+    "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+  }
+}
