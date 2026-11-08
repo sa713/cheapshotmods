@@ -3,7 +3,7 @@ import {randomUUID} from 'node:crypto';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import type {Group} from '@chm/rules';
+import {displayKind,type Group,type Kind} from '@chm/rules';
 import {initData} from '../helpers.js';
 
 test.use({baseURL:'http://localhost:3100'});
@@ -21,10 +21,10 @@ async function command(page:Page,action:Record<string,unknown>){
   expect(r.status()).toBe(200);return r.json();
 }
 async function inventory(page:Page){return (await(await page.request.get('/api/inventory?scope=work&limit=200')).json()).items as Group[];}
-function group(page:Page,kind='🅾',tier=1,value='10'){return page.getByTestId('work-group').filter({hasText:kind+' '+tier+'.0 · +'+value+'%'});}
+function group(page:Page,kind='🅾',tier=1,value='10'){return page.getByTestId('work-group').filter({hasText:displayKind(kind as Kind)+' '+tier+'.0 · +'+value+'%'});}
 async function seedDemo(page:Page){
   await command(page,{type:'level',value:'200'});
-  for(const [kind,value,quantity] of [['🅾','10','9'],['🅾','11','3'],['🅾','12','3'],['💢','8','12'],['🧿','8','6'],['💚','20','8']])await command(page,{type:'original.put',kind,tier:1,value,quantity});
+  for(const [kind,value,quantity] of [['🅾','10','9'],['🅾','11','3'],['🅾','12','3'],['💢','8','12'],['🧿','8','6'],['💚','20','8']])await command(page,{type:'original.put',kind,tier:1,value,quantity,...(['💢','🧿'].includes(kind!)?{crit:'0'}:{})});
   const groups=await inventory(page);
   await command(page,{type:'equip',items:groups.filter(g=>(g.kind==='🅾'&&g.value==='10')||g.kind==='💢'||g.kind==='🧿').map(g=>({id:g.id,quantity:'1'}))});
   await page.reload();await expect(page.getByTestId('damage')).toHaveText('252');await expect(page.getByTestId('equipped-count')).toHaveText('3 / 100');
@@ -127,7 +127,7 @@ test('loaded filters keep pagination and full equipment outside the first page',
   await page.getByText('Вся экипировка · 2 / 100',{exact:true}).click();
   await page.getByRole('button',{name:'Снять / изменить',exact:true}).click();await page.getByLabel('Надеть экземпляров (0 — снять)',{exact:true}).fill('3');
   await page.getByRole('button',{name:'Применить экипировку',exact:true}).click();await expect(page.getByTestId('equipped-count')).toHaveText('3 / 100');
-  const filters=page.getByLabel('Типы загруженных модов');await filters.getByRole('button',{name:'🅾 Урон',exact:true}).click();
+  const filters=page.getByLabel('Типы загруженных модов');await filters.getByRole('button',{name:'🅾️ Урон',exact:true}).click();
   await expect(page.getByTestId('work-group')).toHaveCount(0);await expect(page.getByText('Модов пока нет',{exact:true})).toHaveCount(0);
   await expect(page.getByText('Среди загруженных групп такого типа нет.',{exact:false})).toBeVisible();
   await page.getByRole('button',{name:'Загрузить ещё группы',exact:true}).click();await expect(page.getByText('Загружено групп: 105',{exact:true})).toBeVisible();

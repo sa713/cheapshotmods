@@ -38,7 +38,7 @@ test('source changes are isolated; reset clears history, equipment and expenses,
     assert.equal(s.group('111','work',id).quantity,'9007199254740993');assert.equal(s.group('111','work',id).value,'9007199254740993');
     assert.throws(()=>s.command('111',{key:randomUUID(),revision:reset.revision,experiment:old.experiment,action:{type:'level',value:'5'}}),/REVISION_CONFLICT/);
     command(s,{type:'original.delete',id});assert.equal(s.inventory('111','work').length,1);command(s,{type:'reset'});
-    assert.deepEqual(s.inventory('111','work'),[]);assert.deepEqual(s.summary('111').stats,{damage:'9007199254740993',health:'9007199254740993'});
+    assert.deepEqual(s.inventory('111','work'),[]);assert.deepEqual(s.summary('111').stats,{damage:'9007199254740993',health:'9007199254740993',crit:'0',critIncomplete:false});
   }finally{s.close();}
 });
 test('failed commands and injected write failure roll back every part of craft',()=>{

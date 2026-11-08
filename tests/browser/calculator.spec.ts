@@ -2,7 +2,7 @@ import {test,expect,type Page,type Locator} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import Database from 'better-sqlite3';
 import {initData} from '../helpers.js';
-import type {Group} from '@chm/rules';
+import {displayKind,type Group,type Kind} from '@chm/rules';
 
 test.use({baseURL:'http://localhost:3100'});
 let sequence=0;
@@ -31,10 +31,11 @@ async function add(page:Page,kind='🅾',tier='1',value='10',quantity='6') {
   await page.getByRole('button',{name:'Добавить моды',exact:true}).click();
   await page.getByRole('combobox',{name:'Тип мода',exact:true}).selectOption(kind);await page.getByRole('combobox',{name:'Уровень мода',exact:true}).selectOption(tier);
   const parameter=page.getByRole(tier==='1'&&kind!=='💚'?'combobox':'textbox',{name:'Параметр мода',exact:true});if(tier==='1'&&kind!=='💚')await parameter.selectOption(value);else await parameter.fill(value);
+  if(['💢','🧿'].includes(kind))await page.getByLabel('Крит мода',{exact:true}).fill('0');
   await page.getByLabel('Количество модов',{exact:true}).fill(quantity);await page.getByRole('button',{name:'Сохранить группу',exact:true}).click();await saved(page);
 }
 async function work(page:Page){await page.getByRole('button',{name:'Эксперимент',exact:true}).click();}
-function group(page:Page,kind='🅾',tier='1',value='10'){return page.getByTestId('work-group').filter({hasText:kind+' '+tier+'.0 · +'+value+'%'});}
+function group(page:Page,kind='🅾',tier='1',value='10'){return page.getByTestId('work-group').filter({hasText:displayKind(kind as Kind)+' '+tier+'.0 · +'+value+'%'});}
 async function equip(page:Page,g:Locator,n:string){await g.getByRole('button',{name:'Примерить / снять',exact:true}).click();await page.getByLabel('Надеть экземпляров (0 — снять)').fill(n);await page.getByRole('button',{name:'Применить экипировку'}).click();await saved(page);}
 async function choose(g:Locator,n=3,worn=false){for(let i=0;i<n;i++)await g.getByRole('button',{name:worn?'В крафт с персонажа':'В крафт',exact:true}).click();}
 async function apply(page:Page){await page.getByRole('button',{name:'Применить крафт',exact:true}).click();await saved(page);}
@@ -57,7 +58,7 @@ for(const width of [360,390])test('S-01–06: mobile craft, equipment, repeated 
   await page.request.post('http://localhost:3101/restart');await page.reload();await saved(page);await expect(page.getByTestId('equipped-count')).toHaveText('1 / 100');
   await page.getByRole('button',{name:/Отменить последний крафт/}).click();await saved(page);await expect(page.getByTestId('equipped-count')).toHaveText('3 / 100');await expect(page.getByLabel('Уровень игрока',{exact:true})).toHaveValue('101');
   await page.getByRole('button',{name:'Исходный набор',exact:true}).click();await expect(page.getByTestId('original-group')).toContainText('Количество: 6');
-  await page.getByTestId('original-group').getByRole('button',{name:'Изменить',exact:true}).click();await page.getByLabel('Количество модов',{exact:true}).fill('9');await page.getByRole('button',{name:'Сохранить группу'}).click();await saved(page);await work(page);await expect(group(page)).toContainText('В наборе: 6');
+  await page.getByTestId('original-group').getByRole('button',{name:'Изменить',exact:true}).click();await page.getByLabel('Количество модов',{exact:true}).fill('9');await page.getByRole('button',{name:'Сохранить группу'}).click();await saved(page);await work(page);await expect(group(page)).toContainText('В наборе: 9');
   await page.getByRole('button',{name:'Сбросить эксперимент',exact:true}).click();await page.getByRole('button',{name:'Не сбрасывать',exact:true}).click();await expect(page.getByTestId('equipped-count')).toHaveText('3 / 100');
   await reset(page);await expect(group(page)).toContainText('В наборе: 9');await expect(page.getByTestId('equipped-count')).toHaveText('0 / 100');await expect(page.getByRole('button',{name:/Отменить последний крафт/})).toBeDisabled();
   await noOverflow(page,width);

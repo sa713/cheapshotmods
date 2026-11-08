@@ -8,14 +8,14 @@ import {randomUUID} from 'node:crypto';
 import {Store} from '../apps/server/src/store.js';
 import {add,choice} from './helpers.js';
 
-test('two worker threads contend on independent SQLite connections and commit exactly once',{timeout:20000},async()=>{
+for(const mode of ['single','batch'])test('two worker threads contend on independent SQLite connections and commit exactly once '+mode,{timeout:20000},async()=>{
   const dir=mkdtempSync(join(tmpdir(),'chm-workers-')),path=join(dir,'db.sqlite'),setup=new Store(path),id=add(setup),initial=setup.summary('111');setup.close();
   const gate=new SharedArrayBuffer(4),workers:Worker[]=[];
   try {
     const results=await new Promise<{ok:boolean;error?:string}[]>((resolve,reject)=>{
       let ready=0;const results:{ok:boolean;error?:string}[]=[];
       for(let i=0;i<2;i++) {
-        const worker=new Worker(new URL('./fixtures/command-worker.mjs',import.meta.url),{workerData:{path,gate,command:{key:randomUUID(),revision:initial.revision,experiment:initial.experiment,action:{type:'craft',items:[choice(id)]}}}});workers.push(worker);
+        const worker=new Worker(new URL('./fixtures/command-worker.mjs',import.meta.url),{workerData:{path,gate,command:{key:randomUUID(),revision:initial.revision,experiment:initial.experiment,action:mode==='single'?{type:'craft',items:[choice(id)]}:{type:'fuse',fuse:{kind:'🅾',targetTier:2,count:'1',items:[choice(id,'6')]}}}}});workers.push(worker);
         worker.on('error',reject);
         worker.on('message',(message:{ready?:boolean;done?:boolean;ok?:boolean;error?:string})=>{
           if(message.ready&&++ready===2){Atomics.store(new Int32Array(gate),0,1);Atomics.notify(new Int32Array(gate),0,2);}

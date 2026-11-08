@@ -12,6 +12,6 @@ export function command(store: Store, action: Record<string,unknown>, owner='111
   const s=store.summary(owner); return store.command(owner,{key:randomUUID(),revision:s.revision,experiment:s.experiment,action});
 }
 export function add(store: Store,quantity='6',kind='🅾',tier=1,value='10',owner='111') {
-  return command(store,{type:'original.put',kind,tier,value,quantity},owner).createdId!;
+  return command(store,{type:'original.put',kind,tier,value,quantity,...(['💢','🧿'].includes(kind)?{crit:'0'}:{})},owner).createdId!;
 }
 export const choice=(id:string,quantity='3',worn='0')=>({id,quantity,worn});

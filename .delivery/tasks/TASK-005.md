@@ -1,6 +1,6 @@
 # TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки
 
-- Статус: **ready**.
+- Статус: **implementing**.
 - Риск: **повышенный** — меняются точные вычисления, идентичность групп, миграция SQLite и история отмены; потеря/дублирование модов недопустимы.
 - Основание: [PRODUCT.md](../../PRODUCT.md#собираемый-патч--2026-11-08), П-01–П-04; владелец завершил сбор фразой «патч собран» 2026-11-08. Обычные решения management явно отделены там от игровых правил владельца.
 - Репозиторий: https://github.com/sa713/cheapshotmods.
@@ -113,3 +113,22 @@ Developer возвращает PR/точный runtime SHA, состав изм�
 - delivery: **pending**.
 - Следующий шаг: developer читает актуальный HEAD ветки задания и реализует TASK-005 целиком; затем отдельный reviewer и management.
 - Последнее подтверждение: 2026-11-08, сообщение владельца «патч собран»; исходная версия и содержание проверены management, реализация ещё не запускалась.
+
+## План developer до реализации — 2026-11-08
+
+Стартовый6ab1fa48a2187d15523a9c7a567f61c73a584862 подтверждён; веткаchm-005-batch-fuse, дерево чистое. Базаbd8108c толькоdocs после runtime6dc. Предыдущиеbranch/комплекты/отзывы не переписываются.
+
+1. Schema4: стабильные внутренниеkind, nullablecrit в DTO (integerthousandthsTEXT, в SQL пустойsentinel дляunknown/noncritical), новый partialworkindex сcrit. Все0/1/2/3→4 шаги — однаouterIMMEDIATEtransaction; старыеreceipts/payload/hashes/created неизменны, revision повышается единожды. Legacycrit беззначения=unknown, не0.
+2. Для отмены и уточнений — компактные **диапазоны физических происхождений** work(origin/start/quantity/born+attrs) иwear(origin/start/quantity). Одинorigin на добавленную группу/итоговыйrun, не на экземпляр. History хранит фактически взятые диапазоны/attrs, originsвыходов иpre-wear. Уточнение меняетattrs части текущих диапазонов, сохраняяorigin; undo удаляетвыходныеorigins независимоот последующегоsplit/merge, возвращаетвходы с сохранённымcrit иresolvesстаруюwear через актуальные диапазоны. Последующиеstockadds имеютдругиеorigins и сохраняются. ТехническийFIFO внутри одинаковогомода детерминирован поborn/start; это не оптимизациястатов.
+3. Legacyhistory: reversecounts даётbaseline до retainedфьюзов, затем forward replay строит виртуальное происхождение и snapshots безвыдумываниякрита. Currentcounts/equipment/цены проверяются; known/unknownатрибуты истории не выводятсяиз совпадений. Доизменениякода сохранён настоящий schema3golden от oldStore6dc, отдельноот имеющегосяschema2golden.
+4. Batchrules: выбранныеqueues поуровням/видимому порядку; рекурсивноизготавливаются только недостающиевходы. Однородныеполные тройки считаютсяBigInt-run, на границе не более2переносимыхэкземпляров; промежуточные идутпосле ready. ≤5переходов, безобъекта/row на каждыйфьюз. Техническиеограниченияpool/plansize применяютсядоизменений и явнообъясняются; количествоresults не игровойлимит. Серверpreview readonly, commit пересчитываетплан внутриrevision/experiment/account/CSRFзащит.
+5. Источник: новыеи положительныесameattrsдельты одновременноwork; убывание/attrs/delete вstarted толькоoriginal. Уточнениеoriginal — отдельнаяоперация (не фиктивныйadd), workcrit отдельнои начинаетэксперимент. Reset — изактуальногоsource. UIсохраняетSites/одиночныйcraft/всеactions, новыеформы/план/крит/значки черезобщийmapper.
+6. Проверки: examples1–15, независимыймалыйoracle/randomdifferential, transaction/receipt/migrationfaults, mixedhistory+refinement+additions, huge10^24/128digits время/память, HTTP/Chromium3widths/пагинация/modal/retry. Затем exactCI/обаDockerstores/newkit, canonicalFBE2 и6dc3 actualupdate/rollback,19a3fixture+applicability, отдельныйreviewer. Ownerhost/BotFather/proxy/main не меняются.
+
+## Авторская реализация — кандидат к CI и независимой проверке
+
+Выполнены schema4, compact batch planner, readonly серверный preview, атомарный commit/undo пакета, origin/range history, положительное пополнение started, split/merge unknown→known crit и единый displayKind. Контракт и технические ограничения описаны в [TASK-005-IMPLEMENTATION](../TASK-005-IMPLEMENTATION.md). Игровые требования, старые fixtures/receipts, отзывы и frozen Sites сохранены.
+
+Самопроверка перед runtime-коммитом: полный `bash scripts/verify.sh` прошёл (58/58 native tests, typecheck/lint/build, genuine better-sqlite3); отдельные Python проверки4/4 ingress и14/14 image proof прошли. Chromium25/25 на реализации прошёл; завершающий прогон на финальной сборке выполняется. Pipeline negative probe прошёл с exit17 против0 безpipefail. Новый measure: preview≈3,07ms/commit≈1,46ms/undo≈1,95ms для10^24 tier3 результатов, heap delta273648bytes,1work_lot/1history/1099bytes plan; Node24.22.1/npm11.9.0, Linuxamd64, Xeon8573C,5vCPU/host18GiB; цифры этой изолированной среды, не SLA Debian владельца.
+
+Предварительная отдельная core-проверка reviewer:5000 small random differential против независимого поэкземплярного oracle, native schema2/3→4/late-fault/receipt/history/refine+add+undo прошли. Это ещё не итоговая приёмка runtime SHA/kit. Замечания о видимости крита одиночных входов и подробностях промежуточных переходов учтены до кандидата. PR, CI, canonical kit и настоящие installer/update/restore/rollback ещё предстоит подтвердить. Владелец/production/liveTelegram не затронуты.

@@ -18,7 +18,7 @@ test('identical crafted mods occupy one work row; each undo removes just one res
     const results=s.inventory('111','work');
     assert.equal(results.length,1);
     assert.equal(second.createdId,first.createdId);
-    assert.deepEqual({...results[0],id:undefined},{id:undefined,kind:'💢',tier:4,value:'27',quantity:'2'});
+    assert.deepEqual({...results[0],id:undefined},{id:undefined,kind:'💢',tier:4,value:'27',quantity:'2',crit:'0'});
     assert.equal(second.spent,'1188');
     assert.equal(s.summary('111').lastCraft!.output.quantity,'1');
     assert.equal(command(s,{type:'undo'}).spent,'594');
@@ -90,8 +90,8 @@ test('real schema2 duplicates/history migrate once; all undo steps, receipts, ow
   const players=before.prepare('SELECT owner,revision,level,experiment,started,spent FROM players ORDER BY owner').all() as {owner:string;revision:string;level:string;experiment:string;started:number;spent:string}[];
   before.close();let s=new Store(path);
   try {
-    assert.equal(s.db.pragma('user_version',{simple:true}),3);
-    assert.deepEqual(s.db.prepare("SELECT * FROM groups WHERE scope='original' ORDER BY owner,id").all(),original);
+    assert.equal(s.db.pragma('user_version',{simple:true}),4);
+    assert.deepEqual(s.db.prepare("SELECT owner,scope,id,kind,tier,value,quantity FROM groups WHERE scope='original' ORDER BY owner,id").all(),original);
     assert.deepEqual(s.db.prepare('SELECT * FROM commands ORDER BY owner,key').all(),receipts);
     for (const p of players) {
       const now=s.player(p.owner);assert.equal(now.revision,(BigInt(p.revision)+1n).toString());
@@ -208,7 +208,7 @@ test('stack identity includes owner, kind, tier and value',()=>{
   try {
     add(s,'2','💢',3,'18');add(s,'3','💢',3,'18');
     add(s,'4','💢',3,'19');add(s,'5','💢',4,'18');add(s,'6','🅾',3,'18');
-    command(s,{type:'original.put',kind:'💢',tier:3,value:'18',quantity:'7'},'222');
+    command(s,{type:'original.put',kind:'💢',tier:3,value:'18',quantity:'7',crit:'0'},'222');
     assert.equal(s.inventory('111','work').length,4);
     assert.equal(s.inventory('111','work').find(g=>g.kind==='💢'&&g.tier===3&&g.value==='18')!.quantity,'5');
     assert.equal(s.inventory('222','work')[0]!.quantity,'7');

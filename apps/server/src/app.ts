@@ -56,6 +56,7 @@ export async function app(store: Store, config: Config, remote?: Transport) {
     const owner=session(req).owner;
     return store.db.transaction(()=>({revision:store.player(owner).revision,items:store.inventory(owner,q.scope as string,q.after as string|undefined,q.limit===undefined?100:Number(q.limit))}))();
   });
+  f.post('/api/fuse-preview',async req=>store.preview(session(req,true).owner,req.body));
   f.post('/api/commands',async req=>store.command(session(req,true).owner,req.body));
   f.post('/auth/logout',async(req,reply)=>{
     const s=session(req,true); store.db.prepare('DELETE FROM sessions WHERE hash=?').run(s.hash);
