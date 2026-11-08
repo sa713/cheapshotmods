@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+data/
+*.sqlite*
+.env
+playwright-report/
+test-results/
+artifacts/
+__pycache__/

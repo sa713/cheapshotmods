@@ -1,0 +1,5 @@
+# Isolated installation test / private local TLS only. Never claims public ACME.
+{$CHM_DOMAIN} {
+	tls internal
+	reverse_proxy app:3000
+}

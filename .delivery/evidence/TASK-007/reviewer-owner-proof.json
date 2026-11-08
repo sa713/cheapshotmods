@@ -1,0 +1,22 @@
+{
+  "reviewer": "independent Codex /root/independent_review_007",
+  "result": "passed",
+  "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "artifact_id": 13631764817,
+  "checks": [
+    "bash syntax",
+    "embedded Python syntax",
+    "inline guide byte equality",
+    "exact artifact/ZIP/tar/source bindings",
+    "all five supported predecessors and external mode guards",
+    "existing credential; no new CLI/key",
+    "backup/metadata/config/separate operator hashes",
+    "immediate paired image+volume rollback; restore caveat documented"
+  ],
+  "executed_on_owner_server": false,
+  "files_sha256": {
+    "TASK-007-update.sh": "8ff27f00b03e43737a51b675c0db0c4e9260498dae44846f0dc7c82550300a13",
+    "TASK-007-rollback.sh": "28a84648be32e30c0e8f5789708adb39cff5d28f0d39ae9c8dd6657867b55b04",
+    "TASK-007-NEXT-STEPS.md": "c912c5d7e11b29f175017770903ca6b48cd35d964faaa02ef425e557a155b8d2"
+  }
+}

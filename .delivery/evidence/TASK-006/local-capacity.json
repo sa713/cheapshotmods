@@ -1,0 +1,49 @@
+{
+  "node": "v24.22.1",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "logicalCpus": 5,
+  "hostMemoryMiB": 18008,
+  "compactHugeBatch": {
+    "rawKind": "raw-green",
+    "targetTier": 6,
+    "steps": 6,
+    "inputUnits": "729000000000000000000000000",
+    "resultCount": "1000000000000000000000000",
+    "price": "40824000000000000000000000000",
+    "previewMs": 1.2688210000000026,
+    "commitMs": 1.7095769999999675,
+    "undoMs": 0.8954390000000103,
+    "heapDeltaBytes": 345936,
+    "physicalWorkLots": 1,
+    "historyRows": 1,
+    "planJsonBytes": 2409
+  },
+  "dataset": {
+    "distinctGroups": 10000,
+    "millionGroup": "1000000",
+    "exactQuantity": "9007199254740993"
+  },
+  "batchSetup": {
+    "groups": 10000,
+    "outerTransaction": true,
+    "elapsedMs": 1182.085004
+  },
+  "sequentialHttp": {
+    "sampleSize": 100,
+    "commitPerRequest": true,
+    "totalMs": 247.13601700000072,
+    "p95Ms": 5.891621000000214
+  },
+  "oversizedInteger": {
+    "digits": 1000000,
+    "rejectMs": 12.798436999999922
+  },
+  "resetMs": 287.9185699999998,
+  "paginatedLoadMs": 25.031723000000056,
+  "tenSameRevisionInjectedRequestsMs": 272.0198949999999,
+  "dbAndWalBytes": 21842208,
+  "rssMiB": 174.9296875,
+  "peakRssMiB": 176.18359375
+}

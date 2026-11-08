@@ -1,0 +1,43 @@
+{
+  "reviewer": "independent Codex /root/independent_review_007",
+  "result": "passed",
+  "artifact_id": 13631764817,
+  "zip_sha256": "225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb",
+  "tar_sha256": "e0fef732af099f91f18810954fb48c1e89b19a44c30c7947828f3250ccd4596b",
+  "execution": "actual isolated Debian13 installer run; managed local Docker29.9.2 vfs; synthetic signed Mini App; unchanged scripts/task007-upgrade/run.sh",
+  "source_run_script_sha256": "b6ca05acfe119fa594606a4a3e1a3055560b56a7924deef73832b3a0f2decfd2",
+  "log_sha256": "8c1e394b5c6f5c08f9229509118e6518143f1aed11653913bb5062ff6cc45de9",
+  "log": "/tmp/chm007-review-canonical.log",
+  "predecessor_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "incoming_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "platform": "Debian13-slim/linux-amd64; Docker29.9.2 vfs; Node24.22.1/better-sqlite3",
+  "old_assets": {
+    "css_sha256": "b190ff09b143c7d035d0e8554f9b2ff1d070221bc79ada65a065ff858a3b40b1",
+    "js_sha256": "f1ec9fbc8e5b022e6b1df2e3e2f008bbff63ff2a206602c4078eeff801c17b07",
+    "sites": true
+  },
+  "new_assets": {
+    "css_sha256": "55a58405a9a72c53a35f1713bc4d453887587002a8df98494fdf366da5df62e5",
+    "js_sha256": "d0bca71644723933a296409980a40f2aa2f75b7570a1fc9ddf9f5cc45429841d",
+    "sites": true
+  },
+  "asset_rollback_exact": true,
+  "old_schema": 5,
+  "new_schema": 5,
+  "separate_new_volume": true,
+  "old_image_schema_compatibility_probe": "accepted_copy5_same_schema",
+  "config_and_separate_operator_unchanged": true,
+  "new_image_restart_backup_restore": "passed",
+  "schema5_byte_exact_state_receipts": "passed",
+  "old_mixed_replay_new_mixed_reject": "passed",
+  "raw_equipment_single_batch_undo": "passed",
+  "all_old_undo_late_stock_reset": "passed",
+  "automatic_max_count_worn": "passed",
+  "rollback_old_image_and_volume_exact_state": "passed",
+  "restart_after_rollback": "passed",
+  "test_data": "isolated synthetic signed Mini App; no owner/live Telegram",
+  "predecessor_artifact_id": 13628229576,
+  "predecessor_tar_sha256": "11b211873794fcb13386ad2d97dce97d23521cb00835dcb466d04a196fb98beb",
+  "predecessor_checksums_verified": 13,
+  "predecessor_packaged_sources_equal_canonical_git": true
+}

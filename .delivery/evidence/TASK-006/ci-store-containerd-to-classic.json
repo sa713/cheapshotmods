@@ -1,0 +1,36 @@
+{
+  "mode": "classic",
+  "server": "29.8.0",
+  "driver": "vfs",
+  "driver_status": null,
+  "images_archive_sha256": "d307b188d9a45aa9c1693158cdf4fe4f5e86df42b0f544f64c33c9da8953a841",
+  "images": {
+    "app": {
+      "native_id": "sha256:d1c419256cd92ce26de08b8b9113dba4bce0024dc0762fb02495b2e13558204f",
+      "config_digest": "sha256:d1c419256cd92ce26de08b8b9113dba4bce0024dc0762fb02495b2e13558204f",
+      "diff_ids": [
+        "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+        "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+        "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+        "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+        "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+        "sha256:9a70d19fd718532212a800c09178a8b09930f2a08ea3eb63a631e09d925e38ae",
+        "sha256:ae449e5e5485b919d54dee211957767b517a2f98e9fa7ff53bb1958b063001e2",
+        "sha256:ff202b4a50564dc419dad6f41af2688d823ccc84215c149dc108eef55da4c541"
+      ],
+      "platform": "linux/amd64"
+    },
+    "proxy": {
+      "native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+      "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+      "diff_ids": [
+        "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+        "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+        "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+        "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+      ],
+      "platform": "linux/amd64"
+    }
+  }
+}

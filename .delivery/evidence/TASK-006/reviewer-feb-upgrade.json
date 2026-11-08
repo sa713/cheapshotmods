@@ -1,0 +1,34 @@
+{
+  "executor": "independent reviewer",
+  "runtime_source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "artifact_id": 13628229576,
+  "proof": {
+    "predecessor_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+    "incoming_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+    "platform": "Debian13-slim/linux-amd64; Docker29.9.2 vfs; Node24.22.1/better-sqlite3",
+    "old_assets": {
+      "css_sha256": "4e74e85e848e7b377545f77421b164994ce96f195850493cd8ef632cb7120b47",
+      "js_sha256": "7067d93ed47135db7596df6a8b3e0900d1c0a8c12d4c1f965b525072d05a991c",
+      "sites": true
+    },
+    "new_assets": {
+      "css_sha256": "b190ff09b143c7d035d0e8554f9b2ff1d070221bc79ada65a065ff858a3b40b1",
+      "js_sha256": "f1ec9fbc8e5b022e6b1df2e3e2f008bbff63ff2a206602c4078eeff801c17b07",
+      "sites": true
+    },
+    "asset_rollback_exact": true,
+    "old_schema": 4,
+    "new_schema": 5,
+    "separate_new_volume": true,
+    "old_image_schema_compatibility_probe": "rejected_copy5",
+    "config_and_separate_operator_unchanged": true,
+    "new_image_restart_backup_restore": "passed",
+    "schema4_byte_exact_state_receipts": "passed",
+    "raw_equipment_single_batch_undo": "passed",
+    "all_old_undo_late_stock_reset": "passed",
+    "rollback_old_image_and_volume_exact_state": "passed",
+    "restart_after_rollback": "passed",
+    "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+  },
+  "source_proof_sha256": "2765adcd7b7fc443a548dd7c99ff9710fb0dad31a54cbef51747841a4bbb056b"
+}

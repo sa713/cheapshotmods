@@ -1,0 +1,57 @@
+{
+  "runtime_source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "run_id": 42507713626,
+  "job_id": 128813868245,
+  "source": "decoded GitHub Actions job log",
+  "capacity_artifact_id": 13628152339,
+  "capacity_artifact_zip_sha256": "0bf6be60c295fc138dd42e80d817889ffface5d293242d052834a5740459c095",
+  "measurement": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpus": 2,
+    "hostMemoryMiB": 7933,
+    "compactHugeBatch": {
+      "rawKind": "raw-green",
+      "targetTier": 6,
+      "steps": 6,
+      "inputUnits": "729000000000000000000000000",
+      "resultCount": "1000000000000000000000000",
+      "price": "40824000000000000000000000000",
+      "previewMs": 1.3148049999999785,
+      "commitMs": 1.9052149999999983,
+      "undoMs": 0.6657409999999686,
+      "heapDeltaBytes": 329256,
+      "physicalWorkLots": 1,
+      "historyRows": 1,
+      "planJsonBytes": 2409
+    },
+    "dataset": {
+      "distinctGroups": 10000,
+      "millionGroup": "1000000",
+      "exactQuantity": "9007199254740993"
+    },
+    "batchSetup": {
+      "groups": 10000,
+      "outerTransaction": true,
+      "elapsedMs": 1320.6478690000001
+    },
+    "sequentialHttp": {
+      "sampleSize": 100,
+      "commitPerRequest": true,
+      "totalMs": 185.61707399999932,
+      "p95Ms": 2.155061999999816
+    },
+    "oversizedInteger": {
+      "digits": 1000000,
+      "rejectMs": 7.480361999999786
+    },
+    "resetMs": 149.91004999999996,
+    "paginatedLoadMs": 9.520845999999892,
+    "tenSameRevisionInjectedRequestsMs": 169.16809899999998,
+    "dbAndWalBytes": 21768216,
+    "rssMiB": 214.3125,
+    "peakRssMiB": 218.25
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "zip_bytes": 131987880,
+  "zip_sha256": "ee1b0eb98d48d46de6ee94e33eda5aa1d4a93e1aa1f23ab7817bfe90e2c521d7",
+  "tar_sha256": "11b211873794fcb13386ad2d97dce97d23521cb00835dcb466d04a196fb98beb",
+  "checksums": 13,
+  "packaged_deploy_sources_match": 11,
+  "images_archive_sha256": "d307b188d9a45aa9c1693158cdf4fe4f5e86df42b0f544f64c33c9da8953a841",
+  "app_config_digest": "sha256:d1c419256cd92ce26de08b8b9113dba4bce0024dc0762fb02495b2e13558204f",
+  "result": "passed"
+}

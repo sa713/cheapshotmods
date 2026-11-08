@@ -1,0 +1,318 @@
+{
+  "reviewer": "independent Codex /root/independent_review_007",
+  "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "result": "passed",
+  "observed_via": "GitHub connector: commit runs; run jobs/steps; decoded job logs",
+  "checks_run": 42516633556,
+  "kit_run": 42516633521,
+  "checks_jobs": [
+    {
+      "id": 128840969387,
+      "name": "container-smoke",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 42516633556,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run bash scripts/container-smoke.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        }
+      ]
+    },
+    {
+      "id": 128840969609,
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 42516633556,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Run npm install --global npm@11.9.0",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Run bash scripts/verify.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Run npx playwright install --with-deps chromium",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Run npm run test:browser",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Run bash scripts/check-measure-pipeline.sh",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Measure capacity",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 23
+        }
+      ]
+    }
+  ],
+  "kit_jobs": [
+    {
+      "id": 128840968927,
+      "name": "debian-kit",
+      "status": "completed",
+      "conclusion": "success",
+      "run_id": 42516633521,
+      "logs_url": null,
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1
+        },
+        {
+          "name": "Validate requested source version",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3
+        },
+        {
+          "name": "Test operator validation and portable proof negatives",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4
+        },
+        {
+          "name": "Build versioned private kit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5
+        },
+        {
+          "name": "Extract kit",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6
+        },
+        {
+          "name": "Test installation on isolated Debian",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7
+        },
+        {
+          "name": "Test external shared ingress on isolated Debian",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8
+        },
+        {
+          "name": "Test canonical schema5 and all supported predecessors on isolated Debian",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9
+        },
+        {
+          "name": "Upload migration evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10
+        },
+        {
+          "name": "Test real classic and containerd stores",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11
+        },
+        {
+          "name": "Upload image-store evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 26
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 27
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 13632645237,
+      "name": "image-stores-f944acb6435a9671cef6db5fc500b79a71d21133",
+      "size_in_bytes": 35358,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13632645237",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13632645237/zip",
+      "expired": false,
+      "created_at": "2026-11-08T20:04:25Z",
+      "expires_at": "2026-12-08T20:04:24Z",
+      "updated_at": "2026-11-08T20:04:25Z",
+      "digest": "sha256:e92028996681bde19e2e174146f444304c9e748b3738ea2d5c10485baab93c4e",
+      "workflow_run": {
+        "id": 42516633521,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-007-batch-max",
+        "head_sha": "f944acb6435a9671cef6db5fc500b79a71d21133"
+      }
+    },
+    {
+      "id": 13631764817,
+      "name": "cheapshotmods-f944acb6435a9671cef6db5fc500b79a71d21133-linux-amd64",
+      "size_in_bytes": 131995030,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13631764817",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13631764817/zip",
+      "expired": false,
+      "created_at": "2026-11-08T20:04:28Z",
+      "expires_at": "2026-12-08T20:04:25Z",
+      "updated_at": "2026-11-08T20:04:28Z",
+      "digest": "sha256:225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb",
+      "workflow_run": {
+        "id": 42516633521,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-007-batch-max",
+        "head_sha": "f944acb6435a9671cef6db5fc500b79a71d21133"
+      }
+    },
+    {
+      "id": 13631708673,
+      "name": "upgrades-f944acb6435a9671cef6db5fc500b79a71d21133",
+      "size_in_bytes": 4422,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13631708673",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13631708673/zip",
+      "expired": false,
+      "created_at": "2026-11-08T19:55:34Z",
+      "expires_at": "2026-12-08T19:55:33Z",
+      "updated_at": "2026-11-08T19:55:34Z",
+      "digest": "sha256:764e9cc8f12f2390285fbb56d38e1e2b876a92f83112316b72bbb1b19128bf9a",
+      "workflow_run": {
+        "id": 42516633521,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-007-batch-max",
+        "head_sha": "f944acb6435a9671cef6db5fc500b79a71d21133"
+      }
+    }
+  ],
+  "store_archive_sha256": "e92028996681bde19e2e174146f444304c9e748b3738ea2d5c10485baab93c4e",
+  "store_portable_proof_matches_exact_kit_manifest": true,
+  "native_ids_differ_by_store": true,
+  "store_summary": {
+    "same_input_archive_sha256": "4898646a91eef2edc1f6e0b7084a1b2b4a5e635bd59491b2797cfa80edae9de0",
+    "containerd_export_sha256": "795d4afae15b8d5325a3a0ae4f97bc81921865f0c4d1bd49f6ec1d0fb7149d2e",
+    "classic_to_containerd": "passed",
+    "containerd_to_fresh_classic": "passed",
+    "format1_to_format2_and_rollback": "passed",
+    "external_install_lifecycle_both_stores": "passed"
+  },
+  "upgrade_archive_sha256": "764e9cc8f12f2390285fbb56d38e1e2b876a92f83112316b72bbb1b19128bf9a",
+  "five_upgrade_routes_reviewed": true
+}

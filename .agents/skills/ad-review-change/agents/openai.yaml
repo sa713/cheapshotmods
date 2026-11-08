@@ -1,0 +1,4 @@
+interface:
+  display_name: "Независимая проверка изменений"
+  short_description: "Проверить требования и конкретную версию изменения"
+  default_prompt: "Используй $ad-review-change для независимой проверки указанного PR."

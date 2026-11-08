@@ -1,0 +1,72 @@
+name: Debian installation kit
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full accepted source SHA to rebuild (same repository)
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+defaults:
+  run:
+    shell: bash
+jobs:
+  debian-kit:
+    runs-on: ubuntu-24.04
+    env:
+      REQUESTED_SHA: ${{ inputs.source_sha || github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Validate requested source version
+        run: '[[ "$REQUESTED_SHA" =~ ^[a-f0-9]{40}$ ]]'
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.REQUESTED_SHA }}
+          fetch-depth: 0 # exact historic installer for schema compatibility fixture
+      - name: Test operator validation and portable proof negatives
+        run: |
+          python3 scripts/test-ingress-config.py
+          python3 scripts/test-image-proof.py
+      - name: Build versioned private kit
+        run: bash scripts/bundle.sh artifacts
+      - name: Extract kit
+        run: |
+          (cd artifacts; sha256sum --check "cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz.sha256")
+          tar -xzf "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64.tar.gz" -C artifacts
+      - name: Test installation on isolated Debian
+        run: bash scripts/test-install.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
+      - name: Test external shared ingress on isolated Debian
+        run: bash scripts/test-external.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
+      - name: Test canonical schema5 and all supported predecessors on isolated Debian
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/test-task007-upgrades.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/upgrades
+      - name: Upload migration evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: upgrades-${{ env.REQUESTED_SHA }}
+          path: artifacts/upgrades
+          if-no-files-found: error
+          retention-days: 30
+      - name: Test real classic and containerd stores
+        run: bash scripts/test-image-stores.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/image-stores
+      - name: Upload image-store evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: image-stores-${{ env.REQUESTED_SHA }}
+          path: artifacts/image-stores
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64
+          path: |
+            artifacts/cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64.tar.gz
+            artifacts/cheapshotmods-${{ env.REQUESTED_SHA }}-linux-amd64.tar.gz.sha256
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0

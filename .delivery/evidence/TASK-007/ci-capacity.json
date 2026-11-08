@@ -1,0 +1,68 @@
+{
+  "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "executor": "GitHub Actions verify job",
+  "run_id": 42516633556,
+  "job_id": 128840969609,
+  "run_url": "https://github.com/sa713/cheapshotmods/actions/runs/42516633556",
+  "native_pass": 80,
+  "browser_pass": 38,
+  "metrics": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpus": 2,
+    "hostMemoryMiB": 7933,
+    "compactHugeBatch": {
+      "maxCount": "1000000000000000000000000",
+      "inputPerResult": "729",
+      "rawKind": "raw-green",
+      "targetTier": 6,
+      "steps": 6,
+      "inputUnits": "729000000000000000000000000",
+      "resultCount": "1000000000000000000000000",
+      "price": "40824000000000000000000000000",
+      "previewMs": 1.2887949999999933,
+      "commitMs": 1.8495510000000195,
+      "undoMs": 0.731743999999992,
+      "heapDeltaBytes": 362112,
+      "physicalWorkLots": 1,
+      "historyRows": 1,
+      "planJsonBytes": 2795
+    },
+    "derivedMaximum": {
+      "inputDigits": 128,
+      "additions": 4,
+      "maxDigits": 129,
+      "maxCount": "133333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333332",
+      "previewCommitUndoMs": 1.828439000000003,
+      "planJsonBytes": 2504
+    },
+    "dataset": {
+      "distinctGroups": 10000,
+      "millionGroup": "1000000",
+      "exactQuantity": "9007199254740993"
+    },
+    "batchSetup": {
+      "groups": 10000,
+      "outerTransaction": true,
+      "elapsedMs": 1045.326639
+    },
+    "sequentialHttp": {
+      "sampleSize": 100,
+      "commitPerRequest": true,
+      "totalMs": 175.09602600000085,
+      "p95Ms": 2.321320999999898
+    },
+    "oversizedInteger": {
+      "digits": 1000000,
+      "rejectMs": 7.306150000000116
+    },
+    "resetMs": 153.376489,
+    "paginatedLoadMs": 10.924117999999908,
+    "tenSameRevisionInjectedRequestsMs": 184.97121700000002,
+    "dbAndWalBytes": 21813416,
+    "rssMiB": 217.51171875,
+    "peakRssMiB": 217.65234375
+  }
+}
