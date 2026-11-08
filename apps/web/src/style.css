@@ -1968,7 +1968,7 @@ input {
 .mod-icon.raw-icon {padding:0; overflow:hidden; background:transparent; border:0; flex-shrink:0}
 .raw-icon svg {display:block; width:100%; height:100%}
 .type-option {min-width:0}
-.filters .mod-icon {width:24px; height:24px; font-size:20px; border-radius:6px}
+.filters .mod-icon {flex:0 0 24px; width:24px; height:24px; font-size:20px; border-radius:6px}
 .fusion-slot .mod-icon {width:40px; height:40px; margin:auto}
 
 .filters>button>.mod-icon {display:inline-flex}

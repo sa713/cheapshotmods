@@ -6,7 +6,6 @@ evidence="$(realpath -m "$3")"
 mkdir -p "$evidence"
 fixture_dir="$(cd "$(dirname "$0")" && pwd -P)"
 old="$(realpath "$2")"
-cp "$fixture_dir/../../tests/fixtures/v4-raw-history.json" "$work/schema4.json"
 work="$(mktemp -d /tmp/chm-task006-upgrade-XXXXXX)"
 host="chm-task006-upgrade-$(openssl rand -hex 5)"
 project="chm-$(printf '%s' "$work/install" | sha256sum | cut -c1-12)"
@@ -26,6 +25,7 @@ cleanup() {
   return "$status"
 }
 trap cleanup EXIT
+cp "$fixture_dir/../../tests/fixtures/v4-raw-history.json" "$work/schema4.json"
 cli="$(command -v docker)"
 plugin="$(docker info --format '{{range .ClientInfo.Plugins}}{{if eq .Name "compose"}}{{.Path}}{{end}}{{end}}')"
 mounts=(--mount "type=bind,source=$work,target=$work" --mount "type=bind,source=$bundle,target=$bundle,readonly" --mount "type=bind,source=$old,target=$old,readonly" --mount type=bind,source=$fixture_dir,target=/fixtures,readonly --mount "type=bind,source=$cli,target=/usr/local/bin/docker,readonly" --mount "type=bind,source=$plugin,target=/usr/libexec/docker/cli-plugins/docker-compose,readonly" --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock)
