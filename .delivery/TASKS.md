@@ -13,7 +13,7 @@
 
 6. [TASK-006 — сырьевые моды, экипировка и крафт в1.0](tasks/TASK-006.md): **review**, [PR7](https://github.com/sa713/cheapshotmods/pull/7). Три вида, single/batch до6.0 и schema5 реализованы; native70/browser29/все3CI jobs/четыре predecessor installer routes/both stores прошли, отдельное code/UI/kit review завершено. [Immutable kit и owner-команды](TASK-006-NEXT-STEPS.md). Установка и продуктовое принятие владельцем pending.
 
-7. [TASK-007 — одинаковые моды и автоматический максимум массового фьюза](tasks/TASK-007.md): **implementing**. Новый single-source mass contract/UI и legacy replay/undo реализованы; идут проверки, отдельная приёмка и новый private Debian kit. Установка владельцем и продуктовое принятие pending.
+7. [TASK-007 — одинаковые моды и автоматический максимум массового фьюза](tasks/TASK-007.md): **review**, [PR8](https://github.com/sa713/cheapshotmods/pull/8). Runtime f944acb6,80native/38browser/все3CI jobs/пять predecessor routes/обе stores/reverse прошли; отдельный reviewer accepted exact artifact13631764817, самостоятельно повторил canonical TASK-0065→new5 lifecycle и проверил30compiled-files. [Доказательства](TASK-007-VALIDATION.md), [owner-команды](TASK-007-NEXT-STEPS.md). Установка владельцем и product acceptance/delivery pending.
 
 Предыдущее [исправление группировки одинаковых модов](tasks/TASK-004-mod-stacks.md): **review**, PR4. Исторически developer также назвал его TASK004; карточка сохранена отдельно из-за коллизии с management-заданием дизайна. Immutable19a6fdd kit, прежние review/команды не изменены; установка владельцем пока не подтверждена.
 

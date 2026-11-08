@@ -1,6 +1,6 @@
 # TASK-007 — массовый фьюз одинаковых модов с автоматическим максимумом
 
-- Статус: **implementing**.
+- Статус: **review**.
 - Риск: **повышенный** — меняется серверный контракт массового крафта и UI расчёта; важны точные количества/алмазы, атомарность, совместимость прежней истории/receipt.
 - Основание: [новый раздел PRODUCT](../../PRODUCT.md#исправление-массового-фьюза--2026-11-08), прямое поручение владельца2026-11-08.
 - База: `chm-006-raw-mods`, **50119c83c4ce24fe8338acaa9740aadbfd2289a2**, [PR7](https://github.com/sa713/cheapshotmods/pull/7). Runtime/kit предыдущего кандидата — `d6cb0e9404f07b5573b64131281d29569a010442`; последующий HEAD передачи меняет только delivery.
@@ -106,7 +106,7 @@ Management проверил актуальный код чтением; функ
 
 - product_acceptance: **pending**.
 - delivery: **pending**.
-- Следующий исполнитель: отдельный Codex developer, затем независимый reviewer и management.
+- Следующий исполнитель: management принимает передачу кандидата, владелец выполняет установку и живые проверки.
 - Последнее подтверждение:2026-11-08, прямое поручение владельца исправить массовый сценарий и ограничить его полностью одинаковыми модами. Повторный сбор/«патч собран» не требуется.
 
 ## План developer — 2026-11-08
@@ -116,4 +116,17 @@ Management проверил актуальный код чтением; функ
 UI автоматически запрашивает preview, по умолчанию ставит максимум, позволяет снизить разрешённые входы/результаты и явно включить worn; request generation защищает от старых ответов. Commit фиксирует показанные count/quantity/revision, retry сохраняет тот же payload/key. Обновляются изменившиеся mixed-creation assertions, но настоящие старые mixed fixtures и их replay/undo сохраняются. После author checks — отдельный reviewer, exact-SHA CI и новый immutable kit с canonical TASK-006/schema5 и прежними installer routes.
 
 
-Самопроверка первого кандидата: `bash scripts/verify.sh` —80 native, typecheck/lint/build; полный Chromium —38/38, включая быстрые смены с обратным порядком ответов, 129-значный count, max0, clamp, старый mixed replay и потерю ответа максимального пакета после reload. Native fixture создан неизменённым TASK-006 source d6cb0e9 и содержит также unknown-crit mixed receipt с уже отсутствующими consumed IDs. Старые mixed-creation assertions заменены на homogeneous либо явный отказ; прежний компактный планировщик переиспользован под single-source gate, а старые mixed unit-примеры сохраняют историческую арифметику. History/receipts/schema5/undo не мигрируют. Новые правила доставки вынесены в task007-upgrade, старые task006 scripts сохранены; добавлен пятый canonical schema5 route. Final CI/kit и отдельная приёмка ещё выполняются.
+Самопроверка первого кандидата: `bash scripts/verify.sh` —80 native, typecheck/lint/build; полный Chromium —38/38, включая быстрые смены с обратным порядком ответов, 129-значный count, max0, clamp, старый mixed replay и потерю ответа максимального пакета после reload. Native fixture создан неизменённым TASK-006 source d6cb0e9 и содержит также unknown-crit mixed receipt с уже отсутствующими consumed IDs. Старые mixed-creation assertions заменены на homogeneous либо явный отказ; прежний компактный планировщик переиспользован под single-source gate, а старые mixed unit-примеры сохраняют историческую арифметику. History/receipts/schema5/undo не мигрируют. Новые правила доставки вынесены в task007-upgrade, старые task006 scripts сохранены; добавлен пятый canonical schema5 route. Итог exact CI/kit и отдельной приёмки приведён ниже.
+
+
+## Передача developer — 2026-11-08
+
+Задание выполнено в области проверенного устанавливаемого кандидата. [PR8](https://github.com/sa713/cheapshotmods/pull/8): `chm-007-batch-max` → `chm-006-raw-mods`. Стартовый HEAD подтверждён **5b2e23be7848463d2ac458079453a46ee30b4bd7**; runtime/CI/kit **f944acb6435a9671cef6db5fc500b79a71d21133**. Новый single-source DTO и автоматический максимум, явное worn/cap/count, clamp/invalid input/async generation/409/retry реализованы; сервер рассчитывает и атомарно проверяет план. Новые mixed mass команды отвергаются; старые exact receipts, история и undo сохраняются без миграции schema5. Прежний single и ordinary/raw правила сохранены.
+
+Автор:80native/typecheck/lint/build,38Chromium360/390/1440, capacity/negative pipeline/14image-proof/4ingress. Exact checks42516633556 и Debian kit42516633521 success, все обязательные jobs/steps. Canonical TASK-0065, TASK-0054, FBE2,19a3,6dc3→new5 actual isolated Debian update/restart/backup/restore/paired rollback прошли; новые операции/старые mixed receipts/undo проверены. Format2 и реальные classic/containerd/reverse export подтверждены на одном archive.
+
+[Независимый reviewer](../reviews/TASK-007-review.md) accepted exact runtime/kit после собственных80native/38browser/oracle2102/трёх fresh legacy histories, archive/checksums/sources/30compiled-files и actual canonical TASK-0065→new5 installer lifecycle. Самопроверка автора этим review не подменяется. Подтверждённых дефектов не найдено.
+
+Immutable artifact **13631764817**, expires **2026-12-08T20:04:25Z**, ZIP SHA256 `225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb`, tar SHA256 `e0fef732af099f91f18810954fb48c1e89b19a44c30c7947828f3250ccd4596b`. [Полные доказательства](../TASK-007-VALIDATION.md), [паспорт kit](../evidence/TASK-007/kit.json), [готовые root/curl update/check/rollback](../TASK-007-NEXT-STEPS.md).
+
+Последующий handoff commit меняет только `.delivery` (документы/evidence/review/owner scripts), помечен `[skip ci]`; executable source/tests/build/installer/workflows/lockfile совпадают с runtime. Реальную установку выполняет владелец; main/сервер/proxy/BotFather не менялись. Следующий шаг management — принять передачу; затем владелец обновляет сервис и проверяет живые Telegram/телефон. Product acceptance и delivery остаются **pending**. Откат возвращает прежнюю image+volume пару, записи после update сохраняются в новом volume.

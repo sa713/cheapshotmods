@@ -212,4 +212,6 @@ Source6dc8021e58daa9aa16a93a9265315bb810fe9d0a: все41native/20browser/contain
 
 ## Массовый максимум (TASK-007)
 
+[Команды владельцу и immutable kit](TASK-007-NEXT-STEPS.md), [проверки и ограничения](TASK-007-VALIDATION.md), [отдельное ревью](reviews/TASK-007-review.md). PR8 направлен в chm-006-raw-mods; runtime source f944acb6435a9671cef6db5fc500b79a71d21133. Пять поддержанных predecessors включают canonical TASK-006/schema5; rollback всегда возвращает прежнюю пару image+volume. Новый source не установлен на реальном сервере developer.
+
 Новые массовые операции используют одну work группу: `{id,targetTier,includeWorn,quantity?,count?}`. Без count preview выбирает максимум floor(Q/3^(t−s)); quantity необязательно ограничивает разрешённый запас. Сервер читает реальные атрибуты/экипировку, неизвестный crit требует уточнения. Count/quantity имеют технический предел256цифр, позволяющий производный максимум свыше128; новые исходные записи сохраняют прежний предел128. Schema5 и ledger не меняются. Legacy DTO синтаксически читается до receipt lookup: старый exact mixed replay/expired receipt обрабатывается прежним способом, а новый mixed ключ отвергается. Старые mixed/single undo и поздние пополнения сохраняются. UI commit фиксирует показанные count/quantity/revision, потерянный ответ повторяется тем же payload/key.

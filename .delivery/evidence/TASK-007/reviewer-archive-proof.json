@@ -1,0 +1,77 @@
+{
+  "reviewer": "independent Codex /root/independent_review_007",
+  "result": "passed",
+  "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "artifact_id": 13631764817,
+  "artifact_url": "https://github.com/sa713/cheapshotmods/actions/runs/42516633521/artifacts/13631764817",
+  "expires_at": "2026-12-08T20:04:25Z",
+  "zip_bytes": 131995030,
+  "zip_sha256": "225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb",
+  "tar_sha256": "e0fef732af099f91f18810954fb48c1e89b19a44c30c7947828f3250ccd4596b",
+  "zip_members_checked": 2,
+  "tar_files_checked": 14,
+  "sha256sum_files_checked": 13,
+  "packaged_sources_byte_equal_to_exact_git_source": [
+    "chm.sh",
+    "compose.yml",
+    "compose.external.yml",
+    "ingress.py",
+    "image-proof.py",
+    "Caddyfile",
+    "Caddyfile.internal",
+    "env.example",
+    "env.external.example",
+    "README.md",
+    "EXTERNAL-PROXY.md"
+  ],
+  "archive_proof": "Archive config SHA-256 and ordered layer SHA-256 verified (format 2).",
+  "manifest": {
+    "format": 2,
+    "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+    "platform": "linux/amd64",
+    "app_image": "cheapshotmods:f944acb6435a9671cef6db5fc500b79a71d21133",
+    "proxy_image": "caddy:2.10.2-alpine",
+    "builder_observations": {
+      "app_native_id": "sha256:0a8ed0d05e0eee7c480c9f09a05016aed11276ed522fc56f48df91be8d2cc8e8",
+      "proxy_native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510"
+    },
+    "proxy_manifest_digest": "caddy@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "base_images": [
+      "node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea",
+      "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    ],
+    "image_bytes": 350798336,
+    "external_proxy_source": "existing running image; tested Caddy 2.11.4; daemon-local image ID captured in private operator plan",
+    "image_proofs": {
+      "app": {
+        "config_digest": "sha256:0a8ed0d05e0eee7c480c9f09a05016aed11276ed522fc56f48df91be8d2cc8e8",
+        "diff_ids": [
+          "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+          "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+          "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+          "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+          "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+          "sha256:899d105c5f9d1237498d66ae3318f2c537295af3ea337c29bae1b057ea706c72",
+          "sha256:9fdb3fc4c86c18172a658c9f895071011915f400ce576683b28a2ca78d6f3c73",
+          "sha256:eaa30ef7af58487a974e6f01965648ec0ba73f2aab4b10ba20b6868f57da25b2"
+        ],
+        "platform": "linux/amd64",
+        "revision": "f944acb6435a9671cef6db5fc500b79a71d21133"
+      },
+      "proxy": {
+        "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "diff_ids": [
+          "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+          "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+          "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+          "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ],
+        "platform": "linux/amd64",
+        "revision": null
+      }
+    }
+  }
+}

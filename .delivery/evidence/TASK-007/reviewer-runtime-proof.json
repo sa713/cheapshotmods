@@ -1,0 +1,83 @@
+{
+  "reviewer": "independent Codex /root/independent_review_007",
+  "date": "2026-11-08",
+  "runtime_source": "f944acb6435a9671cef6db5fc500b79a71d21133",
+  "base": "5b2e23be7848463d2ac458079453a46ee30b4bd7",
+  "runtime_result": "accepted",
+  "full_installable_candidate": {
+    "result": "accepted",
+    "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+    "artifact_id": 13631764817,
+    "zip_sha256": "225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb",
+    "tar_sha256": "e0fef732af099f91f18810954fb48c1e89b19a44c30c7947828f3250ccd4596b",
+    "evidence": {
+      "archive": "reviewer-archive-proof.json",
+      "compiled": "reviewer-compiled-proof.json",
+      "lifecycle": "reviewer-lifecycle-proof.json",
+      "ci": "reviewer-ci-proof.json",
+      "owner_scripts": "reviewer-owner-proof.json"
+    }
+  },
+  "source_blobs_match": true,
+  "runtime_files": {
+    "apps/server/src/app.ts": "6158ed3fb747df6614483f75d1dd2d2b8d39fa01553003c1a9a1319243f09d8e",
+    "apps/server/src/auth.ts": "43f4faf5f71d8b89bd724dd41291e4ef23afaa40711dc2114abc0c725b65574a",
+    "apps/server/src/backup-file.ts": "e6adec9744ddcbe8b0b74c624c85e59ce2cb4305f6a58ed829059b427140ae1d",
+    "apps/server/src/backup.ts": "01080700306ca34187807c570412369559dcfa63a3c8cd982179e037c1901a44",
+    "apps/server/src/crit-migration.ts": "ec8864bb5e1c700902b23c8baaed26bac45ee6135dc65a29df3eaa467f7f61c2",
+    "apps/server/src/database-path.ts": "c4e7d436198f82b83df66fb3ba31dee9ecb87b408067768771d6614542935aac",
+    "apps/server/src/login-limiter.ts": "eb6fbfb343d41e37583c2e7bd680d3ed0a8d3775e2b3b690fc818f4acc7c767f",
+    "apps/server/src/lots.ts": "cb97eb348c659d46da27ac3745a191d2ea70ef8d9b50d4f56c65406f977ef12e",
+    "apps/server/src/main.ts": "e1acc9c2364249b0834b03f5ef971c85dbbf6457d3d3c9d3675c0310ada03206",
+    "apps/server/src/mod-stacks.ts": "e86e45cd755d7a0a9a61905b67e9c75ad4ad7d801b807ba1d127cb9ec25f4407",
+    "apps/server/src/store.ts": "f65d3171cf2b531f2a176cb16eff6b42e20b1a598a68892a4c0d143ba39f46a2",
+    "apps/web/src/batch.tsx": "1009da9ca88ee61e48e8a22e660d2c5466c9cb7e089e297d81bd429f23df904a",
+    "apps/web/src/main.tsx": "87434bba7176198cf0733161d60972a4abfc610c4f52114e08da2488e403bfef",
+    "apps/web/src/presentation.tsx": "fd61050e683a67a5c2ea2d3947b814a63b7478d9a7d695f19c59d170aad25c8b",
+    "apps/web/src/style.css": "c774e25464c9ae09cf86bcc4eaecfae8da4aa59f11f89659cb680b866a0d9849",
+    "packages/rules/src/batch.ts": "77842f3dc5436208bf5fdca53b3fe0a3b7b45f58adc9a41f447a621f8fdc840f",
+    "packages/rules/src/index.ts": "a0782dcdd63372db1fa4985c1fc0bdcbf8275c0eeaa5fb7b80c25554305573ed"
+  },
+  "legacy_canonical_source": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "legacy_source_blobs_match": true,
+  "legacy_source_file_count": 17,
+  "checks": {
+    "verify": {
+      "result": "passed",
+      "native": 80,
+      "typecheck": true,
+      "lint": true,
+      "build": true,
+      "log": "/tmp/chm007-review-verify.log"
+    },
+    "browser": {
+      "result": "passed",
+      "count": 38,
+      "viewports": [
+        360,
+        390,
+        1440
+      ],
+      "log": "/tmp/chm007-review-browser.log"
+    },
+    "oracle": {
+      "status": "passed",
+      "cases": 2102,
+      "method": "physical independent triple oracle, literal game prices, floor/ceil per step; large BigInt derivatives"
+    },
+    "legacy": {
+      "status": "passed",
+      "canonical_source": "d6cb0e9404f07b5573b64131281d29569a010442",
+      "cases": 3,
+      "checks": "fresh mixed different values/crits/raw+ordinary; consumed IDs absent; exact receipt replay; mixed new-key refuse; KEY_REUSED; owner isolation; expired/hash; new+old undo; worn/level/late merged stock"
+    }
+  },
+  "diagnostic_sha256": {
+    "/tmp/chm007-independent-oracle.mjs": "f65f05992ed839e409c7d983cf06df59b489a3d089c6e444fa78f1f8a6304a9b",
+    "/tmp/chm007-independent-legacy.mjs": "85718357e67b9bb2ad804a198abd1c43d50340b5bc53d40c8444b74890b6a81f",
+    "/tmp/chm007-review-verify.log": "eed44d183bcff5c5da4e07d1956f3f1139dcbb894363232ca49ab90baa1d64be",
+    "/tmp/chm007-review-browser.log": "375636e0682b8d04b25a1506d6d11ea2c34fb8109568d36ee65b0f78f0ab81e3",
+    "/tmp/chm007-review-oracle.log": "a214a89816c766add992aa7364038c327c7c0aab45e39ca831ed5bcea2631233",
+    "/tmp/chm007-review-legacy.log": "8e27c0084187d0e1546b2dab7cb0a39ea49ca713fe30be84b1b250cd6130ecfe"
+  }
+}
