@@ -1978,3 +1978,12 @@ input {
 .checkbox-control {display:flex; flex-direction:row; align-items:center; gap:12px; margin:16px 0}
 .checkbox-control input {width:44px; height:44px; flex:0 0 44px; accent-color:var(--lime)}
 .batch-maximum {font-size:20px; margin:20px 0 10px}
+
+
+.baseline-card { order: 4; width: 100%; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+.baseline-card h2 { margin: 0 0 12px; font-size: 18px; }
+.baseline-card p { overflow-wrap: anywhere; }
+.baseline-card #baseline-status > span { display: block; margin-bottom: 8px; }
+.baseline-card button { width: 100%; white-space: normal; }
+.reset-actions { order: 5; width: 100%; display: grid; gap: 12px; }
+.reset-actions .reset-button { width: 100%; height: auto; min-height: 44px; white-space: normal; text-align: left; }

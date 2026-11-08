@@ -1,6 +1,6 @@
 # TASK-008 — фиксация исходного набора и возврат к нему
 
-- Статус: **ready**.
+- Статус: **implementing**.
 - Риск: повышенный — новый постоянный снимок и восстановление пользовательских данных.
 - Основание: [PRODUCT](../../PRODUCT.md#зафиксированный-исходный-набор--2026-11-09), поручение владельца от 2026-11-09.
 - Репозиторий: sa713/cheapshotmods.
@@ -94,3 +94,19 @@ Management после независимой приёмки и применим�
 - delivery: **pending**.
 - Следующий исполнитель: Codex developer, затем отдельный reviewer и management.
 - Последнее подтверждение:2026-11-09, прямой запрос владельца на фиксацию и отдельный возврат. Открытых игровых вопросов нет; реализация и новые CI/review/kit ещё не выполнялись.
+
+
+## План developer
+
+Стартовый HEAD260d370638b2ea5bdd826614108078e85e60b10e подтверждён, дерево чистое. Изолированная последовательность20🅾1.0→mass3.0→reset на исходном коде не воспроизвела буквального продвижения результатов в original: original20 неизменен, work2+2/расход1008, reset возвращает20/расход0. Это не диагностика сервера владельца; regression и новый отдельный снимок нужны по контракту. [Исходный proof](../evidence/TASK-008/before.json).
+
+Schema6 добавляет owner metadata `baselines` и независимые строки `baseline_groups`, сохраняя ID отдельных original-записей и точный crit/TEXT. Старые данные не копируются автоматически, существующие таблицы не переписываются. `baseline.capture` с явным replace permission копирует весь original внутри immediate transaction, меняя только snapshot metadata/revision. `baseline.restore` атомарно восстанавливает original, перегруппировывает work/lots, очищает history/spent/equipment и меняет experiment; level/snapshot/receipts остаются. Новые действия идут через прежний command receipt контур; старые завершённые receipts возвращаются до новых semantic checks.
+
+State добавляет nullable metadata снимка (время/число модов/исходных записей); UI сохраняет работу при старом shape state, показывает статус, первую фиксацию/подтверждение замены и отдельный подтверждаемый полный возврат рядом с прежним reset. Далее native HTTP/SQLite/fault/concurrency/миграции/backup и Chromium360/390/1440, прежние capacity/guards, actual canonical TASK-0075→new6 + все прежние installer routes, exact CI/kit и независимый reviewer. PR вmain передаётся management для разрешённой интеграции; сервер обновляет владелец.
+
+
+Авторская самопроверка первого кандидата: `bash scripts/verify.sh` —96native/typecheck/lint/build; полный Chromium —47/47 (новые9 + прежние38), настоящий HTTP/SQLite360/390/1440. Контрольные14image-proof/4ingress/negative pipeline проходят. Capacity: capture/restore10002 записей с точным количеством9007199255750993, ~36/289мс локально,10002lots вместо объекта на каждый экземпляр. Baseline/API/worker/fault/backup tests покрывают критерии1–10, browser —11–12. Screenshot360 просмотрен; обе кнопки сброса рядом, полные подписи и44px targets без overflow.
+
+Изменения старых проверок ограничены новой ожидаемой schema6, nullable metadata в новом state и явным ожиданием пустых новых таблиц: старые rows/receipts/history fixtures не удалялись. Настоящие старые receipts возвращаются в прежнем JSON shape, UI после команды читает current state и допускает отсутствие нового поля.
+
+Новые installer сценарии вынесены в `task008-upgrade`, старые task007 scripts сохранены. Bundle workflow выбирает новый helper с canonical TASK-007/f944 и всеми пятью прежними immutable predecessors, schema6 rejection старым binary, snapshotA/эксперимент/two resets/restart/backup/restore/paired rollback. Перед actual installer новые API-фазы4/5→6 проверены на локальном HTTP/SQLite; это не выдаётся за Debian installer run. CI/kit/независимое review ещё готовятся.

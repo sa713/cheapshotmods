@@ -1,0 +1,71 @@
+{
+  "source_sha": "260d370638b2ea5bdd826614108078e85e60b10e",
+  "executor": "developer, isolated SQLite memory, before implementation",
+  "literal_fuse_output_in_original_reproduced": false,
+  "initial": [
+    {
+      "id": "9f7c7c93-2911-4073-b7a4-5958f9148b7b",
+      "kind": "🅾",
+      "tier": 1,
+      "value": "10",
+      "quantity": "20",
+      "crit": null
+    }
+  ],
+  "fused": {
+    "original": [
+      {
+        "id": "9f7c7c93-2911-4073-b7a4-5958f9148b7b",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "20",
+        "crit": null
+      }
+    ],
+    "work": [
+      {
+        "id": "9f7c7c93-2911-4073-b7a4-5958f9148b7b",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "2",
+        "crit": null
+      },
+      {
+        "id": "edb5fc7b-321d-42f3-9738-93f11e0c520c",
+        "kind": "🅾",
+        "tier": 3,
+        "value": "23",
+        "quantity": "2",
+        "crit": null
+      }
+    ],
+    "spent": "1008"
+  },
+  "reset": {
+    "original": [
+      {
+        "id": "9f7c7c93-2911-4073-b7a4-5958f9148b7b",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "20",
+        "crit": null
+      }
+    ],
+    "work": [
+      {
+        "id": "9f7c7c93-2911-4073-b7a4-5958f9148b7b",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "20",
+        "crit": null
+      }
+    ],
+    "spent": "0",
+    "lastCraft": null
+  },
+  "conclusion": "Single-source mass changes work only. Reset restores current editable original; no persistent separate baseline exists."
+}
