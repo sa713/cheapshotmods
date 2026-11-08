@@ -2,7 +2,7 @@
 
 ## Текущая подготовка — 2026-11-09
 
-[TASK-008](tasks/TASK-008.md) **implementing**: schema6, постоянная независимая копия всего original и отдельный полный возврат реализованы; обычный reset сохранён. Авторские96native/47Chromium, fault/concurrency/migration/backup, capacity/guards проходят. Готовятся PR вmain, exact CI/новый immutable kit с шестью predecessor routes и отдельный reviewer. Интеграцию после приёмки завершает management; реальный Debian/рабочие данные developer не меняет.
+[TASK-008](tasks/TASK-008.md) **review**: [PR9](https://github.com/sa713/cheapshotmods/pull/9) вmain, проверенный runtime **0f2cd90c5b672d67409c2687e4e90a8ce9797482**, schema6. Постоянный независимый снимок всего original и отдельный полный возврат реализованы; обычный reset сохранён.96native/47Chromium, все обязательные exact CI, шесть Debian predecessor routes и реальные classic/containerd/reverse прошли. Отдельная [техническая приёмка accepted](reviews/TASK-008-review.md) exact artifact13637904971, включая собственные96/47/SQL+HTTP probes/30compiled files и actual TASK0075→new6 lifecycle. [Доказательства](TASK-008-VALIDATION.md), [готовый kit/owner-команды](TASK-008-NEXT-STEPS.md). Следующий шаг management — принять передачу и завершить разрешённую интеграцию вmain с применимыми проверками; сервер/рабочие данные обновляет владелец. Main merge, реальный Debian, живые Telegram/телефон/product acceptance/delivery этим developer handoff не заявляются.
 
 ## Актуальное решение — 2026-11-08
 

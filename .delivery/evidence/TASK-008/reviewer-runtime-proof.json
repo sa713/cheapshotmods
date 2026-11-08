@@ -1,0 +1,147 @@
+{
+  "reviewer": "independent_review_008",
+  "source": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "runtime_verdict": "accepted",
+  "installable_candidate_verdict": "accepted",
+  "native": {
+    "command": "bash scripts/verify.sh",
+    "passed": 96,
+    "failed": 0,
+    "typecheck": "passed",
+    "lint": "passed",
+    "production_build": "passed",
+    "sandbox_initial_attempt": "esbuild spawn denied; approved escalation passed"
+  },
+  "chromium": {
+    "command": "npm run test:browser",
+    "passed": 47,
+    "failed": 0,
+    "duration": "2.9m",
+    "viewports": [
+      360,
+      390,
+      1440
+    ],
+    "visual_inspection": "all three baseline-return screenshots inspected; no overflow or clipped labels; 44px controls automated"
+  },
+  "independent_diagnostic": {
+    "source": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+    "reviewer": "independent_review_008",
+    "node": "v24.22.1",
+    "directory": "/tmp/task008-review-probe-4X6aJj",
+    "result": "passed",
+    "sourceRows": 146,
+    "checks": [
+      "all 146 source rows, duplicate source IDs, all pages, 128-digit quantity/value, raw and unknown/zero crit copied exactly; active tables unchanged",
+      "ordinary reset retains edited source; repeated full restore keeps source rows and grouped exact quantities; stale experiment and capture/restore receipt replay preserve later data",
+      "six independent SQLite RAISE(ABORT) failures at snapshot copy, original copy, lots delete, player write and receipt writes roll back every table",
+      "real online backup contains exact snapshot and state; restart/full return preserves consistent backup checkpoint",
+      "independently loaded exact schema5 fixture migrates with all rows unchanged, no implicit snapshot; known and unknown historical undo both work",
+      "real TCP HTTP and signed Mini session: same-revision concurrent capture/edit yields one 200 and one 409; other owner and foreign Origin cannot access snapshot"
+    ]
+  },
+  "negative_pipeline": {
+    "measurementFailureProbe": "passed",
+    "source": "actual workflow step",
+    "workflowDefaults": false,
+    "exitCode": 17,
+    "withoutProtectionExitCode": 0
+  },
+  "capacity": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logicalCpus": 5,
+    "hostMemoryMiB": 18008,
+    "compactHugeBatch": {
+      "maxCount": "1000000000000000000000000",
+      "inputPerResult": "729",
+      "rawKind": "raw-green",
+      "targetTier": 6,
+      "steps": 6,
+      "inputUnits": "729000000000000000000000000",
+      "resultCount": "1000000000000000000000000",
+      "price": "40824000000000000000000000000",
+      "previewMs": 1.5913120000000163,
+      "commitMs": 2.1460449999999582,
+      "undoMs": 1.416462000000024,
+      "heapDeltaBytes": 369400,
+      "physicalWorkLots": 1,
+      "historyRows": 1,
+      "planJsonBytes": 2795
+    },
+    "derivedMaximum": {
+      "inputDigits": 128,
+      "additions": 4,
+      "maxDigits": 129,
+      "maxCount": "133333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333332",
+      "previewCommitUndoMs": 2.8317380000000867,
+      "planJsonBytes": 2504
+    },
+    "inventoryBaseline": {
+      "entries": "10002",
+      "quantity": "9007199255750993",
+      "captureMs": 25.058903999999984,
+      "restoreMs": 246.80863,
+      "restoredWorkGroups": 10002,
+      "physicalWorkLots": 10002
+    },
+    "dataset": {
+      "distinctGroups": 10000,
+      "millionGroup": "1000000",
+      "exactQuantity": "9007199254740993"
+    },
+    "batchSetup": {
+      "groups": 10000,
+      "outerTransaction": true,
+      "elapsedMs": 1009.011727
+    },
+    "sequentialHttp": {
+      "sampleSize": 100,
+      "commitPerRequest": true,
+      "totalMs": 230.0698329999982,
+      "p95Ms": 3.0668359999999666
+    },
+    "oversizedInteger": {
+      "digits": 1000000,
+      "rejectMs": 13.507207000000108
+    },
+    "resetMs": 238.447682,
+    "paginatedLoadMs": 16.98025799999982,
+    "tenSameRevisionInjectedRequestsMs": 261.32005800000024,
+    "dbAndWalBytes": 23779472,
+    "rssMiB": 179.93359375,
+    "peakRssMiB": 181.83984375
+  },
+  "guards": {
+    "ingress_tests": 4,
+    "image_proof_tests": 14,
+    "result": "passed"
+  },
+  "findings": [],
+  "logs_sha256": {
+    "/tmp/task008-review-verify.log": "1b2db5c2d99ebd90f84471648f2d6bd2d605e478f9b7a1fc7421a70dfc7b6df9",
+    "/tmp/task008-review-browser.log": "5f50c1c5971a1d0812e7a249170bc760692b7d3898f48458f6403c1f382cd818",
+    "/tmp/task008-review-probe.log": "a325c8fe8858ebdcc47d623309d63518169962c422f9ca469d4b749efdad0aff"
+  },
+  "full_installable_candidate": "accepted",
+  "artifact": {
+    "id": 13637904971,
+    "url": "https://github.com/sa713/cheapshotmods/actions/runs/42532270571/artifacts/13637904971",
+    "expires_at": "2026-12-08T23:11:21Z",
+    "zip_sha256": "137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537",
+    "tar_sha256": "ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c"
+  },
+  "final_proofs": {
+    "archive": "/tmp/task008-review-archive.json",
+    "compiled": "/tmp/task008-review-compiled.json",
+    "lifecycle": "/tmp/task008-review-lifecycle.json",
+    "ci": "/tmp/task008-review-ci.json",
+    "owner": "/tmp/task008-review-owner.json"
+  },
+  "limitations": [
+    "Real owner server and data not used; live Telegram/phone, product acceptance and delivery remain owner/management steps",
+    "Own canonical TASK007 lifecycle passed on finalCIbytes; full cross-store matrix and other5predecessors independently studied from exact CI proofs"
+  ]
+}

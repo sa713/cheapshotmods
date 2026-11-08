@@ -1,0 +1,104 @@
+{
+  "source_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "checks_run": 42532270563,
+  "kit_run": 42532270571,
+  "checks_artifacts": [
+    {
+      "id": 13637931423,
+      "name": "browser-0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+      "size_in_bytes": 18218522,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637931423",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637931423/zip",
+      "expired": false,
+      "created_at": "2026-11-08T22:54:40Z",
+      "expires_at": "2026-11-22T22:54:38Z",
+      "updated_at": "2026-11-08T22:54:40Z",
+      "digest": "sha256:824618f72eed22829f994a74bd83bf1c56828d3f929b30991127bda3afe2a27f",
+      "workflow_run": {
+        "id": 42532270563,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-008-inventory-baseline",
+        "head_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      }
+    },
+    {
+      "id": 13637592828,
+      "name": "capacity-0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+      "size_in_bytes": 980,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637592828",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637592828/zip",
+      "expired": false,
+      "created_at": "2026-11-08T22:54:44Z",
+      "expires_at": "2027-02-06T22:51:02Z",
+      "updated_at": "2026-11-08T22:54:44Z",
+      "digest": "sha256:cc61df6cbc14b9a5f31ac0d5669d29e9e0d842ee6230a6bf5c91d348e10fdf71",
+      "workflow_run": {
+        "id": 42532270563,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-008-inventory-baseline",
+        "head_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      }
+    }
+  ],
+  "kit_artifacts": [
+    {
+      "id": 13638915400,
+      "name": "image-stores-0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+      "size_in_bytes": 35362,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13638915400",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13638915400/zip",
+      "expired": false,
+      "created_at": "2026-11-08T23:11:21Z",
+      "expires_at": "2026-12-08T23:11:20Z",
+      "updated_at": "2026-11-08T23:11:21Z",
+      "digest": "sha256:d8a24304f72f59bd5d29eb90d4e9d3880896be8131af41380ca5482d923eb50f",
+      "workflow_run": {
+        "id": 42532270571,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-008-inventory-baseline",
+        "head_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      }
+    },
+    {
+      "id": 13638301938,
+      "name": "upgrades-0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+      "size_in_bytes": 5506,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13638301938",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13638301938/zip",
+      "expired": false,
+      "created_at": "2026-11-08T23:00:46Z",
+      "expires_at": "2026-12-08T23:00:46Z",
+      "updated_at": "2026-11-08T23:00:46Z",
+      "digest": "sha256:baab4b2cab3323943004f2588c28bf44a1a8f0377dd13a10444266bb2321170f",
+      "workflow_run": {
+        "id": 42532270571,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-008-inventory-baseline",
+        "head_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      }
+    },
+    {
+      "id": 13637904971,
+      "name": "cheapshotmods-0f2cd90c5b672d67409c2687e4e90a8ce9797482-linux-amd64",
+      "size_in_bytes": 131996431,
+      "url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637904971",
+      "archive_download_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13637904971/zip",
+      "expired": false,
+      "created_at": "2026-11-08T23:11:23Z",
+      "expires_at": "2026-12-08T23:11:21Z",
+      "updated_at": "2026-11-08T23:11:23Z",
+      "digest": "sha256:137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537",
+      "workflow_run": {
+        "id": 42532270571,
+        "repository_id": 1447018704,
+        "head_repository_id": 1447018704,
+        "head_branch": "chm-008-inventory-baseline",
+        "head_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      }
+    }
+  ]
+}

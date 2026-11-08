@@ -225,6 +225,8 @@ Source6dc8021e58daa9aa16a93a9265315bb810fe9d0a: все41native/20browser/contain
 
 ## Зафиксированный инвентарь (TASK-008)
 
+[Проверенный kit и команды владельцу](TASK-008-NEXT-STEPS.md), [доказательства](TASK-008-VALIDATION.md), [независимое review](reviews/TASK-008-review.md). Runtime0f2cd90c5b672d67409c2687e4e90a8ce9797482, PR9 вmain; интеграцию завершает management.
+
 Schema6 добавляет `baselines` и независимые `baseline_groups` с owner scope. Миграция2–5 сохраняет прежние rows/receipts и не создаёт snapshot автоматически. State содержит nullable `baseline: {capturedAt,quantity,entries}`; количества и число исходных записей — decimal TEXT.
 
 Команда `{type:'baseline.capture',replace:false}` фиксирует весь original в одной immediate transaction; повторная фиксация требует явного `replace:true` после подтверждения UI. Она не меняет work/lots/equipment/history/spent/level/experiment. `{type:'baseline.restore'}` восстанавливает original и сгруппированный work/lots, очищает history/spent/equipment, сохраняет level/snapshot/permanent receipts и меняет experiment/revision. Старый `{type:'reset'}` по-прежнему возвращает work к актуальному original, snapshot не меняет. Оба новых действия используют прежние Origin/CSRF/account/revision/experiment/key и exact retry, включая потерю ответа после последующих действий.

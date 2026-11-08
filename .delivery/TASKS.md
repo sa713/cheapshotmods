@@ -2,7 +2,7 @@
 
 ## Активная задача
 
-8. [TASK-008 — фиксация исходного набора и возврат](tasks/TASK-008.md): **implementing**. Snapshot/schema6/полный возврат реализованы, прежний reset сохранён.96native/47Chromium прошли; готовятся PR вmain/exact CI/immutable kit/отдельный reviewer. После приёмки management завершает интеграцию, сервер обновляет владелец.
+8. [TASK-008 — фиксация исходного набора и возврат](tasks/TASK-008.md): **review**, [PR9](https://github.com/sa713/cheapshotmods/pull/9) вmain.96native/47browser/exact CI/шесть routes/stores/reverse и отдельная приёмка exact kit13637904971 accepted. [Доказательства](TASK-008-VALIDATION.md), [owner-команды](TASK-008-NEXT-STEPS.md). Следующий исполнитель management — принять передачу и завершить интеграцию/проверки main; реальный сервер обновляет владелец.
 
 ## Интегрированная основа
 

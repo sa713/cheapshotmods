@@ -1,6 +1,6 @@
 # TASK-008 — фиксация исходного набора и возврат к нему
 
-- Статус: **implementing**.
+- Статус: **review**.
 - Риск: повышенный — новый постоянный снимок и восстановление пользовательских данных.
 - Основание: [PRODUCT](../../PRODUCT.md#зафиксированный-исходный-набор--2026-11-09), поручение владельца от 2026-11-09.
 - Репозиторий: sa713/cheapshotmods.
@@ -92,8 +92,8 @@ Management после независимой приёмки и применим�
 
 - product_acceptance: **pending**.
 - delivery: **pending**.
-- Следующий исполнитель: Codex developer, затем отдельный reviewer и management.
-- Последнее подтверждение:2026-11-09, прямой запрос владельца на фиксацию и отдельный возврат. Открытых игровых вопросов нет; реализация и новые CI/review/kit ещё не выполнялись.
+- Следующий исполнитель: management принимает передачу и завершает интеграцию вmain; владелец обновляет сервер.
+- Последнее подтверждение:2026-11-09, прямой запрос владельца на фиксацию и отдельный возврат. Открытых игровых вопросов нет; при подготовке карточки реализация и новые CI/review/kit ещё не выполнялись; итог developer приведён ниже.
 
 
 ## План developer
@@ -109,4 +109,17 @@ State добавляет nullable metadata снимка (время/число �
 
 Изменения старых проверок ограничены новой ожидаемой schema6, nullable metadata в новом state и явным ожиданием пустых новых таблиц: старые rows/receipts/history fixtures не удалялись. Настоящие старые receipts возвращаются в прежнем JSON shape, UI после команды читает current state и допускает отсутствие нового поля.
 
-Новые installer сценарии вынесены в `task008-upgrade`, старые task007 scripts сохранены. Bundle workflow выбирает новый helper с canonical TASK-007/f944 и всеми пятью прежними immutable predecessors, schema6 rejection старым binary, snapshotA/эксперимент/two resets/restart/backup/restore/paired rollback. Перед actual installer новые API-фазы4/5→6 проверены на локальном HTTP/SQLite; это не выдаётся за Debian installer run. CI/kit/независимое review ещё готовятся.
+Новые installer сценарии вынесены в `task008-upgrade`, старые task007 scripts сохранены. Bundle workflow выбирает новый helper с canonical TASK-007/f944 и всеми пятью прежними immutable predecessors, schema6 rejection старым binary, snapshotA/эксперимент/two resets/restart/backup/restore/paired rollback. Перед actual installer новые API-фазы4/5→6 проверены на локальном HTTP/SQLite; это не выдаётся за Debian installer run. Итог CI/kit/независимой приёмки приведён ниже.
+
+
+## Передача developer
+
+[PR9](https://github.com/sa713/cheapshotmods/pull/9): chm-008-inventory-baseline→main. Стартовый HEAD **260d370638b2ea5bdd826614108078e85e60b10e** подтверждён; runtime/CI/kit **0f2cd90c5b672d67409c2687e4e90a8ce9797482**. Постоянный snapshot всего original, metadata/явная замена и отдельный атомарный возврат original/work/experiment реализованы. Обычный reset, old data/history/receipts/undo сохранены. Исходный сценарий literal fuse→original не воспроизведён, это честно записано; новый контракт реализован полностью.
+
+Автор:96native/typecheck/lint/build,47Chromium360/390/1440, capacity/negative pipeline/14image-proof/4ingress. Exact checks42532270563 и Debian42532270571 success, все3обязательных jobs/steps. Шесть actual predecessor routes2/3/4/5→6, включая canonical TASK0075 с fresh homogeneous и старой mixed history, прошли update/restart/snapshot/two resets/backup/restore/pairedrollback. Реальные classic/containerd/reverse на одном archive проходят; guard/ingress/credentials сохранены.
+
+[Отдельный reviewer](../reviews/TASK-008-review.md) accepted exact runtime/artifact после собственных96native/47browser/SQL+HTTP+backup probes/146rows, archive/13hashes/11sources/30compiled files и actual canonical TASK0075→new6 lifecycle на final CI bytes. Подтверждённых дефектов не найдено. Начальный авторский local restore упёрся в disk guard; scoped cleanup собственных temporary duplicates и повтор прошли без изменения source/guard. Перезапуск managed environment кратко прервал reviewer; он возобновлён и final run завершён exit0.
+
+Immutable artifact **13637904971**, expires **2026-12-08T23:11:21Z**, ZIP SHA256 `137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537`, tar SHA256 `ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c`. [Полные доказательства](../TASK-008-VALIDATION.md), [паспорт kit](../evidence/TASK-008/kit.json), [готовые root/curl update/check/rollback](../TASK-008-NEXT-STEPS.md).
+
+Последующий handoff commit содержит только `.delivery` документы/evidence/review/owner scripts, `[skip ci]`; executable source/tests/workflows/installer/lockfile равны runtime. Интеграцию PR9 вmain и применимые проверки результата завершает management после этой передачи; developer слияние не выполнял. Настоящий Debian обновляет владелец. Product acceptance/delivery pending; новые записи после update остаются в новом volume, rollback возвращает только прежнюю image+volume пару. Реальный сервер/БД/proxy/BotFather не изменялись.

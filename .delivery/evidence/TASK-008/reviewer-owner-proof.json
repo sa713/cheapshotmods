@@ -1,0 +1,16 @@
+{
+  "source": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "reviewer": "independent_review_008",
+  "artifact": 13637904971,
+  "files_sha256": {
+    "TASK-008-update.sh": "13528f66dc01e85e9e026847b8f6ab7468d1b5ef54749d45f5d2be34afd12179",
+    "TASK-008-rollback.sh": "a95d7a93d5d974ca3bfd7b3e7784c219bf681162b85a72c5725955cbc2c491bd",
+    "TASK-008-NEXT-STEPS.md": "4f8e4556511e254f510d99f6a36c21f836a104a5de6db6a3a2ed3e981032f640"
+  },
+  "shell_syntax": "passed",
+  "embedded_Python_AST": "passed",
+  "inline_guide_scripts_equal": "passed",
+  "placeholders": "none",
+  "artifact_and_both_hashes": "exact",
+  "semantic_read": "six predecessor and external guard; existing credential; verify ZIP/tar13files; metadata+backup+config+operator preservation; paired rollback; restore caveat; real server not executed"
+}

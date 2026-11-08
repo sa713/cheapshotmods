@@ -2,7 +2,7 @@
 
 ## Активная задача — 2026-11-09
 
-[TASK-008](tasks/TASK-008.md) — **implementing**. Снимок/schema6 и два разных сброса реализованы; прежний original/work эксперимент не подменён snapshot.96native/47browser и изолированные миграция/fault/concurrency/backup проходят. Следующие действия — PR вmain, exact CI/kit/шесть predecessor routes и независимая приёмка; после передачи management завершает разрешённую интеграцию. Реальный сервер/БД/proxy/BotFather не менялись.
+[TASK-008](tasks/TASK-008.md) — **review**, [PR9](https://github.com/sa713/cheapshotmods/pull/9) вmain. Проверенный snapshot/schema6 кандидат передан с отдельным [accepted review](reviews/TASK-008-review.md), exact CI и immutable kit. [Доказательства](TASK-008-VALIDATION.md), [команды владельцу](TASK-008-NEXT-STEPS.md). Следующий шаг management — принять передачу, завершить разрешённую интеграцию PR9 вmain и проверить итог; затем владелец обновляет сервер и проверяет живые сценарии. Product acceptance/delivery pending. Реальный сервер/БД/proxy/BotFather и main developer не менял.
 
 ## Текущее состояние — 2026-11-08
 

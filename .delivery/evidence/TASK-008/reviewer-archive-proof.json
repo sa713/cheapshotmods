@@ -1,0 +1,66 @@
+{
+  "source": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "reviewer": "independent_review_008",
+  "zip": "/tmp/chm008-final/kit.zip",
+  "zip_bytes": 131996431,
+  "zip_sha256": "137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537",
+  "tar_sha256": "ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c",
+  "kit": "/tmp/chm008-final/cheapshotmods-0f2cd90c5b672d67409c2687e4e90a8ce9797482-linux-amd64",
+  "tar_file_members": 14,
+  "checked_files": 13,
+  "packaged_deploy_sources_equal_git": 11,
+  "archive_proof": "Archive config SHA-256 and ordered layer SHA-256 verified (format 2).",
+  "images_archive_sha256": "efeffa174f33884ccd9e25d1759e0008ad8e1b43f7d7a1f1b65452b5f8fa81df",
+  "manifest": {
+    "format": 2,
+    "source_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+    "platform": "linux/amd64",
+    "app_image": "cheapshotmods:0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+    "proxy_image": "caddy:2.10.2-alpine",
+    "builder_observations": {
+      "app_native_id": "sha256:fa2ba640e4b6ce7c381acc72aa96e4560cea6d3515911596114b96f72a529e26",
+      "proxy_native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510"
+    },
+    "proxy_manifest_digest": "caddy@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "base_images": [
+      "node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea",
+      "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    ],
+    "image_bytes": 350807552,
+    "external_proxy_source": "existing running image; tested Caddy 2.11.4; daemon-local image ID captured in private operator plan",
+    "image_proofs": {
+      "app": {
+        "config_digest": "sha256:fa2ba640e4b6ce7c381acc72aa96e4560cea6d3515911596114b96f72a529e26",
+        "diff_ids": [
+          "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+          "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+          "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+          "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+          "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+          "sha256:61e7ecd185af6dd34627ac735cd84cae7e46093414a021075fbbff374872d3c8",
+          "sha256:fc62d5e4ca33e96f62e3b8fddad779f1df24914a6226115b5e52183280bb4f25",
+          "sha256:d5864ff9ad1485ec90dcf4f2014f07fa20c8a49230093d44074ce028f377a0c6"
+        ],
+        "platform": "linux/amd64",
+        "revision": "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+      },
+      "proxy": {
+        "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "diff_ids": [
+          "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+          "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+          "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+          "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ],
+        "platform": "linux/amd64",
+        "revision": null
+      }
+    }
+  },
+  "independent_extraction_before_cleanup": "/tmp/task008-review-final/cheapshotmods-0f2cd90c5b672d67409c2687e4e90a8ce9797482-linux-amd64",
+  "shared_final_kit_byte_equal_files": 14,
+  "own_transport_and_duplicate_extraction_removed_after_verification": true
+}
