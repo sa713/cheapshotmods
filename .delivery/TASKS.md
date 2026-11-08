@@ -1,20 +1,20 @@
 # Очередь
 
-Единственная очередь продукта. Карточки хранят смысл состояния; HEAD/PR/CI читаются из GitHub.
+Активных задач реализации нет. Реализованный код TASK-001–007 и исправление группировки включены в **main** через [PR8](https://github.com/sa713/cheapshotmods/pull/8), merge `3ffeca3f50c8950d169b928601e16aa770c96221`,2026-11-08.
 
-1. [TASK-001 — техническая основа](tasks/TASK-001.md): техническая область accepted по [отдельному native-review](reviews/TASK-001-native-review.md). При подготовке TASK-002 подтверждено, что после проверенного 67e8abe3 добавлен только этот отчёт; [CI исходной версии](https://github.com/sa713/cheapshotmods/actions/runs/42193551971) success. Это не приёмка всего приложения, не слияние и не production.
-2. [TASK-002 — весь сервис, готовый к установке](tasks/TASK-002.md): accepted в границах устанавливаемого кандидата; передача проверена management. Полный PRODUCT реализован как устанавливаемый кандидат; native/browser/installer/CI и отдельный reviewer приняты в указанной области, блокирующие находки исправлены. Комплект и точные NEXT_STEPS доступны в карточке/RUNBOOK. Следующее участие владельца — установка на Debian и реальные Telegram-настройки/проверки. Это не слияние или production verified.
+| Задача | Результат | Текущее завершение на GitHub |
+| --- | --- | --- |
+| [TASK-001](tasks/TASK-001.md) | Техническая основа | accepted, код вmain |
+| [TASK-002](tasks/TASK-002.md) | Полный устанавливаемый сервис | accepted, код вmain |
+| [TASK-003](tasks/TASK-003.md) | Внешний proxy и переносимость образов | accepted, код вmain |
+| [TASK-004](tasks/TASK-004.md) | Оформление Sites в основном приложении | accepted, код вmain |
+| [Группировка модов](tasks/TASK-004-mod-stacks.md) | Одна рабочая строка для одинаковых модов | accepted, код вmain |
+| [TASK-005](tasks/TASK-005.md) | Пакетный фьюз, пополнение, крит и значки | accepted, код вmain |
+| [TASK-006](tasks/TASK-006.md) | Сырьевые моды и экипировка | accepted, код вmain |
+| [TASK-007](tasks/TASK-007.md) | Однородный массовый фьюз с автоматическим максимумом | accepted, код вmain |
 
-3. [TASK-003 — установка за существующим IP-прокси](tasks/TASK-003.md): **review**, PR3. [Owner подтвердил](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07) отдельный b008helper к fbeapp, stage/apply и HTTPShealth/version/TLS Verification:OK с самого сервера. Independent native/kit/component reviews и обеstoreCI сохранены; полный app update не выполнялся, disk guard не ослаблялся. Повторные install/update/apply не нужны. Остались внешний телефон/действующие соседние маршруты/renewal и настоящий Telegram; developer не исполнял серверные команды/BotFather/merge.
+Здесь accepted означает завершённую техническую приёмку/интеграцию кода. Исторические детали, точные версии, CI/kit и ограничения внешней приёмки остаются в карточках и [STATE](STATE.md). Владелец сообщил, что установленный Debian-сервис работает; конкретный серверныйSHA этим сообщением не установлен. Новая установка ради наведения порядка не требуется.
 
-4. [TASK-004 — дизайн Sites без изменения функционала](tasks/TASK-004.md): **review**, PR5, отдельная ветка chm-004-sites-design. Эталон d7cc4d7 перенесён, прежняя группировка сохранена как зависимость.41native/20browser/визуальноесравнение/CI+bothstores/отдельноеревью и обаoldkitupdate/rollback пройдены; immutablekit и root/curl команды в карточке. Установка/продуктовоепринятие владельцемpending; сервер/Sites/BotFather/main developer не менял.
+Новые задачи создаются от актуальногоmain в отдельной временной ветке, PR направляется вmain. После применимых проверок и независимой приёмки management завершает разрешённую интеграцию, обновляет состояние и закрывает завершённую работу. Не начинать новую цепочку несмерженных завершённых задач.
 
-5. [TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки](tasks/TASK-005.md): **review**, [PR6](https://github.com/sa713/cheapshotmods/pull/6). Runtime/kitfeb6a1bf,58native/25browser/всеCI/bothstores и canonicalFBE/19a/6dc install/update/restore/rollback прошли; separate review и owner-команды в карточке. Artifact13624905831 до2026-12-08. Установка/schema4 на владельческом Debian и product_acceptance pending; developer передаёт готовый кандидат, main/сервер/BotFather не менял.
-
-6. [TASK-006 — сырьевые моды, экипировка и крафт в1.0](tasks/TASK-006.md): **review**, [PR7](https://github.com/sa713/cheapshotmods/pull/7). Три вида, single/batch до6.0 и schema5 реализованы; native70/browser29/все3CI jobs/четыре predecessor installer routes/both stores прошли, отдельное code/UI/kit review завершено. [Immutable kit и owner-команды](TASK-006-NEXT-STEPS.md). Установка и продуктовое принятие владельцем pending.
-
-7. [TASK-007 — одинаковые моды и автоматический максимум массового фьюза](tasks/TASK-007.md): **review**, [PR8](https://github.com/sa713/cheapshotmods/pull/8). Runtime f944acb6,80native/38browser/все3CI jobs/пять predecessor routes/обе stores/reverse прошли; отдельный reviewer accepted exact artifact13631764817, самостоятельно повторил canonical TASK-0065→new5 lifecycle и проверил30compiled-files. [Доказательства](TASK-007-VALIDATION.md), [owner-команды](TASK-007-NEXT-STEPS.md). Установка владельцем и product acceptance/delivery pending.
-
-Предыдущее [исправление группировки одинаковых модов](tasks/TASK-004-mod-stacks.md): **review**, PR4. Исторически developer также назвал его TASK004; карточка сохранена отдельно из-за коллизии с management-заданием дизайна. Immutable19a6fdd kit, прежние review/команды не изменены; установка владельцем пока не подтверждена.
-
-Решение владельца 2026-11-06 заменяет прежний порядок, где живой Debian-стенд был предварительным условием следующей разработки: сейчас код и комплект завершаются в изолированной среде, затем владелец устанавливает сервис и настраивает реального бота. Непроверенные внешние интеграции перечисляются честно. Внешнее размещение, новые расходы и слияние не разрешены этой очередью.
+Прежние продуктовые PR закрыты как вошедшие в итоговый продукт; диагностическийPR2 остаётся архивным без включения его отдельного workflow вmain. История ревью/артефактов не удалена. Следующий шаг — новое поручение владельца.
