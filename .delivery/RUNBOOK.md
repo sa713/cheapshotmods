@@ -208,3 +208,8 @@ Source6dc8021e58daa9aa16a93a9265315bb810fe9d0a: все41native/20browser/contain
 
 
 Последний устанавливаемый кандидат TASK-006: [новый immutable kit и готовые owner-команды](TASK-006-NEXT-STEPS.md), [доказательства](TASK-006-VALIDATION.md), [отдельное ревью](reviews/TASK-006-review.md). Он поддерживает update с FBE2/19a3/6dc3/canonical TASK-0054; новая схема5 требует отката image+volume вместе. Инструкции первоначальной IP-TLS интеграции и прежние комплекты выше сохраняются как история; повторно настраивать общий proxy для обычного app update не требуется.
+
+
+## Массовый максимум (TASK-007)
+
+Новые массовые операции используют одну work группу: `{id,targetTier,includeWorn,quantity?,count?}`. Без count preview выбирает максимум floor(Q/3^(t−s)); quantity необязательно ограничивает разрешённый запас. Сервер читает реальные атрибуты/экипировку, неизвестный crit требует уточнения. Count/quantity имеют технический предел256цифр, позволяющий производный максимум свыше128; новые исходные записи сохраняют прежний предел128. Schema5 и ledger не меняются. Legacy DTO синтаксически читается до receipt lookup: старый exact mixed replay/expired receipt обрабатывается прежним способом, а новый mixed ключ отвергается. Старые mixed/single undo и поздние пополнения сохраняются. UI commit фиксирует показанные count/quantity/revision, потерянный ответ повторяется тем же payload/key.

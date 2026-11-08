@@ -4,7 +4,7 @@ import {performance} from 'node:perf_hooks';
 import {fuseRequest,planFuse,parseCrit,formatCrit,displayKind,modKey,craft,stats,type FuseChoice,type Kind} from '@chm/rules';
 function g(id:string,tier:number,value:string,quantity:string,kind:Kind='🅾',crit:string|null=null,equipped='0'):FuseChoice{return {id,tier,value,quantity,kind,crit,equipped};}
 function plan(groups:FuseChoice[],targetTier=2,count='1',items=groups.map(g=>({id:g.id,quantity:g.quantity,worn:'0'}))){return planFuse(fuseRequest({kind:groups[0]!.kind,targetTier,count,items}),groups);}
-test('batch examples, exact prices and sequential triples; ready selected stock precedes generated stock',()=>{
+test('legacy planner arithmetic for historical mixed fixtures: examples, exact prices and sequential triples; ready selected stock precedes generated stock',()=>{
   assert.deepEqual(plan([g('a',1,'10','6')],2,'2').outputs.map(o=>[o.value,o.quantity]),[['15','2']]);
   for(const [q,tier,price,value] of [['9',3,'504','23'],['27',4,'2268','35']] as const){const p=plan([g('a',1,'10',q)],tier);assert.equal(p.price,price);assert.equal(p.outputs[0]!.value,value);}
   const ready=plan([g('a',1,'10','3'),g('b',2,'15','2')],3);assert.equal(ready.price,'336');assert.equal(ready.outputs[0]!.value,'23');

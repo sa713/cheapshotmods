@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { validateDatabasePath } from './database-path.js';
-import { boundedInteger, craft, fuseRequest, hasCrit, integer, inputInteger, keys, mod, modKey, planFuse, record, requireThat, stats, type Equipped, type Group, type Mod } from '@chm/rules';
+import { boundedInteger, craft, parseAnyFuseRequest, hasCrit, integer, inputInteger, keys, mod, modKey, planCompatibleFuse, planHomogeneousFuse, record, requireThat, stats, type Equipped, type Group, type Mod } from '@chm/rules';
 import {migrateModStacks} from './mod-stacks.js';
 import {migrateCrit,type History} from './crit-migration.js';
 import {Lots,type Piece,type Range} from './lots.js';
@@ -129,8 +129,11 @@ export class Store {
     })();
   }
   private fusePlan(p:Player,raw:unknown) {
-    const request=fuseRequest(raw),equipment=JSON.parse(p.equipment) as Equipped[];
-    return planFuse(request,request.items.map(s=>({...this.group(p.owner,'work',s.id),equipped:equipment.find(e=>e.id===s.id)?.quantity??'0'})));
+    const request=parseAnyFuseRequest(raw),equipment=JSON.parse(p.equipment) as Equipped[];
+    const choice=(id:string)=>({...this.group(p.owner,'work',id),equipped:equipment.find(e=>e.id===id)?.quantity??'0'});
+    if('id' in request)return planHomogeneousFuse(request,choice(request.id));
+    requireThat(request.items.length===1,'HOMOGENEOUS_GROUP_REQUIRED');
+    return planCompatibleFuse(request,request.items.map(s=>choice(s.id)));
   }
   command(owner:string,raw:unknown) {
     const c=record(raw);keys(c,['key','revision','experiment','action']);
@@ -141,7 +144,7 @@ export class Store {
     // validated after permanent receipt lookup so old exact retries still work.
     if(a.type==='level')inputInteger(a.value);
     if(a.type==='original.put'){inputInteger(a.value);inputInteger(a.quantity);if(a.crit!=null)boundedInteger(a.crit,true,131);}
-    if(a.type==='fuse')fuseRequest(a.fuse);
+    if(a.type==='fuse')parseAnyFuseRequest(a.fuse);
     if(['equip','craft'].includes(a.type)&&Array.isArray(a.items))for(const raw of a.items){const i=record(raw);inputInteger(i.quantity);if(a.type==='craft')inputInteger(i.worn,true);}
     if(a.type==='work.crit'||a.type==='original.crit'){boundedInteger(a.quantity,false,256);boundedInteger(a.crit,true,131);if(a.type==='work.crit')boundedInteger(a.worn,true,256);}
     const payload=canonical(c);
@@ -197,7 +200,7 @@ export class Store {
           p.spent=(BigInt(p.spent)+BigInt(price)).toString();p.started=1;break;
         }
         case 'fuse':{
-          keys(a,['type','fuse']);const plan=this.fusePlan(p,a.fuse);this.afterMods?.('plan');const worn=structuredClone(lots.worn),equipment=JSON.parse(p.equipment) as Equipped[],pieces:Piece[]=[],consumed:Group[]=[];
+          keys(a,['type','fuse']);const plan=this.fusePlan(p,a.fuse);requireThat(plan.count!=='0','INSUFFICIENT_MODS');this.afterMods?.('plan');const worn=structuredClone(lots.worn),equipment=JSON.parse(p.equipment) as Equipped[],pieces:Piece[]=[],consumed:Group[]=[];
           for(const s of plan.selected)if(s.used!=='0'){const g=this.group(owner,'work',s.id);pieces.push(...lots.take(modKey(g),BigInt(s.used),BigInt(s.worn)));consumed.push({...g,quantity:s.used});}
           const outputs=plan.outputs.map(o=>lots.add(o,integer(o.quantity),p.revision));this.afterMods?.('intermediate');
           history={type:'batch',consumed,output:{...plan.outputs[0]!,id:'',quantity:plan.outputs[0]!.quantity},outputs:plan.outputs.map(o=>({...o,id:''})),equipment,price:plan.price,plan,

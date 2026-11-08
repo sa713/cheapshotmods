@@ -1,0 +1,1772 @@
+{
+  "source": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "description": "Unchanged canonical TASK-006 Store: schema5 mixed raw/ordinary batch, single, worn lots, unknown/refined crit owners, late stock and merged output, exact mixed and expired receipts.",
+  "ddl": [
+    "CREATE TABLE commands(owner TEXT NOT NULL REFERENCES players(owner),key TEXT NOT NULL,payload TEXT NOT NULL,result TEXT NOT NULL,created INTEGER NOT NULL,PRIMARY KEY(owner,key))",
+    "CREATE TABLE groups(owner TEXT NOT NULL REFERENCES players(owner),scope TEXT NOT NULL CHECK(scope IN ('original','work')),id TEXT NOT NULL,kind TEXT NOT NULL,tier INTEGER NOT NULL,value TEXT NOT NULL,quantity TEXT NOT NULL, crit TEXT NOT NULL DEFAULT '',PRIMARY KEY(owner,scope,id))",
+    "CREATE TABLE history(seq INTEGER PRIMARY KEY,owner TEXT NOT NULL REFERENCES players(owner),body TEXT NOT NULL)",
+    "CREATE TABLE oidc_codes(hash TEXT PRIMARY KEY,expires INTEGER NOT NULL)",
+    "CREATE TABLE players(owner TEXT PRIMARY KEY,revision TEXT NOT NULL,level TEXT NOT NULL,experiment TEXT NOT NULL,started INTEGER NOT NULL,spent TEXT NOT NULL,equipment TEXT NOT NULL, worn_ranges TEXT NOT NULL DEFAULT '[]')",
+    "CREATE TABLE sessions(hash TEXT PRIMARY KEY,owner TEXT REFERENCES players(owner),csrf TEXT NOT NULL,expires INTEGER NOT NULL,flow TEXT)",
+    "CREATE TABLE work_lots(owner TEXT NOT NULL REFERENCES players(owner),origin TEXT NOT NULL,start TEXT NOT NULL,quantity TEXT NOT NULL,born TEXT NOT NULL,kind TEXT NOT NULL,tier INTEGER NOT NULL,value TEXT NOT NULL,crit TEXT NOT NULL,PRIMARY KEY(owner,origin,start))",
+    "CREATE INDEX command_expiry ON commands(created) WHERE result<>''",
+    "CREATE UNIQUE INDEX groups_work_stack ON groups(owner,kind,tier,value,crit) WHERE scope='work'",
+    "CREATE INDEX history_owner ON history(owner,seq)",
+    "CREATE INDEX session_expiry ON sessions(expires)"
+  ],
+  "tables": {
+    "commands": [
+      {
+        "owner": "111",
+        "key": "35b97a36-58a2-4119-b981-96faf5d83820",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"6\",\"tier\":3,\"type\":\"original.put\",\"value\":\"18\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"35b97a36-58a2-4119-b981-96faf5d83820\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "96956306-0c03-4050-971c-1cdac43f31ab",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"3\",\"tier\":3,\"type\":\"original.put\",\"value\":\"18\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"96956306-0c03-4050-971c-1cdac43f31ab\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "e16ef355-47a2-4f01-82b9-10defe28278f",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"1\",\"tier\":4,\"type\":\"original.put\",\"value\":\"27\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"e16ef355-47a2-4f01-82b9-10defe28278f\",\"revision\":\"2\"}",
+        "result": "{\"revision\":\"3\",\"level\":\"1\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "146fb15d-902f-4cbe-8fb3-4fb3b33c16e6",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"1\",\"tier\":4,\"type\":\"original.put\",\"value\":\"27\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"146fb15d-902f-4cbe-8fb3-4fb3b33c16e6\",\"revision\":\"3\"}",
+        "result": "{\"revision\":\"4\",\"level\":\"1\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"c5cc5932-ebde-4389-bdb7-3e3bbf1b4ca8\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "ca309479-d1cc-4231-a7b5-927aaa7759d9",
+        "payload": "{\"action\":{\"type\":\"level\",\"value\":\"200\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"ca309479-d1cc-4231-a7b5-927aaa7759d9\",\"revision\":\"4\"}",
+        "result": "{\"revision\":\"5\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"200\",\"health\":\"200\"},\"lastCraft\":null}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "fd1b16fe-62b9-46c6-93d2-4fa10b29ff85",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"fd1b16fe-62b9-46c6-93d2-4fa10b29ff85\",\"revision\":\"5\"}",
+        "result": "{\"revision\":\"6\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"254\",\"health\":\"200\"},\"lastCraft\":null}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "1846a7f5-e39b-4c1d-9991-9f473c7f670c",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"quantity\":\"3\",\"worn\":\"0\"}],\"type\":\"craft\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"1846a7f5-e39b-4c1d-9991-9f473c7f670c\",\"revision\":\"6\"}",
+        "result": "{\"revision\":\"7\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"594\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"254\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"price\":\"594\"},\"createdId\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "ae8d6c32-d37d-4fd3-a0e4-b6917c329577",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"ae8d6c32-d37d-4fd3-a0e4-b6917c329577\",\"revision\":\"7\"}",
+        "result": "{\"revision\":\"8\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"594\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"308\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"price\":\"594\"}}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "fbbf30b0-c71e-4cbc-a98e-36df363283eb",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"quantity\":\"3\",\"worn\":\"0\"}],\"type\":\"craft\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"fbbf30b0-c71e-4cbc-a98e-36df363283eb\",\"revision\":\"8\"}",
+        "result": "{\"revision\":\"9\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"1188\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"308\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"}],\"price\":\"594\"},\"createdId\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "92a40691-c2ec-4baf-a765-5067467e729f",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"92a40691-c2ec-4baf-a765-5067467e729f\",\"revision\":\"9\"}",
+        "result": "{\"revision\":\"10\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"1188\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"362\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"}],\"price\":\"594\"}}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "ce6cb8fe-c22d-42ca-8304-4e79326cc8ec",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"quantity\":\"3\",\"worn\":\"0\"}],\"type\":\"craft\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"ce6cb8fe-c22d-42ca-8304-4e79326cc8ec\",\"revision\":\"10\"}",
+        "result": "{\"revision\":\"11\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"1782\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"362\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"}],\"price\":\"594\"},\"createdId\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "111",
+        "key": "733a986a-815d-4f7d-9708-a2bbfff97147",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"c5cc5932-ebde-4389-bdb7-3e3bbf1b4ca8\",\"quantity\":\"1\",\"worn\":\"0\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\",\"worn\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\",\"worn\":\"1\"}],\"type\":\"craft\"},\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"key\":\"733a986a-815d-4f7d-9708-a2bbfff97147\",\"revision\":\"11\"}",
+        "result": "{\"revision\":\"12\",\"level\":\"200\",\"experiment\":\"1fc57974-4695-414d-a683-ea0103987bc6\",\"started\":true,\"spent\":\"3564\",\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"254\",\"health\":\"200\"},\"lastCraft\":{\"consumed\":[{\"id\":\"c5cc5932-ebde-4389-bdb7-3e3bbf1b4ca8\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"1\"}],\"output\":{\"kind\":\"💢\",\"tier\":5,\"value\":\"41\",\"id\":\"b90b1f78-635d-40dd-a0fe-4b0d38aa49f8\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"8e50a648-4d99-493a-96fd-20541adfaa3b\",\"quantity\":\"1\"},{\"id\":\"4acac591-2be1-413d-b2f7-3a0c10d94979\",\"quantity\":\"1\"},{\"id\":\"e4419eb3-4b5c-41d2-a9a3-67a45995b1e6\",\"quantity\":\"1\"}],\"price\":\"1782\"},\"createdId\":\"b90b1f78-635d-40dd-a0fe-4b0d38aa49f8\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "222",
+        "key": "a78cd997-d9d2-4e8f-9bf7-62282aa2c545",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"2\",\"tier\":4,\"type\":\"original.put\",\"value\":\"27\"},\"experiment\":\"efebad9a-6317-4d24-857d-e057273a7d1e\",\"key\":\"a78cd997-d9d2-4e8f-9bf7-62282aa2c545\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"efebad9a-6317-4d24-857d-e057273a7d1e\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"f592e1ac-b756-4e32-b926-20de9cecf9b6\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "333",
+        "key": "717257f9-ca1e-4883-9881-08dd38fac6e7",
+        "payload": "{\"action\":{\"kind\":\"💚\",\"quantity\":\"9007199254740993\",\"tier\":6,\"type\":\"original.put\",\"value\":\"9007199254740993\"},\"experiment\":\"f5b95204-b029-49fa-b573-b7737d2085dd\",\"key\":\"717257f9-ca1e-4883-9881-08dd38fac6e7\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"f5b95204-b029-49fa-b573-b7737d2085dd\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"1b06718a-59ce-4f48-98e9-b7cfe7cdd88a\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "333",
+        "key": "112dc650-426e-4654-9976-c2781d99c6cb",
+        "payload": "{\"action\":{\"kind\":\"💚\",\"quantity\":\"9007199254740995\",\"tier\":6,\"type\":\"original.put\",\"value\":\"9007199254740993\"},\"experiment\":\"f5b95204-b029-49fa-b573-b7737d2085dd\",\"key\":\"112dc650-426e-4654-9976-c2781d99c6cb\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"f5b95204-b029-49fa-b573-b7737d2085dd\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"9021be9f-eef0-4f0a-96c7-d3ae4398e9ef\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "444",
+        "key": "5fb2c109-7e0b-4d38-a0eb-87f7d2fda924",
+        "payload": "{\"action\":{\"kind\":\"🅾\",\"quantity\":\"3\",\"tier\":1,\"type\":\"original.put\",\"value\":\"10\"},\"experiment\":\"9f806184-55f9-4aa2-9c9f-83505f2ae8ec\",\"key\":\"5fb2c109-7e0b-4d38-a0eb-87f7d2fda924\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"9f806184-55f9-4aa2-9c9f-83505f2ae8ec\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"4c8399d3-3f38-4630-abcb-985b7fc49431\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "444",
+        "key": "f63df88c-e715-4f26-b48c-fc66fe62f9e6",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"4c8399d3-3f38-4630-abcb-985b7fc49431\",\"quantity\":\"3\",\"worn\":\"0\"}],\"type\":\"craft\"},\"experiment\":\"9f806184-55f9-4aa2-9c9f-83505f2ae8ec\",\"key\":\"f63df88c-e715-4f26-b48c-fc66fe62f9e6\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"9f806184-55f9-4aa2-9c9f-83505f2ae8ec\",\"started\":true,\"spent\":\"84\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":{\"consumed\":[{\"id\":\"4c8399d3-3f38-4630-abcb-985b7fc49431\",\"kind\":\"🅾\",\"tier\":1,\"value\":\"10\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"🅾\",\"tier\":2,\"value\":\"15\",\"id\":\"e5f8d25e-3c4e-4818-83cd-cea449df7928\",\"quantity\":\"1\"},\"equipment\":[],\"price\":\"84\"},\"createdId\":\"e5f8d25e-3c4e-4818-83cd-cea449df7928\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "555",
+        "key": "13afc4f9-8f5d-489b-9392-4bf62718bec9",
+        "payload": "{\"action\":{\"kind\":\"🅾\",\"quantity\":\"3\",\"tier\":1,\"type\":\"original.put\",\"value\":\"10\"},\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"key\":\"13afc4f9-8f5d-489b-9392-4bf62718bec9\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "555",
+        "key": "cd6ad730-9b8a-4efe-813b-3e5fd3b0ce78",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"key\":\"cd6ad730-9b8a-4efe-813b-3e5fd3b0ce78\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"kind\":\"🅾\",\"tier\":1,\"value\":\"10\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"2\",\"health\":\"1\"},\"lastCraft\":null}",
+        "created": 1794061652
+      },
+      {
+        "owner": "555",
+        "key": "fe89ef14-6912-4471-bf4d-8f8e70c9896c",
+        "payload": "{\"action\":{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"kind\":\"💚\",\"quantity\":\"5\",\"tier\":2,\"type\":\"original.put\",\"value\":\"100\"},\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"key\":\"fe89ef14-6912-4471-bf4d-8f8e70c9896c\",\"revision\":\"2\"}",
+        "result": "{\"revision\":\"3\",\"level\":\"1\",\"experiment\":\"7746d8a9-cae9-46f5-a486-e23f70898abb\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"kind\":\"🅾\",\"tier\":1,\"value\":\"10\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"2\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\"}",
+        "created": 1794061652
+      },
+      {
+        "owner": "666",
+        "key": "1ac760a7-8efa-496e-92c4-d19d7b10690a",
+        "payload": "{\"action\":{\"kind\":\"🧿\",\"quantity\":\"9\",\"tier\":1,\"type\":\"original.put\",\"value\":\"8\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"1ac760a7-8efa-496e-92c4-d19d7b10690a\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\"}",
+        "created": 1794151961
+      },
+      {
+        "owner": "666",
+        "key": "4349a381-c8e2-41d5-a1a1-36014ce2e1fe",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"4349a381-c8e2-41d5-a1a1-36014ce2e1fe\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"2\",\"health\":\"1\"},\"lastCraft\":null}",
+        "created": 1794151961
+      },
+      {
+        "owner": "666",
+        "key": "aab74b68-d84e-4dd4-92d5-4c5cc41dff19",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"3\",\"worn\":\"1\"}],\"type\":\"craft\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"aab74b68-d84e-4dd4-92d5-4c5cc41dff19\",\"revision\":\"2\"}",
+        "result": "{\"revision\":\"3\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":true,\"spent\":\"72\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":{\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"price\":\"72\"},\"createdId\":\"02309549-702a-464c-ae32-0426f9ac33bf\"}",
+        "created": 1794151961
+      },
+      {
+        "owner": "666",
+        "key": "f4fe4c0a-26d2-4a65-8f08-3a0ee3f25865",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"f4fe4c0a-26d2-4a65-8f08-3a0ee3f25865\",\"revision\":\"3\"}",
+        "result": "{\"revision\":\"4\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":true,\"spent\":\"72\",\"equipment\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\"}],\"stats\":{\"damage\":\"2\",\"health\":\"1\"},\"lastCraft\":{\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"price\":\"72\"}}",
+        "created": 1794151961
+      },
+      {
+        "owner": "777",
+        "key": "78401a1f-4abd-488b-9ec0-80dcba25208b",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"9007199254740995\",\"tier\":4,\"type\":\"original.put\",\"value\":\"27\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"78401a1f-4abd-488b-9ec0-80dcba25208b\",\"revision\":\"0\"}",
+        "result": "{\"revision\":\"1\",\"level\":\"1\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"a6797ed0-45e0-4e60-bebd-d63736b118d0\"}",
+        "created": 1794151961
+      },
+      {
+        "owner": "777",
+        "key": "c12766d2-4a86-49bf-8b3c-89676d67917f",
+        "payload": "{\"action\":{\"kind\":\"💢\",\"quantity\":\"9007199254740993\",\"tier\":4,\"type\":\"original.put\",\"value\":\"27\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"c12766d2-4a86-49bf-8b3c-89676d67917f\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"1\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"1\",\"health\":\"1\"},\"lastCraft\":null,\"createdId\":\"5a999e9a-cde5-4e29-89a0-ec2118a9bfad\"}",
+        "created": 1794151961
+      },
+      {
+        "owner": "777",
+        "key": "d2b55e65-4694-4287-95a7-916622d25d77",
+        "payload": "{\"action\":{\"type\":\"level\",\"value\":\"200\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"d2b55e65-4694-4287-95a7-916622d25d77\",\"revision\":\"3\"}",
+        "result": "{\"revision\":\"4\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"200\",\"health\":\"200\",\"crit\":\"0\",\"critIncomplete\":false},\"lastCraft\":null}",
+        "created": 1794159623
+      },
+      {
+        "owner": "777",
+        "key": "b8fbaf17-a3fb-410c-9a2d-197abdd062de",
+        "payload": "{\"action\":{\"crit\":\"15\",\"kind\":\"🧿\",\"quantity\":\"27\",\"tier\":1,\"type\":\"original.put\",\"value\":\"8\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"b8fbaf17-a3fb-410c-9a2d-197abdd062de\",\"revision\":\"4\"}",
+        "result": "{\"revision\":\"5\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"200\",\"health\":\"200\",\"crit\":\"0\",\"critIncomplete\":false},\"lastCraft\":null,\"createdId\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\"}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "dc405d66-157d-4519-a5de-b6c9d7acfec4",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"2\"}],\"type\":\"equip\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"dc405d66-157d-4519-a5de-b6c9d7acfec4\",\"revision\":\"5\"}",
+        "result": "{\"revision\":\"6\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"2\"}],\"equippedMods\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"2\",\"crit\":\"15\"}],\"stats\":{\"damage\":\"232\",\"health\":\"200\",\"crit\":\"90\",\"critIncomplete\":false},\"lastCraft\":null}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "60083b41-9913-4531-b657-1b423f4c4ec1",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"3\",\"worn\":\"1\"}],\"type\":\"craft\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"60083b41-9913-4531-b657-1b423f4c4ec1\",\"revision\":\"6\"}",
+        "result": "{\"revision\":\"7\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"72\",\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":\"15\"}],\"stats\":{\"damage\":\"216\",\"health\":\"200\",\"crit\":\"45\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"single\",\"consumed\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"2\"}],\"price\":\"72\",\"ledger\":{\"inputs\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"2\",\"quantity\":\"2\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"0\",\"quantity\":\"2\"}]}},\"createdId\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\"}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "4efadd96-a3ef-4daa-9b42-cae649c4c5ae",
+        "payload": "{\"action\":{\"fuse\":{\"count\":\"1\",\"items\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"quantity\":\"1\",\"worn\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"24\",\"worn\":\"1\"}],\"kind\":\"🧿\",\"targetTier\":3},\"type\":\"fuse\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"4efadd96-a3ef-4daa-9b42-cae649c4c5ae\",\"revision\":\"7\"}",
+        "result": "{\"revision\":\"8\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"432\",\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":\"15\"}],\"stats\":{\"damage\":\"216\",\"health\":\"200\",\"crit\":\"45\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":\"23\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}],\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"price\":\"360\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"360\",\"selected\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"allowed\":\"24\",\"allowWorn\":\"1\",\"used\":\"6\",\"worn\":\"0\",\"unused\":\"18\",\"remaining\":\"18\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"2\",\"unitPrice\":\"72\",\"price\":\"144\",\"inputs\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\",\"equipped\":\"1\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"quantity\":\"2\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"3\",\"crit\":\"23\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"6\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"4\",\"quantity\":\"6\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"1\",\"quantity\":\"1\"}]}},\"createdId\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}",
+        "created": 1794159624
+      },
+      {
+        "owner": "666",
+        "key": "492b9844-a98c-4297-b319-566a1345f23e",
+        "payload": "{\"action\":{\"crit\":\"44\",\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"2\",\"type\":\"work.crit\",\"worn\":\"0\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"492b9844-a98c-4297-b319-566a1345f23e\",\"revision\":\"5\"}",
+        "result": "{\"revision\":\"6\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":true,\"spent\":\"72\",\"equipment\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":null}],\"stats\":{\"damage\":\"2\",\"health\":\"1\",\"crit\":null,\"critIncomplete\":true},\"lastCraft\":{\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"price\":\"72\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"1\",\"born\":\"-8\"}],\"outputs\":[{\"origin\":\"48476a12-ceb5-4e87-8997-e5a3da28a0ee\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"0\",\"quantity\":\"1\"}]}}}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "e5600bc1-33db-451c-8496-325ad4c43950",
+        "payload": "{\"action\":{\"crit\":\"44\",\"kind\":\"🧿\",\"quantity\":\"2\",\"tier\":3,\"type\":\"original.put\",\"value\":\"18\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"e5600bc1-33db-451c-8496-325ad4c43950\",\"revision\":\"8\"}",
+        "result": "{\"revision\":\"9\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"432\",\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":\"15\"}],\"stats\":{\"damage\":\"216\",\"health\":\"200\",\"crit\":\"45\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":\"23\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}],\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"price\":\"360\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"360\",\"selected\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"allowed\":\"24\",\"allowWorn\":\"1\",\"used\":\"6\",\"worn\":\"0\",\"unused\":\"18\",\"remaining\":\"18\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"2\",\"unitPrice\":\"72\",\"price\":\"144\",\"inputs\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\",\"equipped\":\"1\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"quantity\":\"2\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"3\",\"crit\":\"23\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"6\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"4\",\"quantity\":\"6\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"1\",\"quantity\":\"1\"}]}},\"createdId\":\"bd260b3b-2398-49a3-bc02-f06eaf09af69\"}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "4d8b41d6-e72b-4c6d-bea3-9ef08432c4f0",
+        "payload": "{\"action\":{\"crit\":\"15\",\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"quantity\":\"29\",\"tier\":1,\"type\":\"original.put\",\"value\":\"8\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"4d8b41d6-e72b-4c6d-bea3-9ef08432c4f0\",\"revision\":\"9\"}",
+        "result": "{\"revision\":\"10\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"432\",\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":\"15\"}],\"stats\":{\"damage\":\"216\",\"health\":\"200\",\"crit\":\"45\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":\"23\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}],\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"price\":\"360\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"360\",\"selected\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"allowed\":\"24\",\"allowWorn\":\"1\",\"used\":\"6\",\"worn\":\"0\",\"unused\":\"18\",\"remaining\":\"18\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"2\",\"unitPrice\":\"72\",\"price\":\"144\",\"inputs\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\",\"equipped\":\"1\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"quantity\":\"2\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"3\",\"crit\":\"23\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"6\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"4\",\"quantity\":\"6\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"1\",\"quantity\":\"1\"}]}},\"createdId\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\"}",
+        "created": 1794159624
+      },
+      {
+        "owner": "777",
+        "key": "29feddbf-3ed5-4331-999f-920e88fbad10",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"key\":\"29feddbf-3ed5-4331-999f-920e88fbad10\",\"revision\":\"10\"}",
+        "result": "{\"revision\":\"11\",\"level\":\"200\",\"experiment\":\"0b921b38-2944-419f-b9c7-5c20b13f8121\",\"started\":true,\"spent\":\"432\",\"equipment\":[{\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\",\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"quantity\":\"1\",\"crit\":\"35\"}],\"stats\":{\"damage\":\"236\",\"health\":\"200\",\"crit\":\"105\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":\"23\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}],\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"price\":\"360\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"360\",\"selected\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"allowed\":\"24\",\"allowWorn\":\"1\",\"used\":\"6\",\"worn\":\"0\",\"unused\":\"18\",\"remaining\":\"18\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"2\",\"unitPrice\":\"72\",\"price\":\"144\",\"inputs\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\",\"equipped\":\"1\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"quantity\":\"2\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"3\",\"crit\":\"23\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"6\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"4\",\"quantity\":\"6\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"1\",\"quantity\":\"1\"}]}}}",
+        "created": 1794159624
+      },
+      {
+        "owner": "888",
+        "key": "c331c619-d9e2-4aed-b4b1-c1c08f119438",
+        "payload": "c03956de092860782e56b8825dc8dcfe642a7981a88c6a87becac56f7c711000",
+        "result": "",
+        "created": 1
+      },
+      {
+        "owner": "888",
+        "key": "f3231712-1df4-4e0d-aa10-9b69e87092d4",
+        "payload": "{\"action\":{\"crit\":\"13\",\"kind\":\"raw-purple\",\"quantity\":\"27\",\"tier\":0,\"type\":\"original.put\",\"value\":\"5\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"f3231712-1df4-4e0d-aa10-9b69e87092d4\",\"revision\":\"1\"}",
+        "result": "{\"revision\":\"2\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"200\",\"health\":\"200\",\"crit\":\"0\",\"critIncomplete\":false},\"lastCraft\":null,\"createdId\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "a6e4cba0-6353-4740-a294-9fc74ac93643",
+        "payload": "{\"action\":{\"crit\":\"20\",\"kind\":\"🧿\",\"quantity\":\"2\",\"tier\":1,\"type\":\"original.put\",\"value\":\"8\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"a6e4cba0-6353-4740-a294-9fc74ac93643\",\"revision\":\"2\"}",
+        "result": "{\"revision\":\"3\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":false,\"spent\":\"0\",\"equipment\":[],\"equippedMods\":[],\"stats\":{\"damage\":\"200\",\"health\":\"200\",\"crit\":\"0\",\"critIncomplete\":false},\"lastCraft\":null,\"createdId\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "15ad251f-0862-4613-ab10-b0ae5e6a7d59",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"3\"}],\"type\":\"equip\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"15ad251f-0862-4613-ab10-b0ae5e6a7d59\",\"revision\":\"3\"}",
+        "result": "{\"revision\":\"4\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"0\",\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"3\"}],\"equippedMods\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"3\",\"crit\":\"13\"}],\"stats\":{\"damage\":\"230\",\"health\":\"200\",\"crit\":\"117\",\"critIncomplete\":false},\"lastCraft\":null}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "fba00571-c073-4e68-9012-230b9870a78c",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"3\",\"worn\":\"1\"}],\"type\":\"craft\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"fba00571-c073-4e68-9012-230b9870a78c\",\"revision\":\"4\"}",
+        "result": "{\"revision\":\"5\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"24\",\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"equippedMods\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"2\",\"crit\":\"13\"}],\"stats\":{\"damage\":\"220\",\"health\":\"200\",\"crit\":\"78\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"single\",\"consumed\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"3\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"3\"}],\"price\":\"24\",\"ledger\":{\"inputs\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"3\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"0\",\"quantity\":\"3\"}]}},\"createdId\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "a04ab2a4-d365-42af-9596-8a9b87f0a1ee",
+        "payload": "{\"action\":{\"fuse\":{\"count\":\"1\",\"items\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"quantity\":\"3\",\"worn\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"24\",\"worn\":\"2\"}],\"kind\":\"🧿\",\"targetTier\":3},\"type\":\"fuse\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"a04ab2a4-d365-42af-9596-8a9b87f0a1ee\",\"revision\":\"5\"}",
+        "result": "{\"revision\":\"6\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"600\",\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"equippedMods\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"2\",\"crit\":\"13\"}],\"stats\":{\"damage\":\"220\",\"health\":\"200\",\"crit\":\"78\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"20\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}],\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"price\":\"576\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"576\",\"selected\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"allowed\":\"3\",\"allowWorn\":\"0\",\"used\":\"3\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"allowed\":\"24\",\"allowWorn\":\"2\",\"used\":\"18\",\"worn\":\"0\",\"unused\":\"6\",\"remaining\":\"6\"}],\"steps\":[{\"fromTier\":0,\"toTier\":1,\"count\":\"6\",\"unitPrice\":\"24\",\"price\":\"144\",\"inputs\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\",\"equipped\":\"2\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"quantity\":\"6\"}]},{\"fromTier\":1,\"toTier\":2,\"count\":\"3\",\"unitPrice\":\"72\",\"price\":\"216\",\"inputs\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"9\",\"crit\":\"20\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"f7d83d35-0dfa-4272-944a-6199cabec5ad\",\"start\":\"0\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"5\",\"quantity\":\"18\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"1\",\"quantity\":\"2\"}]}},\"createdId\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "98fb29fe-c2b4-4719-a76a-51e76fa753e6",
+        "payload": "{\"action\":{\"crit\":\"45\",\"kind\":\"🧿\",\"quantity\":\"2\",\"tier\":3,\"type\":\"original.put\",\"value\":\"18\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"98fb29fe-c2b4-4719-a76a-51e76fa753e6\",\"revision\":\"6\"}",
+        "result": "{\"revision\":\"7\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"600\",\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"equippedMods\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"2\",\"crit\":\"13\"}],\"stats\":{\"damage\":\"220\",\"health\":\"200\",\"crit\":\"78\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"20\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}],\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"price\":\"576\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"576\",\"selected\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"allowed\":\"3\",\"allowWorn\":\"0\",\"used\":\"3\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"allowed\":\"24\",\"allowWorn\":\"2\",\"used\":\"18\",\"worn\":\"0\",\"unused\":\"6\",\"remaining\":\"6\"}],\"steps\":[{\"fromTier\":0,\"toTier\":1,\"count\":\"6\",\"unitPrice\":\"24\",\"price\":\"144\",\"inputs\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\",\"equipped\":\"2\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"quantity\":\"6\"}]},{\"fromTier\":1,\"toTier\":2,\"count\":\"3\",\"unitPrice\":\"72\",\"price\":\"216\",\"inputs\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"9\",\"crit\":\"20\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"f7d83d35-0dfa-4272-944a-6199cabec5ad\",\"start\":\"0\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"5\",\"quantity\":\"18\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"1\",\"quantity\":\"2\"}]}},\"createdId\":\"6a6670c8-4fd5-4eb9-8e93-18f7408652c6\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "1eb88b56-7229-47b8-b2bd-e890671a80ca",
+        "payload": "{\"action\":{\"crit\":\"13\",\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"quantity\":\"29\",\"tier\":0,\"type\":\"original.put\",\"value\":\"5\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"1eb88b56-7229-47b8-b2bd-e890671a80ca\",\"revision\":\"7\"}",
+        "result": "{\"revision\":\"8\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"600\",\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"equippedMods\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"2\",\"crit\":\"13\"}],\"stats\":{\"damage\":\"220\",\"health\":\"200\",\"crit\":\"78\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"20\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}],\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"price\":\"576\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"576\",\"selected\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"allowed\":\"3\",\"allowWorn\":\"0\",\"used\":\"3\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"allowed\":\"24\",\"allowWorn\":\"2\",\"used\":\"18\",\"worn\":\"0\",\"unused\":\"6\",\"remaining\":\"6\"}],\"steps\":[{\"fromTier\":0,\"toTier\":1,\"count\":\"6\",\"unitPrice\":\"24\",\"price\":\"144\",\"inputs\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\",\"equipped\":\"2\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"quantity\":\"6\"}]},{\"fromTier\":1,\"toTier\":2,\"count\":\"3\",\"unitPrice\":\"72\",\"price\":\"216\",\"inputs\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"9\",\"crit\":\"20\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"f7d83d35-0dfa-4272-944a-6199cabec5ad\",\"start\":\"0\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"5\",\"quantity\":\"18\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"1\",\"quantity\":\"2\"}]}},\"createdId\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\"}",
+        "created": 1794166225
+      },
+      {
+        "owner": "888",
+        "key": "1ae999c1-1ed1-4bb9-a4f3-45c04657c153",
+        "payload": "{\"action\":{\"items\":[{\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\",\"quantity\":\"1\"}],\"type\":\"equip\"},\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"key\":\"1ae999c1-1ed1-4bb9-a4f3-45c04657c153\",\"revision\":\"8\"}",
+        "result": "{\"revision\":\"9\",\"level\":\"200\",\"experiment\":\"ae0407dc-da3c-4972-bc9b-624623e39bf5\",\"started\":true,\"spent\":\"600\",\"equipment\":[{\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\",\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"quantity\":\"1\",\"crit\":\"45\"}],\"stats\":{\"damage\":\"236\",\"health\":\"200\",\"crit\":\"135\",\"critIncomplete\":false},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"20\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}],\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"price\":\"576\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"576\",\"selected\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"allowed\":\"3\",\"allowWorn\":\"0\",\"used\":\"3\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"allowed\":\"24\",\"allowWorn\":\"2\",\"used\":\"18\",\"worn\":\"0\",\"unused\":\"6\",\"remaining\":\"6\"}],\"steps\":[{\"fromTier\":0,\"toTier\":1,\"count\":\"6\",\"unitPrice\":\"24\",\"price\":\"144\",\"inputs\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\",\"equipped\":\"2\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"quantity\":\"6\"}]},{\"fromTier\":1,\"toTier\":2,\"count\":\"3\",\"unitPrice\":\"72\",\"price\":\"216\",\"inputs\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"9\",\"crit\":\"20\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"f7d83d35-0dfa-4272-944a-6199cabec5ad\",\"start\":\"0\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"5\",\"quantity\":\"18\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"1\",\"quantity\":\"2\"}]}}}",
+        "created": 1794166225
+      },
+      {
+        "owner": "666",
+        "key": "f462f8d3-80c7-467c-bc51-21abfcc1b5a9",
+        "payload": "{\"action\":{\"fuse\":{\"count\":\"1\",\"items\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\",\"worn\":\"0\"},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"quantity\":\"2\",\"worn\":\"0\"}],\"kind\":\"🧿\",\"targetTier\":2},\"type\":\"fuse\"},\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"key\":\"f462f8d3-80c7-467c-bc51-21abfcc1b5a9\",\"revision\":\"6\"}",
+        "result": "{\"revision\":\"7\",\"level\":\"1\",\"experiment\":\"bad8d8ef-599f-4989-8cac-f67de5c64108\",\"started\":true,\"spent\":\"144\",\"equipment\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"equippedMods\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":null}],\"stats\":{\"damage\":\"2\",\"health\":\"1\",\"crit\":null,\"critIncomplete\":true},\"lastCraft\":{\"type\":\"batch\",\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":null},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"2\",\"crit\":\"44\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\"}],\"equipment\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"price\":\"72\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":2,\"count\":\"1\",\"price\":\"72\",\"selected\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"3\"},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"allowed\":\"2\",\"allowWorn\":\"0\",\"used\":\"2\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"1\",\"unitPrice\":\"72\",\"price\":\"72\",\"inputs\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":null,\"equipped\":\"0\"},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"2\",\"crit\":\"44\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"5\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":null},{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"44\"},{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"4\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"44\"}],\"outputs\":[{\"origin\":\"dfd40458-5566-4b19-a58c-8c7b6b7cfbc0\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"48476a12-ceb5-4e87-8997-e5a3da28a0ee\",\"start\":\"0\",\"quantity\":\"1\"}]}},\"createdId\":\"02309549-702a-464c-ae32-0426f9ac33bf\"}",
+        "created": 1794166225
+      }
+    ],
+    "groups": [
+      {
+        "owner": "111",
+        "scope": "original",
+        "id": "d2f4f9cb-4c3c-469c-afb9-6b70bfba99ea",
+        "kind": "💢",
+        "tier": 3,
+        "value": "18",
+        "quantity": "6",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "scope": "original",
+        "id": "50aad6b7-2dd7-4abf-a457-0a87f1971aa0",
+        "kind": "💢",
+        "tier": 3,
+        "value": "18",
+        "quantity": "3",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "scope": "original",
+        "id": "8e50a648-4d99-493a-96fd-20541adfaa3b",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "1",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "scope": "original",
+        "id": "c5cc5932-ebde-4389-bdb7-3e3bbf1b4ca8",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "1",
+        "crit": ""
+      },
+      {
+        "owner": "222",
+        "scope": "original",
+        "id": "f592e1ac-b756-4e32-b926-20de9cecf9b6",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "2",
+        "crit": ""
+      },
+      {
+        "owner": "333",
+        "scope": "original",
+        "id": "1b06718a-59ce-4f48-98e9-b7cfe7cdd88a",
+        "kind": "💚",
+        "tier": 6,
+        "value": "9007199254740993",
+        "quantity": "9007199254740993",
+        "crit": ""
+      },
+      {
+        "owner": "333",
+        "scope": "original",
+        "id": "9021be9f-eef0-4f0a-96c7-d3ae4398e9ef",
+        "kind": "💚",
+        "tier": 6,
+        "value": "9007199254740993",
+        "quantity": "9007199254740995",
+        "crit": ""
+      },
+      {
+        "owner": "444",
+        "scope": "original",
+        "id": "4c8399d3-3f38-4630-abcb-985b7fc49431",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "3",
+        "crit": ""
+      },
+      {
+        "owner": "555",
+        "scope": "original",
+        "id": "2163d04e-5db8-46c9-9a3e-70d0a7a29dc5",
+        "kind": "💚",
+        "tier": 2,
+        "value": "100",
+        "quantity": "5",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "scope": "work",
+        "id": "1fcf43af-5b4d-46ef-aee4-d63c0e0cc510",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "2",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "scope": "work",
+        "id": "b90b1f78-635d-40dd-a0fe-4b0d38aa49f8",
+        "kind": "💢",
+        "tier": 5,
+        "value": "41",
+        "quantity": "1",
+        "crit": ""
+      },
+      {
+        "owner": "222",
+        "scope": "work",
+        "id": "f592e1ac-b756-4e32-b926-20de9cecf9b6",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "2",
+        "crit": ""
+      },
+      {
+        "owner": "333",
+        "scope": "work",
+        "id": "1b06718a-59ce-4f48-98e9-b7cfe7cdd88a",
+        "kind": "💚",
+        "tier": 6,
+        "value": "9007199254740993",
+        "quantity": "18014398509481988",
+        "crit": ""
+      },
+      {
+        "owner": "444",
+        "scope": "work",
+        "id": "e5f8d25e-3c4e-4818-83cd-cea449df7928",
+        "kind": "🅾",
+        "tier": 2,
+        "value": "15",
+        "quantity": "1",
+        "crit": ""
+      },
+      {
+        "owner": "555",
+        "scope": "work",
+        "id": "2163d04e-5db8-46c9-9a3e-70d0a7a29dc5",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "quantity": "3",
+        "crit": ""
+      },
+      {
+        "owner": "666",
+        "scope": "original",
+        "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "quantity": "9",
+        "crit": ""
+      },
+      {
+        "owner": "666",
+        "scope": "work",
+        "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "quantity": "3",
+        "crit": ""
+      },
+      {
+        "owner": "666",
+        "scope": "work",
+        "id": "02309549-702a-464c-ae32-0426f9ac33bf",
+        "kind": "🧿",
+        "tier": 2,
+        "value": "12",
+        "quantity": "2",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "scope": "original",
+        "id": "a6797ed0-45e0-4e60-bebd-d63736b118d0",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "9007199254740995",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "scope": "work",
+        "id": "a6797ed0-45e0-4e60-bebd-d63736b118d0",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "18014398509481988",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "scope": "original",
+        "id": "5a999e9a-cde5-4e29-89a0-ec2118a9bfad",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "quantity": "9007199254740993",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "scope": "original",
+        "id": "f4e5c6c7-661d-44e6-b7bd-f3577d04e681",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "quantity": "29",
+        "crit": "15"
+      },
+      {
+        "owner": "777",
+        "scope": "work",
+        "id": "f4e5c6c7-661d-44e6-b7bd-f3577d04e681",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "quantity": "20",
+        "crit": "15"
+      },
+      {
+        "owner": "777",
+        "scope": "work",
+        "id": "0c53e8aa-d16d-43ba-88df-80d3a95f5bf3",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "1",
+        "crit": "35"
+      },
+      {
+        "owner": "777",
+        "scope": "original",
+        "id": "bd260b3b-2398-49a3-bc02-f06eaf09af69",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "2",
+        "crit": "44"
+      },
+      {
+        "owner": "777",
+        "scope": "work",
+        "id": "bd260b3b-2398-49a3-bc02-f06eaf09af69",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "2",
+        "crit": "44"
+      },
+      {
+        "owner": "888",
+        "scope": "original",
+        "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+        "kind": "raw-purple",
+        "tier": 0,
+        "value": "5",
+        "quantity": "29",
+        "crit": "13"
+      },
+      {
+        "owner": "888",
+        "scope": "work",
+        "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+        "kind": "raw-purple",
+        "tier": 0,
+        "value": "5",
+        "quantity": "8",
+        "crit": "13"
+      },
+      {
+        "owner": "888",
+        "scope": "original",
+        "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "quantity": "2",
+        "crit": "20"
+      },
+      {
+        "owner": "888",
+        "scope": "work",
+        "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "3",
+        "crit": "45"
+      },
+      {
+        "owner": "888",
+        "scope": "original",
+        "id": "6a6670c8-4fd5-4eb9-8e93-18f7408652c6",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "2",
+        "crit": "45"
+      }
+    ],
+    "history": [
+      {
+        "seq": 1,
+        "owner": "111",
+        "body": "{\"consumed\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\"}],\"price\":\"594\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"87eb5b7b-88c9-4ed3-9385-1482f1d170d3\",\"start\":\"0\",\"born\":\"-6\"}],\"outputs\":[{\"origin\":\"8d61bba1-d295-4fb7-a2cf-d0373342e14d\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"0\",\"quantity\":\"1\"}]}}"
+      },
+      {
+        "seq": 2,
+        "owner": "111",
+        "body": "{\"consumed\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"2\"}],\"price\":\"594\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"87eb5b7b-88c9-4ed3-9385-1482f1d170d3\",\"start\":\"3\",\"born\":\"-6\"}],\"outputs\":[{\"origin\":\"6e276675-762c-4c77-b91a-6def3c2d9ae5\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"0\",\"quantity\":\"2\"}]}}"
+      },
+      {
+        "seq": 3,
+        "owner": "111",
+        "body": "{\"consumed\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"3\"}],\"price\":\"594\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"50aad6b7-2dd7-4abf-a457-0a87f1971aa0\",\"kind\":\"💢\",\"tier\":3,\"value\":\"18\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"87eb5b7b-88c9-4ed3-9385-1482f1d170d3\",\"start\":\"6\",\"born\":\"-6\"}],\"outputs\":[{\"origin\":\"e0fd6fb6-1467-45c1-8dbd-68f182b88263\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"0\",\"quantity\":\"2\"},{\"origin\":\"8d61bba1-d295-4fb7-a2cf-d0373342e14d\",\"start\":\"0\",\"quantity\":\"1\"}]}}"
+      },
+      {
+        "seq": 4,
+        "owner": "111",
+        "body": "{\"consumed\":[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"💢\",\"tier\":5,\"value\":\"41\",\"id\":\"b90b1f78-635d-40dd-a0fe-4b0d38aa49f8\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"3\"}],\"price\":\"1782\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null,\"origin\":\"6e276675-762c-4c77-b91a-6def3c2d9ae5\",\"start\":\"0\",\"born\":\"-3\"},{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null,\"origin\":\"e0fd6fb6-1467-45c1-8dbd-68f182b88263\",\"start\":\"0\",\"born\":\"-2\"},{\"kind\":\"💢\",\"tier\":4,\"value\":\"27\",\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\",\"crit\":null,\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"0\",\"born\":\"-6\"}],\"outputs\":[{\"origin\":\"05e99628-a737-4ef3-ab6a-84de50c2ee7d\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"0\",\"quantity\":\"2\"},{\"origin\":\"8d61bba1-d295-4fb7-a2cf-d0373342e14d\",\"start\":\"0\",\"quantity\":\"1\"}]}}"
+      },
+      {
+        "seq": 5,
+        "owner": "444",
+        "body": "{\"consumed\":[{\"id\":\"4c8399d3-3f38-4630-abcb-985b7fc49431\",\"kind\":\"🅾\",\"tier\":1,\"value\":\"10\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"🅾\",\"tier\":2,\"value\":\"15\",\"id\":\"e5f8d25e-3c4e-4818-83cd-cea449df7928\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[],\"price\":\"84\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"4c8399d3-3f38-4630-abcb-985b7fc49431\",\"kind\":\"🅾\",\"tier\":1,\"value\":\"10\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"a148e0db-b106-4f9c-ab55-1967f4b0ae11\",\"start\":\"0\",\"born\":\"-7\"}],\"outputs\":[{\"origin\":\"3f256ad7-440f-427b-ad41-b4b38e0a970a\",\"quantity\":\"1\"}],\"worn\":[]}}"
+      },
+      {
+        "seq": 6,
+        "owner": "666",
+        "body": "{\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":null}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\",\"crit\":null},\"equipment\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"quantity\":\"1\"}],\"price\":\"72\",\"type\":\"single\",\"ledger\":{\"inputs\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":null,\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"1\",\"born\":\"-8\"}],\"outputs\":[{\"origin\":\"48476a12-ceb5-4e87-8997-e5a3da28a0ee\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"0\",\"quantity\":\"1\"}]}}"
+      },
+      {
+        "seq": 7,
+        "owner": "777",
+        "body": "{\"type\":\"single\",\"consumed\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"2\"}],\"price\":\"72\",\"ledger\":{\"inputs\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"2\",\"quantity\":\"2\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"0\",\"quantity\":\"2\"}]}}"
+      },
+      {
+        "seq": 8,
+        "owner": "777",
+        "body": "{\"type\":\"batch\",\"consumed\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"1\",\"crit\":\"23\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\",\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\"}],\"equipment\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"quantity\":\"1\"}],\"price\":\"360\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"360\",\"selected\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"allowed\":\"24\",\"allowWorn\":\"1\",\"used\":\"6\",\"worn\":\"0\",\"unused\":\"18\",\"remaining\":\"18\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"2\",\"unitPrice\":\"72\",\"price\":\"144\",\"inputs\":[{\"id\":\"f4e5c6c7-661d-44e6-b7bd-f3577d04e681\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"6\",\"crit\":\"15\",\"equipped\":\"1\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\",\"quantity\":\"2\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"id\":\"e6caeb02-1aa2-43cd-bb10-c9172087d7ed\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"quantity\":\"3\",\"crit\":\"23\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"35\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"8394f335-f247-4651-a889-aa50566bd7ab\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"6\",\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"23\"},{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"4\",\"quantity\":\"6\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"15\"}],\"outputs\":[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"50e9550a-c58e-4c95-a98a-37ffb487b01f\",\"start\":\"1\",\"quantity\":\"1\"}]}}"
+      },
+      {
+        "seq": 9,
+        "owner": "888",
+        "body": "{\"type\":\"single\",\"consumed\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"3\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"quantity\":\"1\"},\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"3\"}],\"price\":\"24\",\"ledger\":{\"inputs\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"3\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"0\",\"quantity\":\"3\"}]}}"
+      },
+      {
+        "seq": 10,
+        "owner": "888",
+        "body": "{\"type\":\"batch\",\"consumed\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"3\",\"crit\":\"20\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\"}],\"output\":{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\",\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\"}],\"equipment\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"quantity\":\"2\"}],\"price\":\"576\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":3,\"count\":\"1\",\"price\":\"576\",\"selected\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"allowed\":\"3\",\"allowWorn\":\"0\",\"used\":\"3\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"},{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"allowed\":\"24\",\"allowWorn\":\"2\",\"used\":\"18\",\"worn\":\"0\",\"unused\":\"6\",\"remaining\":\"6\"}],\"steps\":[{\"fromTier\":0,\"toTier\":1,\"count\":\"6\",\"unitPrice\":\"24\",\"price\":\"144\",\"inputs\":[{\"id\":\"a6299f67-7b08-478e-a0d8-2386ef847f11\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"quantity\":\"18\",\"crit\":\"13\",\"equipped\":\"2\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\",\"quantity\":\"6\"}]},{\"fromTier\":1,\"toTier\":2,\"count\":\"3\",\"unitPrice\":\"72\",\"price\":\"216\",\"inputs\":[{\"id\":\"4715b4b2-ddcd-4e7c-845f-3148f6fea845\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"9\",\"crit\":\"20\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}]},{\"fromTier\":2,\"toTier\":3,\"count\":\"1\",\"unitPrice\":\"216\",\"price\":\"216\",\"inputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":\"30\",\"quantity\":\"3\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":3,\"value\":\"18\",\"crit\":\"45\",\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"f7d83d35-0dfa-4272-944a-6199cabec5ad\",\"start\":\"0\",\"quantity\":\"2\",\"born\":\"2\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"0fc4a814-3969-474c-b10c-fd4f3cf45059\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"4\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"20\"},{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"5\",\"quantity\":\"18\",\"born\":\"2\",\"kind\":\"raw-purple\",\"tier\":0,\"value\":\"5\",\"crit\":\"13\"}],\"outputs\":[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"690f56c8-b41a-43e1-82cb-7afcfd69d6ae\",\"start\":\"1\",\"quantity\":\"2\"}]}}"
+      },
+      {
+        "seq": 11,
+        "owner": "666",
+        "body": "{\"type\":\"batch\",\"consumed\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":null},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"2\",\"crit\":\"44\"}],\"output\":{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\"},\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\",\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\"}],\"equipment\":[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}],\"price\":\"72\",\"plan\":{\"kind\":\"🧿\",\"targetTier\":2,\"count\":\"1\",\"price\":\"72\",\"selected\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"allowed\":\"1\",\"allowWorn\":\"0\",\"used\":\"1\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"3\"},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"allowed\":\"2\",\"allowWorn\":\"0\",\"used\":\"2\",\"worn\":\"0\",\"unused\":\"0\",\"remaining\":\"0\"}],\"steps\":[{\"fromTier\":1,\"toTier\":2,\"count\":\"1\",\"unitPrice\":\"72\",\"price\":\"72\",\"inputs\":[{\"id\":\"a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"1\",\"crit\":null,\"equipped\":\"0\"},{\"id\":\"701b55a5-ea84-41dc-a7a9-cc196c4b9b45\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"quantity\":\"2\",\"crit\":\"44\",\"equipped\":\"0\"}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\"}]}],\"outputs\":[{\"kind\":\"🧿\",\"tier\":2,\"value\":\"12\",\"crit\":null,\"quantity\":\"1\"}]},\"ledger\":{\"inputs\":[{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"5\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":null},{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"0\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"44\"},{\"origin\":\"bfe93ebc-aad2-4376-9b21-0ded4a99380f\",\"start\":\"4\",\"quantity\":\"1\",\"born\":\"-8\",\"kind\":\"🧿\",\"tier\":1,\"value\":\"8\",\"crit\":\"44\"}],\"outputs\":[{\"origin\":\"dfd40458-5566-4b19-a58c-8c7b6b7cfbc0\",\"quantity\":\"1\"}],\"worn\":[{\"origin\":\"48476a12-ceb5-4e87-8997-e5a3da28a0ee\",\"start\":\"0\",\"quantity\":\"1\"}]}}"
+      }
+    ],
+    "oidc_codes": [],
+    "players": [
+      {
+        "owner": "111",
+        "revision": "14",
+        "level": "200",
+        "experiment": "1fc57974-4695-414d-a683-ea0103987bc6",
+        "started": 1,
+        "spent": "3564",
+        "equipment": "[{\"id\":\"1fcf43af-5b4d-46ef-aee4-d63c0e0cc510\",\"quantity\":\"1\"}]",
+        "worn_ranges": "[{\"origin\":\"1452e294-202d-431f-932d-e12b8c455f7a\",\"start\":\"1\",\"quantity\":\"1\"}]"
+      },
+      {
+        "owner": "222",
+        "revision": "3",
+        "level": "1",
+        "experiment": "efebad9a-6317-4d24-857d-e057273a7d1e",
+        "started": 0,
+        "spent": "0",
+        "equipment": "[]",
+        "worn_ranges": "[]"
+      },
+      {
+        "owner": "333",
+        "revision": "4",
+        "level": "1",
+        "experiment": "f5b95204-b029-49fa-b573-b7737d2085dd",
+        "started": 0,
+        "spent": "0",
+        "equipment": "[]",
+        "worn_ranges": "[]"
+      },
+      {
+        "owner": "444",
+        "revision": "4",
+        "level": "1",
+        "experiment": "9f806184-55f9-4aa2-9c9f-83505f2ae8ec",
+        "started": 1,
+        "spent": "84",
+        "equipment": "[]",
+        "worn_ranges": "[]"
+      },
+      {
+        "owner": "555",
+        "revision": "5",
+        "level": "1",
+        "experiment": "7746d8a9-cae9-46f5-a486-e23f70898abb",
+        "started": 1,
+        "spent": "0",
+        "equipment": "[{\"id\":\"2163d04e-5db8-46c9-9a3e-70d0a7a29dc5\",\"quantity\":\"1\"}]",
+        "worn_ranges": "[{\"origin\":\"b4d2aaa3-cbc9-4c95-8db1-1a27dba1280d\",\"start\":\"0\",\"quantity\":\"1\"}]"
+      },
+      {
+        "owner": "666",
+        "revision": "7",
+        "level": "1",
+        "experiment": "bad8d8ef-599f-4989-8cac-f67de5c64108",
+        "started": 1,
+        "spent": "144",
+        "equipment": "[{\"id\":\"02309549-702a-464c-ae32-0426f9ac33bf\",\"quantity\":\"1\"}]",
+        "worn_ranges": "[{\"origin\":\"48476a12-ceb5-4e87-8997-e5a3da28a0ee\",\"start\":\"0\",\"quantity\":\"1\"}]"
+      },
+      {
+        "owner": "777",
+        "revision": "11",
+        "level": "200",
+        "experiment": "0b921b38-2944-419f-b9c7-5c20b13f8121",
+        "started": 1,
+        "spent": "432",
+        "equipment": "[{\"id\":\"0c53e8aa-d16d-43ba-88df-80d3a95f5bf3\",\"quantity\":\"1\"}]",
+        "worn_ranges": "[{\"origin\":\"11361a71-0898-4ae1-baf9-0a6c3b4090c8\",\"start\":\"0\",\"quantity\":\"1\"}]"
+      },
+      {
+        "owner": "888",
+        "revision": "9",
+        "level": "200",
+        "experiment": "ae0407dc-da3c-4972-bc9b-624623e39bf5",
+        "started": 1,
+        "spent": "600",
+        "equipment": "[{\"id\":\"376d10f2-29dd-43b7-872d-c031f6eab0e8\",\"quantity\":\"1\"}]",
+        "worn_ranges": "[{\"origin\":\"e4cb4260-6a43-4be0-af21-f8dcedded7fe\",\"start\":\"0\",\"quantity\":\"1\"}]"
+      }
+    ],
+    "sessions": [],
+    "work_lots": [
+      {
+        "owner": "111",
+        "origin": "1452e294-202d-431f-932d-e12b8c455f7a",
+        "start": "1",
+        "quantity": "1",
+        "born": "-6",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "origin": "8d61bba1-d295-4fb7-a2cf-d0373342e14d",
+        "start": "0",
+        "quantity": "1",
+        "born": "-4",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "crit": ""
+      },
+      {
+        "owner": "111",
+        "origin": "05e99628-a737-4ef3-ab6a-84de50c2ee7d",
+        "start": "0",
+        "quantity": "1",
+        "born": "-1",
+        "kind": "💢",
+        "tier": 5,
+        "value": "41",
+        "crit": ""
+      },
+      {
+        "owner": "222",
+        "origin": "378237a3-3338-4c94-9d3d-271fd1ab2c98",
+        "start": "0",
+        "quantity": "2",
+        "born": "-2",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "crit": ""
+      },
+      {
+        "owner": "333",
+        "origin": "dfcd8edc-21d9-4b08-9ba3-e1c22932a519",
+        "start": "0",
+        "quantity": "18014398509481988",
+        "born": "-2",
+        "kind": "💚",
+        "tier": 6,
+        "value": "9007199254740993",
+        "crit": ""
+      },
+      {
+        "owner": "444",
+        "origin": "3f256ad7-440f-427b-ad41-b4b38e0a970a",
+        "start": "0",
+        "quantity": "1",
+        "born": "-1",
+        "kind": "🅾",
+        "tier": 2,
+        "value": "15",
+        "crit": ""
+      },
+      {
+        "owner": "555",
+        "origin": "b4d2aaa3-cbc9-4c95-8db1-1a27dba1280d",
+        "start": "0",
+        "quantity": "3",
+        "born": "-2",
+        "kind": "🅾",
+        "tier": 1,
+        "value": "10",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "origin": "11361a71-0898-4ae1-baf9-0a6c3b4090c8",
+        "start": "0",
+        "quantity": "1",
+        "born": "7",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "crit": "35"
+      },
+      {
+        "owner": "777",
+        "origin": "50e9550a-c58e-4c95-a98a-37ffb487b01f",
+        "start": "1",
+        "quantity": "1",
+        "born": "4",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "crit": "15"
+      },
+      {
+        "owner": "777",
+        "origin": "50e9550a-c58e-4c95-a98a-37ffb487b01f",
+        "start": "10",
+        "quantity": "17",
+        "born": "4",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "crit": "15"
+      },
+      {
+        "owner": "777",
+        "origin": "95d87cb3-63af-4c45-be0e-e985e506136e",
+        "start": "0",
+        "quantity": "9007199254740993",
+        "born": "4",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "crit": ""
+      },
+      {
+        "owner": "777",
+        "origin": "9f026da1-69b6-478b-8952-6250adfe0960",
+        "start": "0",
+        "quantity": "2",
+        "born": "9",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "crit": "15"
+      },
+      {
+        "owner": "777",
+        "origin": "aa68dbdf-6f06-48a2-b827-f31f94cdc219",
+        "start": "0",
+        "quantity": "2",
+        "born": "8",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "crit": "44"
+      },
+      {
+        "owner": "777",
+        "origin": "ed37e391-69d8-45e0-8e6a-63e98523654c",
+        "start": "0",
+        "quantity": "9007199254740995",
+        "born": "4",
+        "kind": "💢",
+        "tier": 4,
+        "value": "27",
+        "crit": ""
+      },
+      {
+        "owner": "888",
+        "origin": "4d1c3c38-7b70-4b18-aa32-f95289679b47",
+        "start": "0",
+        "quantity": "2",
+        "born": "7",
+        "kind": "raw-purple",
+        "tier": 0,
+        "value": "5",
+        "crit": "13"
+      },
+      {
+        "owner": "888",
+        "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+        "start": "1",
+        "quantity": "2",
+        "born": "2",
+        "kind": "raw-purple",
+        "tier": 0,
+        "value": "5",
+        "crit": "13"
+      },
+      {
+        "owner": "888",
+        "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+        "start": "23",
+        "quantity": "4",
+        "born": "2",
+        "kind": "raw-purple",
+        "tier": 0,
+        "value": "5",
+        "crit": "13"
+      },
+      {
+        "owner": "888",
+        "origin": "79417626-c4bf-49dd-89d2-1ca7a19cbd76",
+        "start": "0",
+        "quantity": "2",
+        "born": "6",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "crit": "45"
+      },
+      {
+        "owner": "888",
+        "origin": "e4cb4260-6a43-4be0-af21-f8dcedded7fe",
+        "start": "0",
+        "quantity": "1",
+        "born": "5",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "crit": "45"
+      },
+      {
+        "owner": "666",
+        "origin": "48476a12-ceb5-4e87-8997-e5a3da28a0ee",
+        "start": "0",
+        "quantity": "1",
+        "born": "-1",
+        "kind": "🧿",
+        "tier": 2,
+        "value": "12",
+        "crit": ""
+      },
+      {
+        "owner": "666",
+        "origin": "bfe93ebc-aad2-4376-9b21-0ded4a99380f",
+        "start": "6",
+        "quantity": "3",
+        "born": "-8",
+        "kind": "🧿",
+        "tier": 1,
+        "value": "8",
+        "crit": ""
+      },
+      {
+        "owner": "666",
+        "origin": "dfd40458-5566-4b19-a58c-8c7b6b7cfbc0",
+        "start": "0",
+        "quantity": "1",
+        "born": "6",
+        "kind": "🧿",
+        "tier": 2,
+        "value": "12",
+        "crit": ""
+      }
+    ]
+  },
+  "owner": "888",
+  "receipt": {
+    "payload": {
+      "key": "a04ab2a4-d365-42af-9596-8a9b87f0a1ee",
+      "revision": "5",
+      "experiment": "ae0407dc-da3c-4972-bc9b-624623e39bf5",
+      "action": {
+        "type": "fuse",
+        "fuse": {
+          "kind": "🧿",
+          "targetTier": 3,
+          "count": "1",
+          "items": [
+            {
+              "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+              "quantity": "3",
+              "worn": "0"
+            },
+            {
+              "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+              "quantity": "24",
+              "worn": "2"
+            }
+          ]
+        }
+      }
+    },
+    "result": {
+      "revision": "6",
+      "level": "200",
+      "experiment": "ae0407dc-da3c-4972-bc9b-624623e39bf5",
+      "started": true,
+      "spent": "600",
+      "equipment": [
+        {
+          "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+          "quantity": "2"
+        }
+      ],
+      "equippedMods": [
+        {
+          "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+          "kind": "raw-purple",
+          "tier": 0,
+          "value": "5",
+          "quantity": "2",
+          "crit": "13"
+        }
+      ],
+      "stats": {
+        "damage": "220",
+        "health": "200",
+        "crit": "78",
+        "critIncomplete": false
+      },
+      "lastCraft": {
+        "type": "batch",
+        "consumed": [
+          {
+            "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+            "kind": "🧿",
+            "tier": 1,
+            "value": "8",
+            "quantity": "3",
+            "crit": "20"
+          },
+          {
+            "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+            "kind": "raw-purple",
+            "tier": 0,
+            "value": "5",
+            "quantity": "18",
+            "crit": "13"
+          }
+        ],
+        "output": {
+          "kind": "🧿",
+          "tier": 3,
+          "value": "18",
+          "crit": "45",
+          "quantity": "1",
+          "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8"
+        },
+        "outputs": [
+          {
+            "kind": "🧿",
+            "tier": 3,
+            "value": "18",
+            "crit": "45",
+            "quantity": "1",
+            "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8"
+          }
+        ],
+        "equipment": [
+          {
+            "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+            "quantity": "2"
+          }
+        ],
+        "price": "576",
+        "plan": {
+          "kind": "🧿",
+          "targetTier": 3,
+          "count": "1",
+          "price": "576",
+          "selected": [
+            {
+              "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+              "allowed": "3",
+              "allowWorn": "0",
+              "used": "3",
+              "worn": "0",
+              "unused": "0",
+              "remaining": "0"
+            },
+            {
+              "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+              "allowed": "24",
+              "allowWorn": "2",
+              "used": "18",
+              "worn": "0",
+              "unused": "6",
+              "remaining": "6"
+            }
+          ],
+          "steps": [
+            {
+              "fromTier": 0,
+              "toTier": 1,
+              "count": "6",
+              "unitPrice": "24",
+              "price": "144",
+              "inputs": [
+                {
+                  "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+                  "kind": "raw-purple",
+                  "tier": 0,
+                  "value": "5",
+                  "quantity": "18",
+                  "crit": "13",
+                  "equipped": "2"
+                }
+              ],
+              "outputs": [
+                {
+                  "kind": "🧿",
+                  "tier": 1,
+                  "value": "8",
+                  "crit": "20",
+                  "quantity": "6"
+                }
+              ]
+            },
+            {
+              "fromTier": 1,
+              "toTier": 2,
+              "count": "3",
+              "unitPrice": "72",
+              "price": "216",
+              "inputs": [
+                {
+                  "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+                  "kind": "🧿",
+                  "tier": 1,
+                  "value": "8",
+                  "quantity": "9",
+                  "crit": "20",
+                  "equipped": "0"
+                }
+              ],
+              "outputs": [
+                {
+                  "kind": "🧿",
+                  "tier": 2,
+                  "value": "12",
+                  "crit": "30",
+                  "quantity": "3"
+                }
+              ]
+            },
+            {
+              "fromTier": 2,
+              "toTier": 3,
+              "count": "1",
+              "unitPrice": "216",
+              "price": "216",
+              "inputs": [
+                {
+                  "kind": "🧿",
+                  "tier": 2,
+                  "value": "12",
+                  "crit": "30",
+                  "quantity": "3"
+                }
+              ],
+              "outputs": [
+                {
+                  "kind": "🧿",
+                  "tier": 3,
+                  "value": "18",
+                  "crit": "45",
+                  "quantity": "1"
+                }
+              ]
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "🧿",
+              "tier": 3,
+              "value": "18",
+              "crit": "45",
+              "quantity": "1"
+            }
+          ]
+        },
+        "ledger": {
+          "inputs": [
+            {
+              "origin": "f7d83d35-0dfa-4272-944a-6199cabec5ad",
+              "start": "0",
+              "quantity": "2",
+              "born": "2",
+              "kind": "🧿",
+              "tier": 1,
+              "value": "8",
+              "crit": "20"
+            },
+            {
+              "origin": "0fc4a814-3969-474c-b10c-fd4f3cf45059",
+              "start": "0",
+              "quantity": "1",
+              "born": "4",
+              "kind": "🧿",
+              "tier": 1,
+              "value": "8",
+              "crit": "20"
+            },
+            {
+              "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+              "start": "5",
+              "quantity": "18",
+              "born": "2",
+              "kind": "raw-purple",
+              "tier": 0,
+              "value": "5",
+              "crit": "13"
+            }
+          ],
+          "outputs": [
+            {
+              "origin": "e4cb4260-6a43-4be0-af21-f8dcedded7fe",
+              "quantity": "1"
+            }
+          ],
+          "worn": [
+            {
+              "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+              "start": "1",
+              "quantity": "2"
+            }
+          ]
+        }
+      },
+      "createdId": "376d10f2-29dd-43b7-872d-c031f6eab0e8"
+    }
+  },
+  "unknownReceipt": {
+    "payload": {
+      "key": "f462f8d3-80c7-467c-bc51-21abfcc1b5a9",
+      "revision": "6",
+      "experiment": "bad8d8ef-599f-4989-8cac-f67de5c64108",
+      "action": {
+        "type": "fuse",
+        "fuse": {
+          "kind": "🧿",
+          "targetTier": 2,
+          "count": "1",
+          "items": [
+            {
+              "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+              "quantity": "1",
+              "worn": "0"
+            },
+            {
+              "id": "701b55a5-ea84-41dc-a7a9-cc196c4b9b45",
+              "quantity": "2",
+              "worn": "0"
+            }
+          ]
+        }
+      }
+    },
+    "result": {
+      "revision": "7",
+      "level": "1",
+      "experiment": "bad8d8ef-599f-4989-8cac-f67de5c64108",
+      "started": true,
+      "spent": "144",
+      "equipment": [
+        {
+          "id": "02309549-702a-464c-ae32-0426f9ac33bf",
+          "quantity": "1"
+        }
+      ],
+      "equippedMods": [
+        {
+          "id": "02309549-702a-464c-ae32-0426f9ac33bf",
+          "kind": "🧿",
+          "tier": 2,
+          "value": "12",
+          "quantity": "1",
+          "crit": null
+        }
+      ],
+      "stats": {
+        "damage": "2",
+        "health": "1",
+        "crit": null,
+        "critIncomplete": true
+      },
+      "lastCraft": {
+        "type": "batch",
+        "consumed": [
+          {
+            "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+            "kind": "🧿",
+            "tier": 1,
+            "value": "8",
+            "quantity": "1",
+            "crit": null
+          },
+          {
+            "id": "701b55a5-ea84-41dc-a7a9-cc196c4b9b45",
+            "kind": "🧿",
+            "tier": 1,
+            "value": "8",
+            "quantity": "2",
+            "crit": "44"
+          }
+        ],
+        "output": {
+          "kind": "🧿",
+          "tier": 2,
+          "value": "12",
+          "crit": null,
+          "quantity": "1",
+          "id": "02309549-702a-464c-ae32-0426f9ac33bf"
+        },
+        "outputs": [
+          {
+            "kind": "🧿",
+            "tier": 2,
+            "value": "12",
+            "crit": null,
+            "quantity": "1",
+            "id": "02309549-702a-464c-ae32-0426f9ac33bf"
+          }
+        ],
+        "equipment": [
+          {
+            "id": "02309549-702a-464c-ae32-0426f9ac33bf",
+            "quantity": "1"
+          }
+        ],
+        "price": "72",
+        "plan": {
+          "kind": "🧿",
+          "targetTier": 2,
+          "count": "1",
+          "price": "72",
+          "selected": [
+            {
+              "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+              "allowed": "1",
+              "allowWorn": "0",
+              "used": "1",
+              "worn": "0",
+              "unused": "0",
+              "remaining": "3"
+            },
+            {
+              "id": "701b55a5-ea84-41dc-a7a9-cc196c4b9b45",
+              "allowed": "2",
+              "allowWorn": "0",
+              "used": "2",
+              "worn": "0",
+              "unused": "0",
+              "remaining": "0"
+            }
+          ],
+          "steps": [
+            {
+              "fromTier": 1,
+              "toTier": 2,
+              "count": "1",
+              "unitPrice": "72",
+              "price": "72",
+              "inputs": [
+                {
+                  "id": "a2c243c3-cc62-43cd-b7f0-a7fe8e36a33b",
+                  "kind": "🧿",
+                  "tier": 1,
+                  "value": "8",
+                  "quantity": "1",
+                  "crit": null,
+                  "equipped": "0"
+                },
+                {
+                  "id": "701b55a5-ea84-41dc-a7a9-cc196c4b9b45",
+                  "kind": "🧿",
+                  "tier": 1,
+                  "value": "8",
+                  "quantity": "2",
+                  "crit": "44",
+                  "equipped": "0"
+                }
+              ],
+              "outputs": [
+                {
+                  "kind": "🧿",
+                  "tier": 2,
+                  "value": "12",
+                  "crit": null,
+                  "quantity": "1"
+                }
+              ]
+            }
+          ],
+          "outputs": [
+            {
+              "kind": "🧿",
+              "tier": 2,
+              "value": "12",
+              "crit": null,
+              "quantity": "1"
+            }
+          ]
+        },
+        "ledger": {
+          "inputs": [
+            {
+              "origin": "bfe93ebc-aad2-4376-9b21-0ded4a99380f",
+              "start": "5",
+              "quantity": "1",
+              "born": "-8",
+              "kind": "🧿",
+              "tier": 1,
+              "value": "8",
+              "crit": null
+            },
+            {
+              "origin": "bfe93ebc-aad2-4376-9b21-0ded4a99380f",
+              "start": "0",
+              "quantity": "1",
+              "born": "-8",
+              "kind": "🧿",
+              "tier": 1,
+              "value": "8",
+              "crit": "44"
+            },
+            {
+              "origin": "bfe93ebc-aad2-4376-9b21-0ded4a99380f",
+              "start": "4",
+              "quantity": "1",
+              "born": "-8",
+              "kind": "🧿",
+              "tier": 1,
+              "value": "8",
+              "crit": "44"
+            }
+          ],
+          "outputs": [
+            {
+              "origin": "dfd40458-5566-4b19-a58c-8c7b6b7cfbc0",
+              "quantity": "1"
+            }
+          ],
+          "worn": [
+            {
+              "origin": "48476a12-ceb5-4e87-8997-e5a3da28a0ee",
+              "start": "0",
+              "quantity": "1"
+            }
+          ]
+        }
+      },
+      "createdId": "02309549-702a-464c-ae32-0426f9ac33bf"
+    }
+  },
+  "expired": {
+    "key": "c331c619-d9e2-4aed-b4b1-c1c08f119438",
+    "revision": "0",
+    "experiment": "ae0407dc-da3c-4972-bc9b-624623e39bf5",
+    "action": {
+      "type": "level",
+      "value": "200"
+    }
+  },
+  "state": {
+    "revision": "9",
+    "level": "200",
+    "experiment": "ae0407dc-da3c-4972-bc9b-624623e39bf5",
+    "started": true,
+    "spent": "600",
+    "equipment": [
+      {
+        "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8",
+        "quantity": "1"
+      }
+    ],
+    "equippedMods": [
+      {
+        "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8",
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "quantity": "1",
+        "crit": "45"
+      }
+    ],
+    "stats": {
+      "damage": "236",
+      "health": "200",
+      "crit": "135",
+      "critIncomplete": false
+    },
+    "lastCraft": {
+      "type": "batch",
+      "consumed": [
+        {
+          "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+          "kind": "🧿",
+          "tier": 1,
+          "value": "8",
+          "quantity": "3",
+          "crit": "20"
+        },
+        {
+          "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+          "kind": "raw-purple",
+          "tier": 0,
+          "value": "5",
+          "quantity": "18",
+          "crit": "13"
+        }
+      ],
+      "output": {
+        "kind": "🧿",
+        "tier": 3,
+        "value": "18",
+        "crit": "45",
+        "quantity": "1",
+        "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8"
+      },
+      "outputs": [
+        {
+          "kind": "🧿",
+          "tier": 3,
+          "value": "18",
+          "crit": "45",
+          "quantity": "1",
+          "id": "376d10f2-29dd-43b7-872d-c031f6eab0e8"
+        }
+      ],
+      "equipment": [
+        {
+          "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+          "quantity": "2"
+        }
+      ],
+      "price": "576",
+      "plan": {
+        "kind": "🧿",
+        "targetTier": 3,
+        "count": "1",
+        "price": "576",
+        "selected": [
+          {
+            "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+            "allowed": "3",
+            "allowWorn": "0",
+            "used": "3",
+            "worn": "0",
+            "unused": "0",
+            "remaining": "0"
+          },
+          {
+            "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+            "allowed": "24",
+            "allowWorn": "2",
+            "used": "18",
+            "worn": "0",
+            "unused": "6",
+            "remaining": "6"
+          }
+        ],
+        "steps": [
+          {
+            "fromTier": 0,
+            "toTier": 1,
+            "count": "6",
+            "unitPrice": "24",
+            "price": "144",
+            "inputs": [
+              {
+                "id": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+                "kind": "raw-purple",
+                "tier": 0,
+                "value": "5",
+                "quantity": "18",
+                "crit": "13",
+                "equipped": "2"
+              }
+            ],
+            "outputs": [
+              {
+                "kind": "🧿",
+                "tier": 1,
+                "value": "8",
+                "crit": "20",
+                "quantity": "6"
+              }
+            ]
+          },
+          {
+            "fromTier": 1,
+            "toTier": 2,
+            "count": "3",
+            "unitPrice": "72",
+            "price": "216",
+            "inputs": [
+              {
+                "id": "4715b4b2-ddcd-4e7c-845f-3148f6fea845",
+                "kind": "🧿",
+                "tier": 1,
+                "value": "8",
+                "quantity": "9",
+                "crit": "20",
+                "equipped": "0"
+              }
+            ],
+            "outputs": [
+              {
+                "kind": "🧿",
+                "tier": 2,
+                "value": "12",
+                "crit": "30",
+                "quantity": "3"
+              }
+            ]
+          },
+          {
+            "fromTier": 2,
+            "toTier": 3,
+            "count": "1",
+            "unitPrice": "216",
+            "price": "216",
+            "inputs": [
+              {
+                "kind": "🧿",
+                "tier": 2,
+                "value": "12",
+                "crit": "30",
+                "quantity": "3"
+              }
+            ],
+            "outputs": [
+              {
+                "kind": "🧿",
+                "tier": 3,
+                "value": "18",
+                "crit": "45",
+                "quantity": "1"
+              }
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "kind": "🧿",
+            "tier": 3,
+            "value": "18",
+            "crit": "45",
+            "quantity": "1"
+          }
+        ]
+      },
+      "ledger": {
+        "inputs": [
+          {
+            "origin": "f7d83d35-0dfa-4272-944a-6199cabec5ad",
+            "start": "0",
+            "quantity": "2",
+            "born": "2",
+            "kind": "🧿",
+            "tier": 1,
+            "value": "8",
+            "crit": "20"
+          },
+          {
+            "origin": "0fc4a814-3969-474c-b10c-fd4f3cf45059",
+            "start": "0",
+            "quantity": "1",
+            "born": "4",
+            "kind": "🧿",
+            "tier": 1,
+            "value": "8",
+            "crit": "20"
+          },
+          {
+            "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+            "start": "5",
+            "quantity": "18",
+            "born": "2",
+            "kind": "raw-purple",
+            "tier": 0,
+            "value": "5",
+            "crit": "13"
+          }
+        ],
+        "outputs": [
+          {
+            "origin": "e4cb4260-6a43-4be0-af21-f8dcedded7fe",
+            "quantity": "1"
+          }
+        ],
+        "worn": [
+          {
+            "origin": "690f56c8-b41a-43e1-82cb-7afcfd69d6ae",
+            "start": "1",
+            "quantity": "2"
+          }
+        ]
+      }
+    }
+  },
+  "rawId": "a6299f67-7b08-478e-a0d8-2386ef847f11",
+  "readyId": "4715b4b2-ddcd-4e7c-845f-3148f6fea845"
+}

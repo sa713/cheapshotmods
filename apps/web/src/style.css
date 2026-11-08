@@ -1972,3 +1972,9 @@ input {
 .fusion-slot .mod-icon {width:40px; height:40px; margin:auto}
 
 .filters>button>.mod-icon {display:inline-flex}
+
+/* Homogeneous automatic batch controls retain exact values and touch targets. */
+.batch-source {margin:16px 0}
+.checkbox-control {display:flex; flex-direction:row; align-items:center; gap:12px; margin:16px 0}
+.checkbox-control input {width:44px; height:44px; flex:0 0 44px; accent-color:var(--lime)}
+.batch-maximum {font-size:20px; margin:20px 0 10px}

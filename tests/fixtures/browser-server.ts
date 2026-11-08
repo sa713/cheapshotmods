@@ -7,6 +7,8 @@ import {app} from '../../apps/server/src/app.js';
 import {issuer,sha256,type Transport} from '../../apps/server/src/auth.js';
 import {Store} from '../../apps/server/src/store.js';
 import {config} from '../helpers.js';
+import {seedV5} from './legacy-v5.js';
+import {rmSync} from 'node:fs';
 import {seedLegacy} from './legacy-v2.js';
 
 const directory=process.env.CHM_BROWSER_DIR!;mkdirSync(directory,{recursive:true});
@@ -27,6 +29,7 @@ const provider=createServer((req,res)=>{void(async()=>{
   if(url.pathname==='/restart'&&req.method==='POST'){
     await server.close();store.close();
     if(url.searchParams.get('legacy')==='1')seedLegacy(directory+'/browser.sqlite',true);
+    if(url.searchParams.get('legacy')==='5'){rmSync(directory+'/browser.sqlite',{force:true});rmSync(directory+'/browser.sqlite-wal',{force:true});rmSync(directory+'/browser.sqlite-shm',{force:true});seedV5(directory+'/browser.sqlite');}
     store=new Store(directory+'/browser.sqlite');
     server=await app(store,{...config,baseUrl:'http://localhost:3100',trustProxy:true},remote);await server.listen({port:3100,host:'127.0.0.1'});res.end('ok');return;
   }

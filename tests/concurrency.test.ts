@@ -15,7 +15,7 @@ for(const mode of ['single','batch','raw-single','raw-batch'])test('two worker t
     const results=await new Promise<{ok:boolean;error?:string}[]>((resolve,reject)=>{
       let ready=0;const results:{ok:boolean;error?:string}[]=[];
       for(let i=0;i<2;i++) {
-        const worker=new Worker(new URL('./fixtures/command-worker.mjs',import.meta.url),{workerData:{path,gate,command:{key:randomUUID(),revision:initial.revision,experiment:initial.experiment,action:mode.endsWith('single')?{type:'craft',items:[choice(id)]}:{type:'fuse',fuse:{kind:mode.startsWith('raw')?'🧿':'🅾',targetTier:mode.startsWith('raw')?1:2,count:'1',items:[choice(id,'6')]}}}}});workers.push(worker);
+        const worker=new Worker(new URL('./fixtures/command-worker.mjs',import.meta.url),{workerData:{path,gate,command:{key:randomUUID(),revision:initial.revision,experiment:initial.experiment,action:mode.endsWith('single')?{type:'craft',items:[choice(id)]}:{type:'fuse',fuse:{id,targetTier:mode.startsWith('raw')?1:2,includeWorn:false,count:'1'}}}}});workers.push(worker);
         worker.on('error',reject);
         worker.on('message',(message:{ready?:boolean;done?:boolean;ok?:boolean;error?:string})=>{
           if(message.ready&&++ready===2){Atomics.store(new Int32Array(gate),0,1);Atomics.notify(new Int32Array(gate),0,2);}

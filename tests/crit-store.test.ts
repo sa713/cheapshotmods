@@ -68,9 +68,9 @@ test('schema-3 migration failure rolls back schema, all owners, history and rece
     const snapshot=(db:Database.Database)=>({version:db.pragma('user_version',{simple:true}),schema:db.prepare('SELECT name,sql FROM sqlite_master ORDER BY name').all(),tables:Object.fromEntries((db.prepare("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").all() as {name:string}[]).map(({name})=>[name,db.prepare('SELECT * FROM '+name).safeIntegers().all()]))});const before=snapshot(db);db.close();assert.throws(()=>new Store(path,phase=>{if(injected&&phase==='migration')throw new Error('fault');}));db=new Database(path);assert.equal(db.pragma('user_version',{simple:true}),3);assert.deepEqual(snapshot(db),before);db.close();
   }finally{rmSync(dir,{recursive:true,force:true});}}
 });
-test('mixed single → batch → single undo survives restart and preserves later replenishment exactly once',()=>{
-  const dir=mkdtempSync(join(tmpdir(),'chm-mixed-')),path=join(dir,'db');let s=new Store(path);try{const id=add(s,'27'),first=command(s,{type:'craft',items:[choice(id)]}).createdId!;
-    command(s,{type:'fuse',fuse:{kind:'🅾',targetTier:3,count:'1',items:[choice(first,'1'),choice(id,'24')]}});
+test('single → homogeneous batch → single undo survives restart and preserves later replenishment exactly once',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'chm-mixed-')),path=join(dir,'db');let s=new Store(path);try{const id=add(s,'27');command(s,{type:'craft',items:[choice(id)]});
+    command(s,{type:'fuse',fuse:{kind:'🅾',targetTier:3,count:'1',items:[choice(id,'24')]}});
     const second=s.inventory('111','work').find(g=>g.tier===3)!;add(s,'2','🅾',3,'23');command(s,{type:'craft',items:[choice(second.id)]});
     const state=s.summary('111'),raw={key:'later-input-add-key-001',revision:state.revision,experiment:state.experiment,action:{type:'original.put',kind:'🅾',tier:1,value:'10',quantity:'2'}};
     const result=s.command('111',raw);assert.deepEqual(s.command('111',raw),result);s.close();s=new Store(path);

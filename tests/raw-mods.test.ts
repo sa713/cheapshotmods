@@ -35,9 +35,9 @@ test('raw equipment shares the cap, sums before rounding and keeps ordinary unkn
   const s=new Store(':memory:');try{const id=add(s,'1000'),ordinary=add(s,'1',{kind:'🅾',tier:1,value:'9'});command(s,{type:'equip',items:[{id,quantity:'100'}]});const before=snapshot(s);assert.throws(()=>command(s,{type:'equip',items:[{id,quantity:'100'},{id:ordinary,quantity:'1'}]}),/EQUIPMENT_LIMIT/);assert.deepEqual(snapshot(s),before);}finally{s.close();}
 });
 
-test('raw to tiers 1/2/6 prices; selected ordinary stock precedes newly crafted inputs',()=>{
+test('raw to tiers 1/2/6 prices; mixed creation rejected and explicit homogeneous steps preserve prices',()=>{
   for(const [kind,price,value,crit] of [['raw-purple','144','12','30'],['raw-red','132','12','30'],['raw-green','168','18',null]] as const){const s=new Store(':memory:');try{const id=add(s,'9',raw(kind)),p=s.summary('111'),before=snapshot(s);const plan=s.preview('111',{revision:p.revision,experiment:p.experiment,fuse:request(s,id)});assert.deepEqual(snapshot(s),before);assert.equal(plan.price,price);batch(s,id);assert.equal(stock(s)[0]!.value,value);assert.equal(stock(s)[0]!.crit,crit);assert.equal(s.inventory('111','original')[0]!.quantity,'9');command(s,{type:'undo'});assert.equal(stock(s)[0]!.quantity,'9');}finally{s.close();}}
-  const s=new Store(':memory:');try{const id=add(s,'3'),ready=add(s,'2',{kind:'🧿',tier:1,value:'8',crit:'20'});command(s,{type:'fuse',fuse:{kind:'🧿',targetTier:2,count:'1',items:[choice(id),choice(ready,'2')]}});assert.equal(s.summary('111').spent,'96');assert.equal(stock(s)[0]!.value,'12');assert.equal(stock(s)[0]!.crit,'30');}finally{s.close();}
+  const s=new Store(':memory:');try{const id=add(s,'3'),ready=add(s,'2',{kind:'🧿',tier:1,value:'8',crit:'20'});const before=snapshot(s);assert.throws(()=>command(s,{type:'fuse',fuse:{kind:'🧿',targetTier:2,count:'1',items:[choice(id),choice(ready,'2')]}}),/HOMOGENEOUS_GROUP_REQUIRED/);assert.deepEqual(snapshot(s),before);batch(s,id,1);batch(s,stock(s).find(g=>g.tier===1)!.id,2);assert.equal(s.summary('111').spent,'96');assert.equal(stock(s)[0]!.value,'12');assert.equal(stock(s)[0]!.crit,'30');}finally{s.close();}
   for(const t of [1,6]){const s=new Store(':memory:');try{const id=add(s,t===6?'729':'3',raw('raw-green','10'));const r=batch(s,id,t);assert.equal(r.spent,t===6?'40824':'28');assert.equal(stock(s)[0]!.value,t===6?'120':'15');assert.equal((r.lastCraft!.plan as {steps:unknown[]}).steps.length,t);}finally{s.close();}}
   assert.throws(()=>fuseRequest({kind:'💚',targetTier:1,count:'1',items:[choice('x')]}),/INVALID_TARGET/);
   assert.throws(()=>fuseRequest({kind:'raw-purple',targetTier:2,count:'1',items:[choice('x')]}),/INVALID_TARGET/);
@@ -61,9 +61,9 @@ test('worn raw single consumes only explicit part, output is unworn, undo restor
   }finally{s.close();}
 });
 
-test('raw single → mixed batch → single, merges/splits/additions preserve later lots once across all undo',()=>{
-  const s=new Store(':memory:');try{const id=add(s,'27'),first=triple(s,id).createdId!;command(s,{type:'equip',items:[{id,quantity:'20'}]});
-    command(s,{type:'fuse',fuse:{kind:'🧿',targetTier:2,count:'1',items:[choice(first,'1'),choice(id,'24','20')]}});const out=stock(s).find(g=>g.tier===2)!;assert.equal(s.summary('111').equipment[0]!.quantity,'18');
+test('raw single → homogeneous batch → single, merges/splits/additions preserve later lots once across all undo',()=>{
+  const s=new Store(':memory:');try{const id=add(s,'27');triple(s,id);command(s,{type:'equip',items:[{id,quantity:'20'}]});
+    command(s,{type:'fuse',fuse:{kind:'🧿',targetTier:2,count:'1',items:[choice(id,'24','20')]}});const out=stock(s).find(g=>g.tier===2)!;assert.equal(s.summary('111').equipment[0]!.quantity,'15');
     add(s,'2',{kind:'🧿',tier:2,value:'12',crit:'30'});triple(s,out.id);add(s,'2');command(s,{type:'original.put',id,...raw(),quantity:'29'});command(s,{type:'level',value:'333'});
     for(let i=0;i<3;i++)command(s,{type:'undo'});assert.equal(stock(s).find(g=>g.tier===0)!.quantity,'31');assert.equal(stock(s).find(g=>g.tier===2)!.quantity,'2');assert.equal(s.summary('111').equipment.length,0);assert.equal(s.summary('111').level,'333');assert.equal(s.summary('111').spent,'0');
     // Source edits do not rewrite active work; reset uses current source.

@@ -1,6 +1,6 @@
 # TASK-007 — массовый фьюз одинаковых модов с автоматическим максимумом
 
-- Статус: **ready**.
+- Статус: **implementing**.
 - Риск: **повышенный** — меняется серверный контракт массового крафта и UI расчёта; важны точные количества/алмазы, атомарность, совместимость прежней истории/receipt.
 - Основание: [новый раздел PRODUCT](../../PRODUCT.md#исправление-массового-фьюза--2026-11-08), прямое поручение владельца2026-11-08.
 - База: `chm-006-raw-mods`, **50119c83c4ce24fe8338acaa9740aadbfd2289a2**, [PR7](https://github.com/sa713/cheapshotmods/pull/7). Runtime/kit предыдущего кандидата — `d6cb0e9404f07b5573b64131281d29569a010442`; последующий HEAD передачи меняет только delivery.
@@ -108,3 +108,12 @@ Management проверил актуальный код чтением; функ
 - delivery: **pending**.
 - Следующий исполнитель: отдельный Codex developer, затем независимый reviewer и management.
 - Последнее подтверждение:2026-11-08, прямое поручение владельца исправить массовый сценарий и ограничить его полностью одинаковыми модами. Повторный сбор/«патч собран» не требуется.
+
+## План developer — 2026-11-08
+
+Подтверждены чистая ветка и стартовый HEAD `5b2e23be7848463d2ac458079453a46ee30b4bd7`.
+Новый DTO: один work `id`, `targetTier`, явный `includeWorn`, необязательные `quantity` (разрешённый запас) и `count` (без него preview выбирает максимум). Сервер читает атрибуты/stock/equipment, считает BigInt R/max и компактный план прежними рецептами. Новый массовый путь допускает только один известный по crit исходник. Legacy DTO остаётся синтаксически читаемым до receipt lookup: exact старые результаты возвращаются без повторной проверки нового контракта; новые legacy mixed/unknown операции отклоняются после lookup. Ledger/undo/receipts/schema5 не переписываются.
+UI автоматически запрашивает preview, по умолчанию ставит максимум, позволяет снизить разрешённые входы/результаты и явно включить worn; request generation защищает от старых ответов. Commit фиксирует показанные count/quantity/revision, retry сохраняет тот же payload/key. Обновляются изменившиеся mixed-creation assertions, но настоящие старые mixed fixtures и их replay/undo сохраняются. После author checks — отдельный reviewer, exact-SHA CI и новый immutable kit с canonical TASK-006/schema5 и прежними installer routes.
+
+
+Самопроверка первого кандидата: `bash scripts/verify.sh` —80 native, typecheck/lint/build; полный Chromium —38/38, включая быстрые смены с обратным порядком ответов, 129-значный count, max0, clamp, старый mixed replay и потерю ответа максимального пакета после reload. Native fixture создан неизменённым TASK-006 source d6cb0e9 и содержит также unknown-crit mixed receipt с уже отсутствующими consumed IDs. Старые mixed-creation assertions заменены на homogeneous либо явный отказ; прежний компактный планировщик переиспользован под single-source gate, а старые mixed unit-примеры сохраняют историческую арифметику. History/receipts/schema5/undo не мигрируют. Новые правила доставки вынесены в task007-upgrade, старые task006 scripts сохранены; добавлен пятый canonical schema5 route. Final CI/kit и отдельная приёмка ещё выполняются.

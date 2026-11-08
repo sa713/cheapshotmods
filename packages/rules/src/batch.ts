@@ -1,4 +1,4 @@
-import {boundedInteger, canonicalKind, craft, familyKind, isRaw, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
+import {boundedInteger, canonicalKind, craft, familyKind, hasCrit, isRaw, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
 export interface FuseRequest {kind: Kind; targetTier: number; count: string; items: {id:string;quantity:string;worn:string}[]}
 export interface FuseChoice extends Group {equipped: string}
 export interface Run extends Mod {quantity: string}
@@ -82,4 +82,50 @@ export function planFuse(request: FuseRequest, choices: FuseChoice[]): FusePlan 
       requireThat(w<=allowWorn,'INSUFFICIENT_MODS');
       return {id:g.id,allowed:s.quantity,allowWorn:s.worn,used:n.toString(),worn:w.toString(),unused:(allowed-n).toString(),remaining:(BigInt(g.quantity)-n).toString()};}),
     steps:[...steps.values()].sort((a,b)=>a.fromTier-b.fromTier),outputs};
+}
+
+// TASK-007 is a single-source contract. The legacy parser/planner above remains
+// available for historical receipts/fixtures; new server commands enter here.
+export interface HomogeneousFuseRequest {
+  id:string; targetTier:number; includeWorn:boolean; quantity?:string; count?:string;
+}
+export interface HomogeneousFusePlan extends FusePlan {
+  source:FuseChoice; available:string; permitted:string; inputPerResult:string;
+  maxCount:string; shortfall:string; result:Mod;
+}
+export function homogeneousFuseRequest(raw:unknown):HomogeneousFuseRequest {
+  const r=record(raw);keys(r,['id','targetTier','includeWorn','quantity','count']);
+  requireThat(typeof r.id==='string'&&r.id.length>0,'INVALID_SELECTION');
+  requireThat(Number.isInteger(r.targetTier)&&Number(r.targetTier)>=1&&Number(r.targetTier)<=6,'INVALID_TARGET');
+  requireThat(typeof r.includeWorn==='boolean','INVALID_SELECTION');
+  if(r.quantity!==undefined)boundedInteger(r.quantity,true,256);
+  if(r.count!==undefined)boundedInteger(r.count,false,256);
+  return {id:r.id,targetTier:r.targetTier as number,includeWorn:r.includeWorn,...(r.quantity!==undefined?{quantity:r.quantity as string}:{}),...(r.count!==undefined?{count:r.count as string}:{})};
+}
+export function parseAnyFuseRequest(raw:unknown):HomogeneousFuseRequest|FuseRequest {
+  return Object.hasOwn(record(raw),'id')?homogeneousFuseRequest(raw):fuseRequest(raw);
+}
+function singleSourcePlan(g:FuseChoice,targetTier:number,allowed:bigint,allowWorn:bigint,count?:string):HomogeneousFusePlan {
+  requireThat(targetTier>g.tier&&targetTier<=6,'INVALID_TARGET');
+  requireThat(!hasCrit(g.kind)||g.crit!=null,'CRIT_REQUIRED');
+  const stock=BigInt(g.quantity),free=stock-BigInt(g.equipped),available=free+allowWorn;
+  requireThat(allowed>=0n&&allowed<=available&&allowWorn<=BigInt(g.equipped),'INSUFFICIENT_MODS');
+  const inputPerResult=3n**BigInt(targetTier-g.tier),max=allowed/inputPerResult,n=count===undefined?max:BigInt(count);
+  requireThat(n>=(count===undefined?0n:1n)&&n<=max,'FUSE_COUNT_OUT_OF_RANGE');
+  let result:Mod=g;for(let t=g.tier;t<targetTier;t++)result=craft([result,result,result]).result;
+  const kind=familyKind(g.kind),plan:FusePlan=n>0n?planFuse({kind,targetTier,count:n.toString(),items:[{id:g.id,quantity:allowed.toString(),worn:allowWorn.toString()}]},[g]):{
+    kind,targetTier,count:'0',price:'0',steps:[],outputs:[],selected:[{id:g.id,allowed:allowed.toString(),allowWorn:allowWorn.toString(),used:'0',worn:'0',unused:allowed.toString(),remaining:g.quantity}]
+  };
+  return {...plan,source:g,available:available.toString(),permitted:allowed.toString(),inputPerResult:inputPerResult.toString(),maxCount:max.toString(),shortfall:(max===0n?inputPerResult-allowed:0n).toString(),result};
+}
+export function planHomogeneousFuse(request:HomogeneousFuseRequest,g:FuseChoice):HomogeneousFusePlan {
+  requireThat(request.id===g.id,'GROUP_NOT_FOUND',404);
+  const worn=request.includeWorn?BigInt(g.equipped):0n,available=BigInt(g.quantity)-BigInt(g.equipped)+worn;
+  return singleSourcePlan(g,request.targetTier,request.quantity===undefined?available:BigInt(request.quantity),worn,request.count);
+}
+export function planCompatibleFuse(request:FuseRequest,choices:FuseChoice[]):HomogeneousFusePlan {
+  requireThat(request.items.length===1,'HOMOGENEOUS_GROUP_REQUIRED');
+  const s=request.items[0]!,g=choices.find(g=>g.id===s.id);requireThat(g,'GROUP_NOT_FOUND',404);
+  requireThat(familyKind(g.kind)===request.kind,'INCOMPATIBLE_MODS');
+  return singleSourcePlan(g,request.targetTier,BigInt(s.quantity),BigInt(s.worn),request.count);
 }
