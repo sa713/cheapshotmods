@@ -1,6 +1,6 @@
 # TASK-006 — три сырьевых мода, экипировка и крафт в1.0
 
-- Статус: **implementing**.
+- Статус: **review**.
 - Риск: **повышенный** — новые игровые типы и переход, пакетный планировщик, сохраняемые группы/история и совместимость старой БД.
 - Основание: [PRODUCT](../../PRODUCT.md#дополнение--сырьевые-моды-2026-11-08), сообщение владельца о трёх видах и ответ «можно надевать» от2026-11-08.
 - Исходный продуктовый код: `chm-005-batch-fuse`, **eb3eb3dbb320b8846a5c3581c4c5a9855a6fd1fe**, [PR6](https://github.com/sa713/cheapshotmods/pull/6). Runtime/kit TASK-005 — `feb6a1bf82e70474c482c6a2e1fb0e77c4e20586`.
@@ -118,3 +118,16 @@ Management проверил актуальную базу и реализуем�
 Независимая проверка нашла R1: новый test harness копировал schema4 fixture до создания `$work`, `set -u` останавливал installer test до Docker. Исправлено размещением copy после создания каталога и регистрации cleanup. Первые CI checks42506810909 прошли, kit42506810941 остановился именно на R1; этот SHA не является итоговым кандидатом. При визуальной самопроверке также устранены наследуемый flex-basis и letterboxing у маленьких raw filter icons. Для нового SHA обязательные проверки/kit запускаются заново.
 
 Reviewer R2: заполненные одиночные craft slots имели только числовые параметры и скрытую пиктограмму, без доступного названия типа. Исправление включает тип в aria-label каждого заполненного слота. Новые browser assertions различают фиолетовый/красный; повтор raw4/4 на360/390/1440 прошёл. Повтор capacity окончательного кода — в evidence/TASK-006/local-capacity.json. Иных подтверждённых замечаний к коду reviewer не сообщил; окончательные CI/kit и их отдельная проверка ещё обязательны.
+
+
+## Проверенный кандидат и передача — 2026-11-08
+
+- [PR7](https://github.com/sa713/cheapshotmods/pull/7) в `chm-005-batch-fuse`.
+- Exact runtime/kit source: **d6cb0e9404f07b5573b64131281d29569a010442**. Начальный HEAD `8792e68d9fcc7f8dd6876f62bb32bf292f029be0` подтверждён; история сохранена.
+- Три сырьевых вида, общий лимит экипировки/характеристики, single и семейный batch до 6.0 реализованы. Schema5 сохраняет прежние данные, lots, history и receipts; старые binaries отвергают5. Эталон JPEG сохранён побайтово, обычные значки/Sites layout и TASK-005 функциональность сохранены.
+- [Checks42507713626](https://github.com/sa713/cheapshotmods/actions/runs/42507713626): verify **70 native / 29 Chromium**, typecheck/lint/build, capacity/negative pipeline и container-smoke — success. [Kit42507713711](https://github.com/sa713/cheapshotmods/actions/runs/42507713711) — success всех обязательных шагов, включая настоящие четыре predecessor Debian update/restore/rollback, Docker29.8 classic/containerd/reverse-export.
+- Новый private artifact **[13628229576](https://github.com/sa713/cheapshotmods/actions/runs/42507713711/artifacts/13628229576)**, до **2026-12-08T18:19:24Z**. ZIP SHA256 `ee1b0eb98d48d46de6ee94e33eda5aa1d4a93e1aa1f23ab7817bfe90e2c521d7`; tar SHA256 `11b211873794fcb13386ad2d97dce97d23521cb00835dcb466d04a196fb98beb`. [Паспорт kit](../evidence/TASK-006/kit.json).
+- Отдельный [reviewer](../reviews/TASK-006-review.md) завершил code/UI/kit приёмку: собственные native/browser, 2500 oracle случаев, отдельная schema4 БД, metadata/ZIP/tar/checksums/source/proofs и повтор actual canonical TASK-005 → final kit на Debian13/Docker29.9.2/vfs. R1/R2 исправлены; blocker не осталось. [Собственный installer proof reviewer](../evidence/TASK-006/reviewer-feb-upgrade.json), [30 compiled files](../evidence/TASK-006/reviewer-compiled-proof.json).
+- [Все доказательства и соответствие критериям](../TASK-006-VALIDATION.md), [готовые root/curl update/check/rollback](../TASK-006-NEXT-STEPS.md). Поддержаны FBE2/19a3/6dc3/canonical TASK-0054. Скрипты сохраняют existing private credential/config/отдельный operator и disk guard.
+- После runtime добавляются только `.delivery` документы, evidence, независимый отчёт и заполненные owner-команды; исходники apps/packages/deploy/tests/workflows не меняются. Их commit не является новым runtime. CI и kit относятся к exact source выше.
+- Product acceptance и delivery: **pending**. Следующий шаг владельца — установка, полная перезагрузка сайта/Mini App, живые Telegram/телефон и проверка фактического HTTPS source. Main/слияние/реальный сервер/общий proxy/BotFather developer не менял. Откат — только прежняя пара image+volume; новые записи остаются в новом volume.

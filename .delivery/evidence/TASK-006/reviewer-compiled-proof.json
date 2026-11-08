@@ -1,0 +1,10 @@
+{
+  "source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "compiled_files_exact": 30,
+  "areas": [
+    "packages/rules/dist",
+    "apps/server/dist",
+    "apps/web/dist"
+  ],
+  "result": "passed"
+}

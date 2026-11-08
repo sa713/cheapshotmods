@@ -1,0 +1,67 @@
+{
+  "runtime_source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+  "artifact_id": 13628229576,
+  "artifact_url": "https://github.com/sa713/cheapshotmods/actions/runs/42507713711/artifacts/13628229576",
+  "api_url": "https://api.github.com/repos/sa713/cheapshotmods/actions/artifacts/13628229576/zip",
+  "run_id": 42507713711,
+  "job_id": 128813868395,
+  "expires_at": "2026-12-08T18:19:24Z",
+  "zip_bytes": 131987880,
+  "zip_sha256": "ee1b0eb98d48d46de6ee94e33eda5aa1d4a93e1aa1f23ab7817bfe90e2c521d7",
+  "tar_sha256": "11b211873794fcb13386ad2d97dce97d23521cb00835dcb466d04a196fb98beb",
+  "SHA256SUMS_sha256": "6df9fab63120d2965374d793c83be6d0f0722fd217948c6c858c3dd7ad2fbc6b",
+  "manifest_sha256": "c90a41b568d049dae4d37851575c3f1329e82886b8ff5e297b6e214bddd7d247",
+  "image_archive_sha256": "d307b188d9a45aa9c1693158cdf4fe4f5e86df42b0f544f64c33c9da8953a841",
+  "checksums_verified": 13,
+  "packaged_deploy_sources_verified": 11,
+  "archive_proof": "config SHA-256 and ordered uncompressed layer SHA-256; format2",
+  "manifest": {
+    "format": 2,
+    "source_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+    "platform": "linux/amd64",
+    "app_image": "cheapshotmods:d6cb0e9404f07b5573b64131281d29569a010442",
+    "proxy_image": "caddy:2.10.2-alpine",
+    "builder_observations": {
+      "app_native_id": "sha256:d1c419256cd92ce26de08b8b9113dba4bce0024dc0762fb02495b2e13558204f",
+      "proxy_native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510"
+    },
+    "proxy_manifest_digest": "caddy@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "base_images": [
+      "node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea",
+      "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    ],
+    "image_bytes": 350791168,
+    "external_proxy_source": "existing running image; tested Caddy 2.11.4; daemon-local image ID captured in private operator plan",
+    "image_proofs": {
+      "app": {
+        "config_digest": "sha256:d1c419256cd92ce26de08b8b9113dba4bce0024dc0762fb02495b2e13558204f",
+        "diff_ids": [
+          "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+          "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+          "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+          "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+          "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+          "sha256:9a70d19fd718532212a800c09178a8b09930f2a08ea3eb63a631e09d925e38ae",
+          "sha256:ae449e5e5485b919d54dee211957767b517a2f98e9fa7ff53bb1958b063001e2",
+          "sha256:ff202b4a50564dc419dad6f41af2688d823ccc84215c149dc108eef55da4c541"
+        ],
+        "platform": "linux/amd64",
+        "revision": "d6cb0e9404f07b5573b64131281d29569a010442"
+      },
+      "proxy": {
+        "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "diff_ids": [
+          "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+          "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+          "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+          "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ],
+        "platform": "linux/amd64",
+        "revision": null
+      }
+    }
+  }
+}
