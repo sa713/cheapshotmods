@@ -1963,3 +1963,12 @@ input {
 .crit-stat { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
 .crit-stat strong { display: block; margin: 8px 0; }
 @media(max-width:600px) { .batch-fuse { padding: 18px; } .batch-pick { display: block; } .batch-pool { padding-left: 16px; } .batch-pool li { padding: 12px; } .batch-fuse .fields { grid-template-columns: 1fr; } }
+
+/* TASK-006: original reference pixels, distinct from the health flower. */
+.mod-icon.raw-icon {padding:0; overflow:hidden; background:transparent; border:0; flex-shrink:0}
+.raw-icon svg {display:block; width:100%; height:100%}
+.type-option {min-width:0}
+.filters .mod-icon {width:24px; height:24px; font-size:20px; border-radius:6px}
+.fusion-slot .mod-icon {width:40px; height:40px; margin:auto}
+
+.filters>button>.mod-icon {display:inline-flex}

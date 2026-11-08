@@ -1,4 +1,4 @@
-import {boundedInteger, canonicalKind, craft, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
+import {boundedInteger, canonicalKind, craft, familyKind, isRaw, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
 export interface FuseRequest {kind: Kind; targetTier: number; count: string; items: {id:string;quantity:string;worn:string}[]}
 export interface FuseChoice extends Group {equipped: string}
 export interface Run extends Mod {quantity: string}
@@ -13,7 +13,8 @@ export const MAX_FUSE_GROUPS = 1000, MAX_FUSE_RUNS = 10000;
 export function fuseRequest(raw: unknown): FuseRequest {
   const r=record(raw); keys(r,['kind','targetTier','count','items']);
   const kind=canonicalKind(r.kind); inputInteger(r.count);
-  requireThat(Number.isInteger(r.targetTier)&&Number(r.targetTier)>=2&&Number(r.targetTier)<=6,'INVALID_TARGET');
+  requireThat(Number.isInteger(r.targetTier)&&Number(r.targetTier)>=1&&Number(r.targetTier)<=6,'INVALID_TARGET');
+  requireThat(!isRaw(kind)&&(kind!=='💚'||r.targetTier!==1),'INVALID_TARGET');
   requireThat(Array.isArray(r.items)&&r.items.length>0,'INVALID_SELECTION');
   requireThat(r.items.length<=MAX_FUSE_GROUPS,'FUSE_POOL_TOO_LARGE');
   const seen=new Set<string>();
@@ -28,7 +29,7 @@ export function planFuse(request: FuseRequest, choices: FuseChoice[]): FusePlan 
   const queues:QueueRun[][]=Array.from({length:7},()=>[]), used=new Map<string,bigint>();
   const selected=request.items.map(s=>{
     const g=choices.find(g=>g.id===s.id);requireThat(g,'GROUP_NOT_FOUND',404);
-    requireThat(g.kind===request.kind&&g.tier<request.targetTier,'INCOMPATIBLE_MODS');
+    requireThat(familyKind(g.kind)===request.kind&&g.tier<request.targetTier,'INCOMPATIBLE_MODS');
     const allowed=BigInt(s.quantity), allowWorn=BigInt(s.worn), stock=BigInt(g.quantity), equipped=BigInt(g.equipped);
     // Worn is a permission cap; every available free unit precedes worn units.
     requireThat(allowed<=stock&&allowWorn<=equipped&&allowed<=stock-equipped+allowWorn,'INSUFFICIENT_MODS');
@@ -44,7 +45,7 @@ export function planFuse(request: FuseRequest, choices: FuseChoice[]): FusePlan 
   function available(t:number) {return queues[t]!.reduce((s,r)=>s+r.n,0n);}
   function ensure(t:number,n:bigint) {
     const missing=n-available(t);if(missing<=0n)return;
-    requireThat(t>1,'INSUFFICIENT_MODS');generate(t,missing);
+    requireThat(t>0,'INSUFFICIENT_MODS');generate(t,missing);
   }
   function generate(t:number,n:bigint) {
     ensure(t-1,n*3n);

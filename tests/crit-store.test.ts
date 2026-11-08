@@ -36,7 +36,7 @@ test('critical work is grouped by all attributes; partial refinement preserves w
 function seedV3(path:string){const fixture=JSON.parse(readFileSync(new URL('./fixtures/v3-crit-history.json',import.meta.url),'utf8'));const db=new Database(path);db.exec(fixture.ddl.join(';'));for(const [name,rows] of Object.entries(fixture.tables) as [string,Record<string,unknown>[]][]){for(const row of rows){const columns=Object.keys(row);db.prepare(`INSERT INTO ${name} (${columns.join(',')}) VALUES (${columns.map(()=>'?').join(',')})`).run(...columns.map(c=>row[c] as never));}}db.pragma('user_version=3');db.close();return fixture;}
 test('real schema-3 history migration: unknown distinct from zero, split/refine crafted output then undo after reopen',()=>{
   const dir=mkdtempSync(join(tmpdir(),'chm-crit-')),path=join(dir,'db');try{seedV3(path);let s=new Store(path);
-    assert.equal(s.db.pragma('user_version',{simple:true}),4);const before=s.summary('666'),unknown=stock(s,'666').find(g=>g.tier===2)!;
+    assert.equal(s.db.pragma('user_version',{simple:true}),5);const before=s.summary('666'),unknown=stock(s,'666').find(g=>g.tier===2)!;
     assert.equal(unknown.crit,null);assert.equal(before.stats.critIncomplete,true);
     command(s,{type:'work.crit',id:unknown.id,quantity:'1',worn:'1',crit:'44'},'666');
     command(s,{type:'original.put',kind:'🧿',tier:2,value:'12',quantity:'2',crit:'44'},'666');

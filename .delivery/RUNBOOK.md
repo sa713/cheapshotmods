@@ -201,3 +201,7 @@ Test-install использует чистый Debian 13 amd64, настоящи
 Source6dc8021e58daa9aa16a93a9265315bb810fe9d0a: все41native/20browser/container/installer/bothstores CI success. Дизайн не меняет сервер/схему/данные, именаAPI иauth остаются прежними. Входящий штатный installer допускает подтверждённыеfbe или19a/external; currentownerstate после выданных ранее команд неизвестен, поэтому его не угадывают. Изfbe применяется сохранённая schema2→3 migration в копии; из19a копируется schema3 безбумпа revision. Rollback возвращает предыдущую пару image+volume/еёданные и прежниеassets; новые записи остаются в новомvolume.
 
 Сохранены config/bot secrets и отдельный b008 helper, общий ip-proxy/daemon/BotFather не перенастраивать ради оформления. Diskguard не ослаблен; при недостатке места stop, безDockerprune. Реальный сервер/телефон/живойTelegram новогоfrontend проверяет владелец после update, developer его не выполняет.
+
+## Сырьевые моды (TASK-006)
+
+Новый формат БД — schema5. Миграция4→5 меняет marker без изменения строк, receipts, history, revision или исходного инвентаря; schema2/3 проходят прежние миграции. Старое приложение отвергает5. Откат требует прежних image+volume вместе; новые записи остаются в новом volume. Сырьевые `raw-purple`, `raw-red`, `raw-green` имеют только внутренний tier0, а интерфейс показывает «сырьевой». Рецепты/экипировка/семейные пакеты1–6 описаны в TASK-006; у цветов нет target1. Инсталлятор и его guards не ослаблены.

@@ -30,7 +30,7 @@ export class Store {
     this.db.pragma('journal_mode = WAL'); this.db.pragma('foreign_keys = ON'); this.db.pragma('busy_timeout = 5000');
     try {
       const version = this.db.pragma('user_version', {simple:true});
-      requireThat([0,1,2,3,4].includes(Number(version)), 'UNKNOWN_DATABASE_VERSION', 503);
+      requireThat([0,1,2,3,4,5].includes(Number(version)), 'UNKNOWN_DATABASE_VERSION', 503);
       this.db.transaction(()=>{
       if (version === 0) this.db.transaction(()=>this.db.exec(`
         CREATE TABLE players(owner TEXT PRIMARY KEY, revision TEXT NOT NULL, level TEXT NOT NULL, experiment TEXT NOT NULL, started INTEGER NOT NULL, spent TEXT NOT NULL, equipment TEXT NOT NULL);
@@ -53,6 +53,10 @@ export class Store {
         if (this.db.pragma('user_version',{simple:true})!==3) migrateModStacks(this.db);
       }).immediate();
       if (Number(version)<4) migrateCrit(this.db,version===3,phase=>{if(Number(version)>0&&this.afterMods&&this.afterMods.length>0)this.afterMods(phase);});
+      if (Number(version)<5) {
+        if(Number(version)>0&&this.afterMods&&this.afterMods.length>0)this.afterMods('raw-migration');
+        this.db.pragma('user_version=5');
+      }
       }).immediate();
     } catch(error) {this.db.close();throw error;}
   }

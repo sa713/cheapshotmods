@@ -1,5 +1,5 @@
 import React, {useLayoutEffect,useRef,type ReactNode} from 'react';
-import {displayKind,formatCrit,hasCrit,type Group,type Kind} from '@chm/rules';
+import {displayKind,displayTier,formatCrit,hasCrit,isRaw,type Group,type Kind} from '@chm/rules';
 
 const paths={
   bolt:'m13 2-9 12h7l-1 8 10-12h-7z',
@@ -22,10 +22,13 @@ export function Icon({name}:{name:keyof typeof paths}) {
   return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={paths[name]}/>{name==='help'&&<circle cx="12" cy="12" r="9"/>}</svg>;
 }
 export function Brand(){return <div className="brand"><span className="brand-symbol"><Icon name="bolt"/></span><span>CHEAPSHOT<small>MODS LAB</small></span></div>;}
-const colors:Record<Kind,string>={'🅾':'orange','💢':'pink','🧿':'blue','💚':'green'};
-export function ModIcon({kind}:{kind:Kind}){return <span className={'mod-icon '+colors[kind]} aria-hidden="true">{displayKind(kind)}</span>;}
+const colors:Partial<Record<Kind,string>>={'🅾':'orange','💢':'pink','🧿':'blue','💚':'green'};
+export function ModIcon({kind}:{kind:Kind}){
+  const boxes={'raw-purple':'50 88 390 394','raw-red':'516 88 392 394','raw-green':'982 88 394 394'};
+  return <span className={'mod-icon '+(isRaw(kind)?'raw-icon':colors[kind])} aria-hidden="true">{isRaw(kind)?<svg viewBox={boxes[kind]}><image href="/raw-mods.jpg" width="1536" height="538"/></svg>:displayKind(kind)}</span>;
+}
 export function ModCardTitle({g}:{g:Pick<Group,'kind'|'tier'|'value'|'crit'>}) {
-  return <div className="card-heading"><ModIcon kind={g.kind}/><div className="mod-info"><h3 className="mod-title"><span className="sr-only">{displayKind(g.kind)} {g.tier}.0 · +{g.value}%</span><strong className="exact" aria-hidden="true">+{g.value}%</strong><span className="tier-badge" aria-hidden="true">{g.tier}.0</span></h3><p className="mod-description">{g.kind==='💚'?'Здоровье':'Урон'} · бонус к уровню</p>{hasCrit(g.kind)&&<p className="mod-crit">Крит: <span className="exact">{formatCrit(g.crit)}</span></p>}</div></div>;
+  return <div className="card-heading"><ModIcon kind={g.kind}/><div className="mod-info"><h3 className="mod-title"><span className="sr-only">{displayKind(g.kind)} {displayTier(g)} · +{g.value}%</span><strong className="exact" aria-hidden="true">+{g.value}%</strong><span className="tier-badge" aria-hidden="true">{displayTier(g)}</span></h3><p className="mod-description">{isRaw(g.kind)?displayKind(g.kind)+' · Урон':g.kind==='💚'?'Здоровье':'Урон'} · бонус к уровню</p>{hasCrit(g.kind)&&<p className="mod-crit">Крит: <span className="exact">{formatCrit(g.crit)}</span></p>}</div></div>;
 }
 export function Modal({label,title,onClose,children}:{label:string;title:string;onClose:()=>void;children:ReactNode}) {
   const ref=useRef<HTMLDialogElement>(null);

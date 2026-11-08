@@ -11,7 +11,7 @@
 
 5. [TASK-005 — пакетный фьюз, пополнение эксперимента, крит и значки](tasks/TASK-005.md): **review**, [PR6](https://github.com/sa713/cheapshotmods/pull/6). Runtime/kitfeb6a1bf,58native/25browser/всеCI/bothstores и canonicalFBE/19a/6dc install/update/restore/rollback прошли; separate review и owner-команды в карточке. Artifact13624905831 до2026-12-08. Установка/schema4 на владельческом Debian и product_acceptance pending; developer передаёт готовый кандидат, main/сервер/BotFather не менял.
 
-6. [TASK-006 — сырьевые моды, экипировка и крафт в1.0](tasks/TASK-006.md): **ready**. Владелец 2026-11-08 подтвердил возможность надевать сырьё; последняя игровая развилка закрыта. На базе TASK-005 подготовлено полное задание отдельному Codex в chm-006-raw-mods: новые рецепты/характеристики/цепочки/сохранность и новый проверенный Debian kit. Реализация ещё не начата; прежний kit новое сырьё не содержит.
+6. [TASK-006 — сырьевые моды, экипировка и крафт в1.0](tasks/TASK-006.md): **implementing**. Реализуются и проверяются три вида сырья, смешанный семейный пул до6.0, schema5, совместимость/undo и новый Debian kit; отдельная приёмка/owner install pending.
 
 Предыдущее [исправление группировки одинаковых модов](tasks/TASK-004-mod-stacks.md): **review**, PR4. Исторически developer также назвал его TASK004; карточка сохранена отдельно из-за коллизии с management-заданием дизайна. Immutable19a6fdd kit, прежние review/команды не изменены; установка владельцем пока не подтверждена.
 

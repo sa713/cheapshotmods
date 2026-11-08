@@ -12,17 +12,18 @@ const server=await app(store,config),auth=new Auth(store,config),session=auth.cr
 const command=(action:Record<string,unknown>)=>{const s=store.summary('111');return store.command('111',{key:randomUUID(),revision:s.revision,experiment:s.experiment,action});};
 const compactStore=new Store(':memory:');
 const compactCommand=(action:Record<string,unknown>)=>{const s=compactStore.summary('999');return compactStore.command('999',{key:randomUUID(),revision:s.revision,experiment:s.experiment,action});};
-const resultCount=10n**24n,compactId=compactCommand({type:'original.put',kind:'🅾',tier:1,value:'10',quantity:(9n*resultCount).toString()}).createdId!;
+const resultCount=10n**24n,compactId=compactCommand({type:'original.put',kind:'raw-green',tier:0,value:'10',quantity:(729n*resultCount).toString()}).createdId!;
 const compactBefore=compactStore.summary('999'),heapBefore=process.memoryUsage().heapUsed,compactStart=performance.now();
-const compactRequest={kind:'🅾',targetTier:3,count:resultCount.toString(),items:[{id:compactId,quantity:(9n*resultCount).toString(),worn:'0'}]};
+const compactRequest={kind:'🅾',targetTier:6,count:resultCount.toString(),items:[{id:compactId,quantity:(729n*resultCount).toString(),worn:'0'}]};
 const compactPlan=compactStore.preview('999',{revision:compactBefore.revision,experiment:compactBefore.experiment,fuse:compactRequest});
 const previewMs=performance.now()-compactStart,commitStart=performance.now();compactCommand({type:'fuse',fuse:compactRequest});const commitMs=performance.now()-commitStart;
-assert.equal(compactStore.summary('999').spent,(504n*resultCount).toString());
+assert.equal(compactStore.summary('999').spent,(40824n*resultCount).toString());
 const physicalWorkLots=(compactStore.db.prepare('SELECT count(*) AS n FROM work_lots').get() as {n:number}).n;
 const historyRows=(compactStore.db.prepare('SELECT count(*) AS n FROM history').get() as {n:number}).n;
 const undoStart=performance.now();compactCommand({type:'undo'});const undoMs=performance.now()-undoStart;
-assert.equal(compactStore.inventory('999','work')[0]!.quantity,(9n*resultCount).toString());
-const compactHugeBatch={inputUnits:(9n*resultCount).toString(),resultCount:resultCount.toString(),price:compactPlan.price,previewMs,commitMs,undoMs,heapDeltaBytes:process.memoryUsage().heapUsed-heapBefore,physicalWorkLots,historyRows,planJsonBytes:Buffer.byteLength(JSON.stringify(compactPlan))};compactStore.close();
+assert.equal(compactStore.inventory('999','work')[0]!.quantity,(729n*resultCount).toString());
+assert.equal(compactPlan.steps.length,6);
+const compactHugeBatch={rawKind:'raw-green',targetTier:6,steps:compactPlan.steps.length,inputUnits:(729n*resultCount).toString(),resultCount:resultCount.toString(),price:compactPlan.price,previewMs,commitMs,undoMs,heapDeltaBytes:process.memoryUsage().heapUsed-heapBefore,physicalWorkLots,historyRows,planJsonBytes:Buffer.byteLength(JSON.stringify(compactPlan))};compactStore.close();
 try {
   command({type:'reset'});const start=performance.now();
   store.db.transaction(()=>{for(let i=1;i<=10000;i++)command({type:'original.put',kind:'💚',tier:2,value:String(i),quantity:'1'});}).immediate();
