@@ -1,12 +1,14 @@
 # Запуск и эксплуатация
 
-## После интеграции в main — 2026-11-08
+## Текущий принятый комплект — 2026-11-09
 
-Код продукта находится вmain после [PR8](https://github.com/sa713/cheapshotmods/pull/8). Владелец сообщил, что установленный наDebian функционал работает; уборкаGitHub не требует повторной установки и не меняет работающие app/data/proxy/BotFather. Точный server SHA в этом сообщении не указан. Принятый immutable kit TASK-007 связан с runtimef944acb6435a9671cef6db5fc500b79a71d21133, его прежние [команды](TASK-007-NEXT-STEPS.md)/hashes/expiry сохраняются; SHA управляющего docs-коммита вmain не заменяет источник комплекта. Следующие изменения брать отmain; новый deploy выполняется только в рамках отдельного порученного выпуска.
+TASK-008 технически принята и включена в main через [PR9](https://github.com/sa713/cheapshotmods/pull/9), merge `db2f43ada73aa14af19d6b1e5ffb2ff25608724b`. Проверенный runtime/immutable kit — **0f2cd90c5b672d67409c2687e4e90a8ce9797482**, schema 6: [команды обновления/check/backup/restore/rollback](TASK-008-NEXT-STEPS.md), [доказательства](TASK-008-VALIDATION.md), [независимое ревью](reviews/TASK-008-review.md). Комплект добавляет фиксацию исходного набора и отдельный полный возврат; миграция не создаёт снимок автоматически. Старый binary5 отвергает schema6, откат выполняется прежней image+volume парой.
+
+Для штатного обновления приложения сохраняется существующий external-proxy маршрут, повторная настройка общего proxy/BotFather не требуется. Установка TASK-008 и живые сценарии владельцем пока не подтверждены. GitHub-интеграция не меняла сервер или рабочую БД; следующий внешний шаг выполняет владелец по готовым командам. Управляющий SHA в main не заменяет source уже собранного комплекта.
 
 Далее сохранены инструкции и исторические наблюдения предыдущих установок/передач. Их pending-отметки не являются требованием повторить уже работающую установку.
 
-> Актуально TASK-005: новый проверенный runtime/kit **feb6a1bf82e70474c482c6a2e1fb0e77c4e20586**, [команды root/curl update/check/backup/restore/rollback](TASK-005-NEXT-STEPS.md), [валидация](TASK-005-VALIDATION.md), [review](reviews/TASK-005-review.md). Для существующей установки external-proxy обновляется только app; повторять ingress stage/apply, настройку BotFather или установку второго proxy не нужно. FBE/schema2 и19a/6dc/schema3→schema4; rollback только прежняя image+volume пара. Установку и реальный Telegram выполняет владелец. Ниже сохранены исторические маршруты первоначальной установки и прежних задач.
+> Исторический комплект TASK-005: новый проверенный runtime/kit **feb6a1bf82e70474c482c6a2e1fb0e77c4e20586**, [команды root/curl update/check/backup/restore/rollback](TASK-005-NEXT-STEPS.md), [валидация](TASK-005-VALIDATION.md), [review](reviews/TASK-005-review.md). Для существующей установки external-proxy обновляется только app; повторять ingress stage/apply, настройку BotFather или установку второго proxy не нужно. FBE/schema2 и19a/6dc/schema3→schema4; rollback только прежняя image+volume пара. Установку и реальный Telegram выполняет владелец. Ниже сохранены исторические маршруты первоначальной установки и прежних задач.
 
 > Исторический отказ 2026-11-06 (устранён R6, не текущий блокер): реальный Docker29/containerd отклонил cf0 kit на непереносимой сверке image .Id. TASK-003/R6 — changes_required, ожидается новый проверенный комплект с cross-store доказательством. Не продолжать cf0 install через ручную подмену manifest/проверок. Архив и GitHub credential сохранены; повторная настройка gh/ключа или смена Docker backend не требуются.
 
@@ -180,7 +182,7 @@ bash scripts/test-external.sh artifacts/cheapshotmods-FULL_SHA-linux-amd64
 
 Test-install использует чистый Debian 13 amd64, настоящий Docker/SQLite, loopback HTTPS и отдельную internal CA Caddy, проверяет restart, согласованный backup, restore в новый volume, синтетическую вторую версию для механики update и rollback. Он не является внешним размещением, ACME или живым Telegram; test fixture image не передаётся владельцу. Результаты конкретной исходной версии сохраняются в TASK-002. Реальные DNS/ACME/HTTPS, OIDC/nonce/отказ/дополнительные callback поля и Secure cookie в Telegram WebView остаются явно непроверенными до операторской настройки.
 
-## Текущая передача: отдельный ingress helper при дисковом отказе app update
+## Историческая передача: отдельный ingress helper при дисковом отказе app update
 
 **Текущее состояние владельца:** отдельный helper b008 установлен, stage/apply/check прошли; app SHA fbe82aef6008d292515c0efce2fde601c221f3d2 и TLS1.3/IP+chain Verification:OK подтверждены из самого сервера. [Receipt](tasks/TASK-003.md#фактическое-применение-владельцем--2026-11-07). Повторные setup/install/update/apply не нужны. Сейчас owner проверяет URL с внешнего телефона и привычные соседние сервисы, затем настраивает BotFather/private Telegram fields и делает обычный app restart/check. Инструкции ниже описывают уже выполненную установку и дальнейшее обслуживание; внешняя доступность/renewal/живые входы остаются pending.
 
@@ -200,7 +202,7 @@ Test-install использует чистый Debian 13 amd64, настоящи
 
 Полный app update снова использует исходный reserve:2GiB+две копии image_bytes+две копии data. До загрузки нового kit можно удалить только сверенные по известному SHA256 воспроизводимые scratch ZIP/tar/images.tar.gz прежних Cheapshot скачиваний, сохранив configs, snapshots/backups и установленный operator. Удаление Docker images/cache, рабочих volumes и чужих данных не поручено. Если места недостаточно, installer останавливается: не повторять его и не обходить guard. Exact artifact/hashes/проверки сохранены в [карточке](tasks/TASK-004-mod-stacks.md#проверенный-кандидат-и-передача--2026-11-07), root/curl команды — [TASK-004-NEXT-STEPS.md](TASK-004-NEXT-STEPS.md).
 
-## TASK004 Sites — текущий кандидат оформления
+## TASK004 Sites — сохранённый комплект оформления
 
 Основное приложение с одобренным Sites v1: [TASK004](tasks/TASK-004.md), [визуальное сравнение/снимки](design/TASK-004-VISUAL-COMPARISON.md), [точные root/curl update/check/rollback команды](TASK-004-SITES-NEXT-STEPS.md). Этот kit включает завершённую группировку PR4; старый TASK-004-NEXT-STEPS.md/19a kit остаётся историческим маршрутом только группировки. Отзывы и исходные receipts сохранены.
 
@@ -213,19 +215,19 @@ Source6dc8021e58daa9aa16a93a9265315bb810fe9d0a: все41native/20browser/contain
 Новый формат БД — schema5. Миграция4→5 меняет marker без изменения строк, receipts, history, revision или исходного инвентаря; schema2/3 проходят прежние миграции. Старое приложение отвергает5. Откат требует прежних image+volume вместе; новые записи остаются в новом volume. Сырьевые `raw-purple`, `raw-red`, `raw-green` имеют только внутренний tier0, а интерфейс показывает «сырьевой». Рецепты/экипировка/семейные пакеты1–6 описаны в TASK-006; у цветов нет target1. Инсталлятор и его guards не ослаблены.
 
 
-Последний устанавливаемый кандидат TASK-006: [новый immutable kit и готовые owner-команды](TASK-006-NEXT-STEPS.md), [доказательства](TASK-006-VALIDATION.md), [отдельное ревью](reviews/TASK-006-review.md). Он поддерживает update с FBE2/19a3/6dc3/canonical TASK-0054; новая схема5 требует отката image+volume вместе. Инструкции первоначальной IP-TLS интеграции и прежние комплекты выше сохраняются как история; повторно настраивать общий proxy для обычного app update не требуется.
+Сохранённый устанавливаемый кандидат TASK-006: [новый immutable kit и готовые owner-команды](TASK-006-NEXT-STEPS.md), [доказательства](TASK-006-VALIDATION.md), [отдельное ревью](reviews/TASK-006-review.md). Он поддерживает update с FBE2/19a3/6dc3/canonical TASK-0054; новая схема5 требует отката image+volume вместе. Инструкции первоначальной IP-TLS интеграции и прежние комплекты выше сохраняются как история; повторно настраивать общий proxy для обычного app update не требуется.
 
 
 ## Массовый максимум (TASK-007)
 
-[Команды владельцу и immutable kit](TASK-007-NEXT-STEPS.md), [проверки и ограничения](TASK-007-VALIDATION.md), [отдельное ревью](reviews/TASK-007-review.md). PR8 направлен в chm-006-raw-mods; runtime source f944acb6435a9671cef6db5fc500b79a71d21133. Пять поддержанных predecessors включают canonical TASK-006/schema5; rollback всегда возвращает прежнюю пару image+volume. Новый source не установлен на реальном сервере developer.
+[Команды владельцу и immutable kit](TASK-007-NEXT-STEPS.md), [проверки и ограничения](TASK-007-VALIDATION.md), [отдельное ревью](reviews/TASK-007-review.md). Историческая передача PR8 направлялась в chm-006-raw-mods, позднее PR8 слит в main; runtime source f944acb6435a9671cef6db5fc500b79a71d21133. Пять поддержанных predecessors включают canonical TASK-006/schema5; rollback всегда возвращает прежнюю пару image+volume. Новый source не установлен на реальном сервере developer.
 
 Новые массовые операции используют одну work группу: `{id,targetTier,includeWorn,quantity?,count?}`. Без count preview выбирает максимум floor(Q/3^(t−s)); quantity необязательно ограничивает разрешённый запас. Сервер читает реальные атрибуты/экипировку, неизвестный crit требует уточнения. Count/quantity имеют технический предел256цифр, позволяющий производный максимум свыше128; новые исходные записи сохраняют прежний предел128. Schema5 и ledger не меняются. Legacy DTO синтаксически читается до receipt lookup: старый exact mixed replay/expired receipt обрабатывается прежним способом, а новый mixed ключ отвергается. Старые mixed/single undo и поздние пополнения сохраняются. UI commit фиксирует показанные count/quantity/revision, потерянный ответ повторяется тем же payload/key.
 
 
 ## Зафиксированный инвентарь (TASK-008)
 
-[Проверенный kit и команды владельцу](TASK-008-NEXT-STEPS.md), [доказательства](TASK-008-VALIDATION.md), [независимое review](reviews/TASK-008-review.md). Runtime0f2cd90c5b672d67409c2687e4e90a8ce9797482, PR9 вmain; интеграцию завершает management.
+[Проверенный kit и команды владельцу](TASK-008-NEXT-STEPS.md), [доказательства](TASK-008-VALIDATION.md), [независимое review](reviews/TASK-008-review.md). Runtime `0f2cd90c5b672d67409c2687e4e90a8ce9797482`, [PR9](https://github.com/sa713/cheapshotmods/pull/9) merged в main, техническая приёмка и интеграция завершены 2026-11-09.
 
 Schema6 добавляет `baselines` и независимые `baseline_groups` с owner scope. Миграция2–5 сохраняет прежние rows/receipts и не создаёт snapshot автоматически. State содержит nullable `baseline: {capturedAt,quantity,entries}`; количества и число исходных записей — decimal TEXT.
 

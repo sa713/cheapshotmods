@@ -1,6 +1,6 @@
 # TASK-008 — фиксация исходного набора и возврат к нему
 
-- Статус: **review**.
+- Статус: **accepted**, интегрирована в **main**, 2026-11-09.
 - Риск: повышенный — новый постоянный снимок и восстановление пользовательских данных.
 - Основание: [PRODUCT](../../PRODUCT.md#зафиксированный-исходный-набор--2026-11-09), поручение владельца от 2026-11-09.
 - Репозиторий: sa713/cheapshotmods.
@@ -92,8 +92,8 @@ Management после независимой приёмки и применим�
 
 - product_acceptance: **pending**.
 - delivery: **pending**.
-- Следующий исполнитель: management принимает передачу и завершает интеграцию вmain; владелец обновляет сервер.
-- Последнее подтверждение:2026-11-09, прямой запрос владельца на фиксацию и отдельный возврат. Открытых игровых вопросов нет; при подготовке карточки реализация и новые CI/review/kit ещё не выполнялись; итог developer приведён ниже.
+- Следующий исполнитель: владелец обновляет целевой сервер и проверяет живые сценарии по [готовой инструкции](../TASK-008-NEXT-STEPS.md). Техническая приёмка и интеграция management завершены.
+- Последнее подтверждение: 2026-11-09, владелец сообщил о реализации доработки и поручил актуализировать репозиторий. Management завершил техническую приёмку и интеграцию; установка TASK-008 на реальном сервере этим сообщением не подтверждена. Историческая передача developer и итог управления приведены ниже.
 
 
 ## План developer
@@ -112,7 +112,7 @@ State добавляет nullable metadata снимка (время/число �
 Новые installer сценарии вынесены в `task008-upgrade`, старые task007 scripts сохранены. Bundle workflow выбирает новый helper с canonical TASK-007/f944 и всеми пятью прежними immutable predecessors, schema6 rejection старым binary, snapshotA/эксперимент/two resets/restart/backup/restore/paired rollback. Перед actual installer новые API-фазы4/5→6 проверены на локальном HTTP/SQLite; это не выдаётся за Debian installer run. Итог CI/kit/независимой приёмки приведён ниже.
 
 
-## Передача developer
+## Передача developer — до интеграции
 
 [PR9](https://github.com/sa713/cheapshotmods/pull/9): chm-008-inventory-baseline→main. Стартовый HEAD **260d370638b2ea5bdd826614108078e85e60b10e** подтверждён; runtime/CI/kit **0f2cd90c5b672d67409c2687e4e90a8ce9797482**. Постоянный snapshot всего original, metadata/явная замена и отдельный атомарный возврат original/work/experiment реализованы. Обычный reset, old data/history/receipts/undo сохранены. Исходный сценарий literal fuse→original не воспроизведён, это честно записано; новый контракт реализован полностью.
 
@@ -123,3 +123,13 @@ State добавляет nullable metadata снимка (время/число �
 Immutable artifact **13637904971**, expires **2026-12-08T23:11:21Z**, ZIP SHA256 `137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537`, tar SHA256 `ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c`. [Полные доказательства](../TASK-008-VALIDATION.md), [паспорт kit](../evidence/TASK-008/kit.json), [готовые root/curl update/check/rollback](../TASK-008-NEXT-STEPS.md).
 
 Последующий handoff commit содержит только `.delivery` документы/evidence/review/owner scripts, `[skip ci]`; executable source/tests/workflows/installer/lockfile равны runtime. Интеграцию PR9 вmain и применимые проверки результата завершает management после этой передачи; developer слияние не выполнял. Настоящий Debian обновляет владелец. Product acceptance/delivery pending; новые записи после update остаются в новом volume, rollback возвращает только прежнюю image+volume пару. Реальный сервер/БД/proxy/BotFather не изменялись.
+
+## Итог management — 2026-11-09
+
+Техническая приёмка — **accepted**; [PR9](https://github.com/sa713/cheapshotmods/pull/9) **merged в main**, merge `db2f43ada73aa14af19d6b1e5ffb2ff25608724b`. Слияние выполнено с проверкой ожидаемого HEAD `5bbf615fd10dd65083f00853494e7846f896286c`. Дерево передачи и merge совпадает; сравнение принятого runtime `0f2cd90c5b672d67409c2687e4e90a8ce9797482` с передачей меняет только `.delivery`.
+
+Management изучил [отдельное accepted review](../reviews/TASK-008-review.md), [валидацию](../TASK-008-VALIDATION.md) и первичные GitHub runs/jobs/steps [checks42532270563](https://github.com/sa713/cheapshotmods/actions/runs/42532270563) / [kit42532270571](https://github.com/sa713/cheapshotmods/actions/runs/42532270571): все обязательные проверки success, 96 native / 47 Chromium. Метаданные immutable artifact 13637904971 сверены с GitHub: source/digest/expiry совпадают, artifact не истёк. Повторный локальный прогон management не заявляется.
+
+После слияния фактически завершён [main CI42565774435](https://github.com/sa713/cheapshotmods/actions/runs/42565774435) на merge `db2f43ada73aa14af19d6b1e5ffb2ff25608724b`: verify, container-smoke и все их обязательные шаги **success**. Текущий статус последующих управляющих коммитов доступен в GitHub Actions; этот запуск относится именно к merge.
+
+README, паспорт, состояние, очередь и эксплуатационная сводка актуализированы. Функциональные исходники, тесты, установщик, CI и lock-файл управляющей актуализацией не изменяются. Product acceptance/delivery TASK-008 остаются pending до подтверждения установки и живых сценариев владельцем; реальный Debian/БД/proxy/BotFather не изменялись.
