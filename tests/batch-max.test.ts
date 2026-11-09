@@ -75,11 +75,11 @@ test('preview is read-only, max-zero commit fails; retries and stale revision/ex
 });
 
 test('real canonical schema5 mixed receipts and every old/new undo survive restart and late additions',()=>{
-  const dir=mkdtempSync(join(tmpdir(),'chm007-legacy-')),path=join(dir,'db');let s:Store|undefined;try{const f=seedV5(path);s=new Store(path);assert.deepEqual(rows(s),f.tables);assert.deepEqual(s.command('888',f.receipt.payload),f.receipt.result);assert.deepEqual(rows(s),f.tables);assert.throws(()=>s!.command('888',f.expired),/COMMAND_EXPIRED/);
+  const dir=mkdtempSync(join(tmpdir(),'chm007-legacy-')),path=join(dir,'db');let s:Store|undefined;try{const f=seedV5(path);s=new Store(path);assert.deepEqual(rows(s),{...f.tables,baselines:[],baseline_groups:[]});assert.deepEqual(s.command('888',f.receipt.payload),f.receipt.result);assert.deepEqual(rows(s),{...f.tables,baselines:[],baseline_groups:[]});assert.throws(()=>s!.command('888',f.expired),/COMMAND_EXPIRED/);
     const p=s.summary('888'),bytes=s.db.serialize();assert.throws(()=>s!.command('888',{...f.receipt.payload,key:randomUUID(),revision:p.revision,experiment:p.experiment}),/HOMOGENEOUS_GROUP_REQUIRED/);assert.deepEqual(s.db.serialize(),bytes);
     command(s,{type:'level',value:'307'},'888');const input=stock(s,'888').find(g=>g.kind==='raw-purple')!;command(s,{type:'fuse',fuse:req(input.id,1)},'888');command(s,{type:'original.put',kind:'raw-purple',tier:0,value:'5',crit:'13',quantity:'2'},'888');
     s.close();s=new Store(path);for(let i=0;i<3;i++)command(s,{type:'undo'},'888');const current=stock(s,'888');assert.equal(current.find(g=>g.tier===0)!.quantity,'31');assert.equal(current.find(g=>g.tier===1)!.quantity,'2');assert.equal(current.find(g=>g.tier===3)!.quantity,'2');assert.equal(s.summary('888').spent,'0');assert.equal(s.summary('888').level,'307');assert.equal(s.summary('888').equipment[0]!.quantity,'3');
-    command(s,{type:'reset'},'888');assert.equal(stock(s,'888').find(g=>g.tier===0)!.quantity,'31');assert.equal(s.db.pragma('user_version',{simple:true}),5);
+    command(s,{type:'reset'},'888');assert.equal(stock(s,'888').find(g=>g.tier===0)!.quantity,'31');assert.equal(s.db.pragma('user_version',{simple:true}),6);
   }finally{s?.close();rmSync(dir,{recursive:true,force:true});}
 });
 

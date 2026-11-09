@@ -90,7 +90,7 @@ test('real schema2 duplicates/history migrate once; all undo steps, receipts, ow
   const players=before.prepare('SELECT owner,revision,level,experiment,started,spent FROM players ORDER BY owner').all() as {owner:string;revision:string;level:string;experiment:string;started:number;spent:string}[];
   before.close();let s=new Store(path);
   try {
-    assert.equal(s.db.pragma('user_version',{simple:true}),5);
+    assert.equal(s.db.pragma('user_version',{simple:true}),6);
     assert.deepEqual(s.db.prepare("SELECT owner,scope,id,kind,tier,value,quantity FROM groups WHERE scope='original' ORDER BY owner,id").all(),original);
     assert.deepEqual(s.db.prepare('SELECT * FROM commands ORDER BY owner,key').all(),receipts);
     for (const p of players) {

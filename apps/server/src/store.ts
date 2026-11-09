@@ -9,6 +9,7 @@ import {migrateCrit,type History} from './crit-migration.js';
 import {Lots,type Piece,type Range} from './lots.js';
 
 interface Player { owner: string; revision: string; level: string; experiment: string; started: number; spent: string; equipment: string; worn_ranges:string }
+interface Baseline { capturedAt:string; quantity:string; entries:string }
 export interface Session { hash: string; owner: string | null; csrf: string; expires: number; flow: string | null }
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return '['+value.map(canonical).join(',')+']';
@@ -30,7 +31,7 @@ export class Store {
     this.db.pragma('journal_mode = WAL'); this.db.pragma('foreign_keys = ON'); this.db.pragma('busy_timeout = 5000');
     try {
       const version = this.db.pragma('user_version', {simple:true});
-      requireThat([0,1,2,3,4,5].includes(Number(version)), 'UNKNOWN_DATABASE_VERSION', 503);
+      requireThat([0,1,2,3,4,5,6].includes(Number(version)), 'UNKNOWN_DATABASE_VERSION', 503);
       this.db.transaction(()=>{
       if (version === 0) this.db.transaction(()=>this.db.exec(`
         CREATE TABLE players(owner TEXT PRIMARY KEY, revision TEXT NOT NULL, level TEXT NOT NULL, experiment TEXT NOT NULL, started INTEGER NOT NULL, spent TEXT NOT NULL, equipment TEXT NOT NULL);
@@ -56,6 +57,14 @@ export class Store {
       if (Number(version)<5) {
         if(Number(version)>0&&this.afterMods&&this.afterMods.length>0)this.afterMods('raw-migration');
         this.db.pragma('user_version=5');
+      }
+      if (Number(version)<6) {
+        this.db.exec(`
+          CREATE TABLE baselines(owner TEXT PRIMARY KEY REFERENCES players(owner), captured_at TEXT NOT NULL, quantity TEXT NOT NULL, entries TEXT NOT NULL);
+          CREATE TABLE baseline_groups(owner TEXT NOT NULL REFERENCES baselines(owner) ON DELETE CASCADE, id TEXT NOT NULL, kind TEXT NOT NULL, tier INTEGER NOT NULL, value TEXT NOT NULL, quantity TEXT NOT NULL, crit TEXT NOT NULL, PRIMARY KEY(owner,id));
+        `);
+        if(Number(version)>0&&this.afterMods&&this.afterMods.length>0)this.afterMods('baseline-migration');
+        this.db.pragma('user_version=6');
       }
       }).immediate();
     } catch(error) {this.db.close();throw error;}
@@ -119,7 +128,8 @@ export class Store {
     const p=this.player(owner),equipment=JSON.parse(p.equipment) as Equipped[];
     const items=equipment.map(e=>({...this.group(owner,'work',e.id),quantity:e.quantity}));
     const last=this.sql('SELECT body FROM history WHERE owner=? ORDER BY seq DESC LIMIT 1').get(owner) as {body:string}|undefined;
-    return {revision:p.revision,level:p.level,experiment:p.experiment,started:!!p.started,spent:p.spent,equipment,equippedMods:items,stats:stats(p.level,items),lastCraft:last?JSON.parse(last.body) as History:null};
+    const baseline=this.sql('SELECT captured_at AS capturedAt,quantity,entries FROM baselines WHERE owner=?').get(owner) as Baseline|undefined;
+    return {revision:p.revision,level:p.level,experiment:p.experiment,started:!!p.started,spent:p.spent,equipment,equippedMods:items,stats:stats(p.level,items),lastCraft:last?JSON.parse(last.body) as History:null,baseline:baseline??null};
   }
   preview(owner:string,raw:unknown) {
     const c=record(raw);keys(c,['revision','experiment','fuse']);inputInteger(c.revision,true);
@@ -154,8 +164,8 @@ export class Store {
         requireThat(previous.payload===expected,'KEY_REUSED',409);requireThat(previous.result!=='','COMMAND_EXPIRED',410);
         return JSON.parse(previous.result) as ReturnType<Store['summary']>&{createdId?:string};}
       requireThat(p.revision===c.revision&&p.experiment===c.experiment,'REVISION_CONFLICT',409);
-      const save=!(a.type==='level'||(p.started&&['original.put','original.delete','original.crit'].includes(a.type as string)));
-      let lots=save&&a.type!=='reset'?this.lots(p):new Lots(),createdId:string|undefined,history:History|undefined;let restoreIds:Group[]=[];
+      const save=!(a.type==='level'||a.type==='baseline.capture'||(p.started&&['original.put','original.delete','original.crit'].includes(a.type as string)));
+      let lots=save&&!['reset','baseline.restore'].includes(a.type as string)?this.lots(p):new Lots(),createdId:string|undefined,history:History|undefined;let restoreIds:Group[]=[];
       switch(a.type){
         case 'original.put':{
           keys(a,['type','id','kind','tier','value','quantity','crit']);const old=a.id!==undefined?this.group(owner,'original',a.id):undefined,m=mod(a);
@@ -184,6 +194,23 @@ export class Store {
           lots.restore(pieces.map(piece=>({...piece,crit:a.crit as string})));lots.worn=wear;p.started=1;break;
         }
         case 'level':keys(a,['type','value']);p.level=a.value as string;break;
+        case 'baseline.capture':{
+          keys(a,['type','replace']);requireThat(typeof a.replace==='boolean');
+          requireThat(a.replace||!this.sql('SELECT 1 FROM baselines WHERE owner=?').get(owner),'BASELINE_REPLACE_REQUIRED',409);
+          let quantity=0n,entries=0n;
+          for(const row of this.sql("SELECT quantity FROM groups WHERE owner=? AND scope='original'").iterate(owner)){quantity+=BigInt((row as {quantity:string}).quantity);entries++;}
+          this.sql('INSERT INTO baselines(owner,captured_at,quantity,entries) VALUES (?,?,?,?) ON CONFLICT(owner) DO UPDATE SET captured_at=excluded.captured_at,quantity=excluded.quantity,entries=excluded.entries').run(owner,new Date().toISOString(),quantity.toString(),entries.toString());
+          this.sql('DELETE FROM baseline_groups WHERE owner=?').run(owner);this.afterMods?.('baseline-capture-cleared');
+          this.sql("INSERT INTO baseline_groups SELECT owner,id,kind,tier,value,quantity,crit FROM groups WHERE owner=? AND scope='original'").run(owner);this.afterMods?.('baseline-captured');break;
+        }
+        case 'baseline.restore':{
+          keys(a,['type']);requireThat(this.sql('SELECT 1 FROM baselines WHERE owner=?').get(owner),'BASELINE_REQUIRED');
+          this.sql("DELETE FROM groups WHERE owner=? AND scope='original'").run(owner);this.afterMods?.('baseline-original-cleared');
+          this.sql("INSERT INTO groups(owner,scope,id,kind,tier,value,quantity,crit) SELECT owner,'original',id,kind,tier,value,quantity,crit FROM baseline_groups WHERE owner=?").run(owner);this.afterMods?.('baseline-original-restored');
+          this.sql("DELETE FROM groups WHERE owner=? AND scope='work'").run(owner);this.afterMods?.('baseline-work-cleared');
+          lots=this.originalLots(p);p.spent='0';p.started=1;p.experiment=randomUUID();
+          this.sql('DELETE FROM history WHERE owner=?').run(owner);this.afterMods?.('baseline-history-cleared');break;
+        }
         case 'reset':keys(a,['type']);lots=this.originalLots(p);p.spent='0';p.started=1;p.experiment=randomUUID();this.sql('DELETE FROM history WHERE owner=?').run(owner);break;
         case 'equip':{
           keys(a,['type','items']);requireThat(Array.isArray(a.items)&&a.items.length<=100,'EQUIPMENT_LIMIT');const seen=new Set<string>();
@@ -217,6 +244,7 @@ export class Store {
         default:requireThat(false,'UNKNOWN_COMMAND');
       }
       const groups=save?this.saveLots(p,lots,restoreIds):[];
+      if(a.type==='baseline.restore')this.afterMods?.('baseline-work-restored');
       if(history){const resolve=(g:Group)=>({...g,id:groups.find(x=>modKey(x)===modKey(g))!.id});history.output=resolve(history.output);if(history.outputs)history.outputs=history.outputs.map(resolve);
         createdId=history.output.id;this.afterMods?.();this.sql('INSERT INTO history(owner,body) VALUES (?,?)').run(owner,JSON.stringify(history));this.afterMods?.('history');}
       p.revision=(BigInt(p.revision)+1n).toString();

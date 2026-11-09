@@ -1,5 +1,9 @@
 # Паспорт Cheapshot Mods
 
+## Текущая подготовка — 2026-11-09
+
+[TASK-008](tasks/TASK-008.md) **review**: [PR9](https://github.com/sa713/cheapshotmods/pull/9) вmain, проверенный runtime **0f2cd90c5b672d67409c2687e4e90a8ce9797482**, schema6. Постоянный независимый снимок всего original и отдельный полный возврат реализованы; обычный reset сохранён.96native/47Chromium, все обязательные exact CI, шесть Debian predecessor routes и реальные classic/containerd/reverse прошли. Отдельная [техническая приёмка accepted](reviews/TASK-008-review.md) exact artifact13637904971, включая собственные96/47/SQL+HTTP probes/30compiled files и actual TASK0075→new6 lifecycle. [Доказательства](TASK-008-VALIDATION.md), [готовый kit/owner-команды](TASK-008-NEXT-STEPS.md). Следующий шаг management — принять передачу и завершить разрешённую интеграцию вmain с применимыми проверками; сервер/рабочие данные обновляет владелец. Main merge, реальный Debian, живые Telegram/телефон/product acceptance/delivery этим developer handoff не заявляются.
+
 ## Актуальное решение — 2026-11-08
 
 Владелец подтвердил работоспособность установленного Debian-сервиса и поручил навести порядок наGitHub. Полный проверенный продукт интегрирован вmain через [PR8](https://github.com/sa713/cheapshotmods/pull/8), merge `3ffeca3f50c8950d169b928601e16aa770c96221`, с сохранением всей продуктовой истории. Main является точкой входа для кода и дальнейшей разработки; текущие [STATE](STATE.md)/[TASKS](TASKS.md)/корневойREADME обновлены. Runtime принятого неизменяемого комплекта остаётсяf944acb6435a9671cef6db5fc500b79a71d21133; новые управляющие документы не подменяют его source.

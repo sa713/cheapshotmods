@@ -1,0 +1,40 @@
+{
+  "executor": "GitHub Actions actual Debian installer run",
+  "run_id": 42532270571,
+  "job_id": 128888846094,
+  "evidence_artifact_id": 13638301938,
+  "evidence_zip_sha256": "baab4b2cab3323943004f2588c28bf44a1a8f0377dd13a10444266bb2321170f",
+  "proof": {
+    "predecessor_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+    "incoming_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+    "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+    "old_assets": {
+      "css_sha256": "55a58405a9a72c53a35f1713bc4d453887587002a8df98494fdf366da5df62e5",
+      "js_sha256": "d0bca71644723933a296409980a40f2aa2f75b7570a1fc9ddf9f5cc45429841d",
+      "sites": true
+    },
+    "new_assets": {
+      "css_sha256": "2f81719e6e7596b5790d07456a8bcf811220e12e0a4865e2cfcce056009c8aff",
+      "js_sha256": "b2378335c979ebe281c9ae13f37e11ef16c0ae960597987233d9f05156a9a9e8",
+      "sites": true
+    },
+    "asset_rollback_exact": true,
+    "old_schema": 5,
+    "new_schema": 6,
+    "separate_new_volume": true,
+    "old_image_schema_compatibility_probe": "rejected_copy6",
+    "config_and_separate_operator_unchanged": true,
+    "new_image_restart_backup_restore": "passed",
+    "baseline_backup_restore_restart": "passed",
+    "schema5_state_rows_receipts_preserved": "passed",
+    "task007_homogeneous_replay_undo": "passed",
+    "baseline_capture_restore_isolation": "passed",
+    "old_mixed_replay_new_mixed_reject": "passed",
+    "raw_equipment_single_batch_undo": "passed",
+    "all_old_undo_late_stock_reset": "passed",
+    "automatic_max_count_worn": "passed",
+    "rollback_old_image_and_volume_exact_state": "passed",
+    "restart_after_rollback": "passed",
+    "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+  }
+}

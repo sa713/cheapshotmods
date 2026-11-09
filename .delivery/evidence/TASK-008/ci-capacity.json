@@ -1,0 +1,75 @@
+{
+  "source_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "executor": "GitHub Actions verify job",
+  "run_id": 42532270563,
+  "job_id": 128888846212,
+  "native_pass": 96,
+  "browser_pass": 47,
+  "metrics": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "logicalCpus": 2,
+    "hostMemoryMiB": 7933,
+    "compactHugeBatch": {
+      "maxCount": "1000000000000000000000000",
+      "inputPerResult": "729",
+      "rawKind": "raw-green",
+      "targetTier": 6,
+      "steps": 6,
+      "inputUnits": "729000000000000000000000000",
+      "resultCount": "1000000000000000000000000",
+      "price": "40824000000000000000000000000",
+      "previewMs": 1.4701180000000136,
+      "commitMs": 1.8388239999999882,
+      "undoMs": 0.8927229999999895,
+      "heapDeltaBytes": 371064,
+      "physicalWorkLots": 1,
+      "historyRows": 1,
+      "planJsonBytes": 2795
+    },
+    "derivedMaximum": {
+      "inputDigits": 128,
+      "additions": 4,
+      "maxDigits": 129,
+      "maxCount": "133333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333332",
+      "previewCommitUndoMs": 1.7799269999999865,
+      "planJsonBytes": 2504
+    },
+    "inventoryBaseline": {
+      "entries": "10002",
+      "quantity": "9007199255750993",
+      "captureMs": 19.36709400000018,
+      "restoreMs": 317.9257170000001,
+      "restoredWorkGroups": 10002,
+      "physicalWorkLots": 10002
+    },
+    "dataset": {
+      "distinctGroups": 10000,
+      "millionGroup": "1000000",
+      "exactQuantity": "9007199254740993"
+    },
+    "batchSetup": {
+      "groups": 10000,
+      "outerTransaction": true,
+      "elapsedMs": 1117.1173600000002
+    },
+    "sequentialHttp": {
+      "sampleSize": 100,
+      "commitPerRequest": true,
+      "totalMs": 191.15041599999995,
+      "p95Ms": 3.1938480000001164
+    },
+    "oversizedInteger": {
+      "digits": 1000000,
+      "rejectMs": 7.417081999999937
+    },
+    "resetMs": 160.36888399999998,
+    "paginatedLoadMs": 9.613644000000022,
+    "tenSameRevisionInjectedRequestsMs": 164.49653599999988,
+    "dbAndWalBytes": 23791808,
+    "rssMiB": 218.83984375,
+    "peakRssMiB": 218.83984375
+  }
+}

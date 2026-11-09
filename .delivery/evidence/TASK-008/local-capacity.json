@@ -1,0 +1,67 @@
+{
+  "node": "v24.22.1",
+  "platform": "linux",
+  "arch": "x64",
+  "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "logicalCpus": 5,
+  "hostMemoryMiB": 18008,
+  "compactHugeBatch": {
+    "maxCount": "1000000000000000000000000",
+    "inputPerResult": "729",
+    "rawKind": "raw-green",
+    "targetTier": 6,
+    "steps": 6,
+    "inputUnits": "729000000000000000000000000",
+    "resultCount": "1000000000000000000000000",
+    "price": "40824000000000000000000000000",
+    "previewMs": 2.2055670000000873,
+    "commitMs": 2.6478270000000066,
+    "undoMs": 2.152157999999986,
+    "heapDeltaBytes": 333408,
+    "physicalWorkLots": 1,
+    "historyRows": 1,
+    "planJsonBytes": 2795
+  },
+  "derivedMaximum": {
+    "inputDigits": 128,
+    "additions": 4,
+    "maxDigits": 129,
+    "maxCount": "133333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333332",
+    "previewCommitUndoMs": 2.856792999999925,
+    "planJsonBytes": 2504
+  },
+  "inventoryBaseline": {
+    "entries": "10002",
+    "quantity": "9007199255750993",
+    "captureMs": 36.009348000000045,
+    "restoreMs": 289.2244270000001,
+    "restoredWorkGroups": 10002,
+    "physicalWorkLots": 10002
+  },
+  "dataset": {
+    "distinctGroups": 10000,
+    "millionGroup": "1000000",
+    "exactQuantity": "9007199254740993"
+  },
+  "batchSetup": {
+    "groups": 10000,
+    "outerTransaction": true,
+    "elapsedMs": 1460.2901980000001
+  },
+  "sequentialHttp": {
+    "sampleSize": 100,
+    "commitPerRequest": true,
+    "totalMs": 264.02405099999896,
+    "p95Ms": 3.7658550000001014
+  },
+  "oversizedInteger": {
+    "digits": 1000000,
+    "rejectMs": 11.981416000000081
+  },
+  "resetMs": 225.0109050000001,
+  "paginatedLoadMs": 20.420634999999947,
+  "tenSameRevisionInjectedRequestsMs": 263.5502769999998,
+  "dbAndWalBytes": 23709936,
+  "rssMiB": 198.17578125,
+  "peakRssMiB": 198.17578125
+}

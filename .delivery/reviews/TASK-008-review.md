@@ -1,0 +1,54 @@
+# Независимая проверка TASK-008
+
+- Репозиторий: `sa713/cheapshotmods`, [PR9](https://github.com/sa713/cheapshotmods/pull/9), `chm-008-inventory-baseline` → `main`. Reviewer самостоятельно прочитал remote metadata: PR открыт, не слит, base `4b7b50464c888909b33d70171b055739cda9d142`, head совпадает с проверенным runtime.
+- Функциональный base: `260d370638b2ea5bdd826614108078e85e60b10e`; runtime HEAD: **`0f2cd90c5b672d67409c2687e4e90a8ce9797482`**. Прочитаны AGENTS, локальный `ad-review-change`, закреплённые START/WORKFLOW/reviewer/QUALITY/RELEASE, PROJECT, исходное требование PRODUCT и [TASK-008](../tasks/TASK-008.md), изменённые и связанные исходники, тесты, workflow и installer harness.
+- Проверяющий: отдельный Codex reviewer-контекст `/root/independent_review_008`, 2026-11-08. Функциональный код, тесты, ветка, main и выпуск reviewer не менял. Собственные диагностические программы и БД находились в `/tmp`; этот файл — единственная запись reviewer в репозитории.
+- Область: независимый постоянный снимок original, capture/restore и прежний reset, авторизация/receipts/атомарность, миграции, UI, backup и устанавливаемый кандидат. Риск повышенный.
+- **Заключение: accepted для runtime и устанавливаемого кандидата source `0f2cd90c5b672d67409c2687e4e90a8ce9797482`, immutable artifact `13637904971`. Подтверждённых блокирующих и неблокирующих дефектов не найдено.**
+
+## Собственные запуски и наблюдения
+
+| Область | Проверка reviewer | Результат |
+| --- | --- | --- |
+| Полная сборка и регрессии | `bash scripts/verify.sh`, `/tmp/task008-review-verify.log` | **96/96 native**, typecheck, lint, production build прошли. Первый sandbox-запуск остановился на npm/esbuild spawn; повтор с разрешённым escalation завершился успешно. |
+| Независимая диагностика | `node --import tsx /tmp/task008-review-probe.mjs` на настоящем better-sqlite3/SQLite | **146** исходных строк, более одной страницы, отдельные одинаковые записи, raw, неизвестный/нулевой крит, 128-значные value/quantity скопированы точно. Capture сохранил groups/work_lots/history/equipment/level/experiment/started; изменились снимок, revision и receipt. |
+| Два сброса и повторы | Собственный probe и полный native suite | Обычный reset использует изменённый original. Полный возврат восстанавливает исходные записи и сгруппированный work, очищает расход/историю/экипировку, сохраняет уровень и снимок, меняет experiment. Три цикла fuse/restore не дублировали запас. Старые capture/restore receipts после новых действий вернули прежние ответы без мутации текущих данных. |
+| Частичные SQL-отказы | Собственные SQLite `RAISE(ABORT)` triggers, без production fault callbacks | Шесть отказов при копировании snapshot/original, удалении lots, записи player и обоих receipts откатили все таблицы. Native suite дополнительно проверил объявленные промежуточные fault points и конкуренцию независимых SQLite connections. |
+| HTTP и сохранность | Собственный настоящий TCP HTTP, подписанный синтетический Mini login, online backup и restart | Конкурентные capture/edit с одной revision дали один 200 и один 409; другой owner и чужой Origin не получили доступ к снимку. Backup содержал точное состояние и снимок; restart/full restore прошли. Самостоятельно загруженная schema5 fixture мигрировала без изменений старых таблиц и без автоматического снимка, обе исторические undo работали. |
+| Полный Chromium | `npm run test:browser`, `/tmp/task008-review-browser.log` | **47/47**, 2.9 минуты, настоящий HTTP/SQLite. Новые capture/restore/replace/empty/absent/409/lost-response/reload/pagination/site–Mini-owner случаи и все прежние ordinary/raw/fuse/crit/equipment/auth/modal регрессии прошли. |
+| Визуальная проверка | Просмотр собственных `baseline-return` screenshots **360/390/1440** | Две кнопки сброса расположены рядом, полные русские подписи читаемы, время/объём снимка видны. Automated checks подтвердили цели ≥44px и отсутствие горизонтального overflow; cancel/focus/Escape, длинные числа и старый shape state прошли. Screenshots сохранены в `/tmp/task008-review-baseline-{360,390,1440}.png`. |
+| Capacity и guards | Собственные `check-measure-pipeline.sh`, `npm run measure`, ingress/image-proof negatives | Actual pipeline failure возвращает17, отрицательный контроль без pipefail —0. Capture/restore **10002** строк и количества **9007199255750993** прошли примерно за25/247мс; восстановлены10002groups/10002lots. Ingress4 и image-proof14 проверок прошли. Это измерение изолированной среды. |
+
+Среда собственных запусков: Node24.22.1/npm11.9.0, настоящий better-sqlite3/SQLite3.53.4, Chromium/Playwright. [Runtime proof](../evidence/TASK-008/reviewer-runtime-proof.json) содержит команды, результаты, собственные диагностические assertions и hashes логов.
+
+## Вывод по реализации и изменённым проверкам
+
+Capture читает весь сохранённый original внутри общей immediate-транзакции и копирует строки в отдельные owner-таблицы. Он исключён из `saveLots`, поэтому не пересоздаёт эксперимент. Снимок сохраняет отдельные исходные IDs, количества и unknown/zero crit; subsequent craft/refine/stock/reset не обновляют его.
+
+Полный возврат в той же транзакции заменяет original/work из снимка, пересобирает компактные lots, очищает equipment/history/spent и создаёт новый experiment. Прежние receipts остаются: exact retry обрабатывается до проверки текущей revision/experiment, поэтому не повторяет разрушительное действие. Owner берётся из авторизованной сессии, применяются прежние Origin/CSRF/account preconditions. Пустой снимок имеет собственные metadata и отличается от отсутствующего.
+
+Schema6 добавляет только две новые таблицы, миграция проходит в прежней общей транзакции и не создаёт снимок автоматически. Изменённые старые schema assertions соответствуют новой версии; старые fixtures, historical receipts/undo и прежние migration routes сохранены. Новые `task008-upgrade` scripts расширяют матрицу до шести predecessors; старые scripts не заменены. Требования и проверки вместе с реализацией не ослаблены.
+
+## Изученные CI-доказательства
+
+Reviewer напрямую получил GitHub metadata и decoded logs: [checks42532270563](https://github.com/sa713/cheapshotmods/actions/runs/42532270563), jobs `128888846212` verify и `128888845941` container-smoke; [kit42532270571](https://github.com/sa713/cheapshotmods/actions/runs/42532270571), job `128888846094` debian-kit. Все три jobs и обязательные steps завершены success, не skipped. Checkout/source привязаны к exact `0f2cd90`. Verify подтверждает96native/47browser/capacity, smoke — seed/check/HTTP на restored volume.
+
+Reviewer сам пересчитал SHA ZIP evidence и прочитал:
+
+- Upgrades artifact **13638301938**, ZIP SHA256 `baab4b2cab3323943004f2588c28bf44a1a8f0377dd13a10444266bb2321170f`: все шесть schema2/3/3/4/5/5 →6 proofs, old binary rejects6, snapshot isolation/backup/restore/restart и paired rollback. Canonical TASK-007 перед обновлением сам выполнил новый homogeneous fuse; его replay/undo сохранились.
+- Stores artifact **13638915400**, ZIP SHA256 `d8a24304f72f59bd5d29eb90d4e9d3880896be8131af41380ca5482d923eb50f`: classic/containerd/containerd-to-fresh-classic config digest, ordered diff IDs и platform совпали с exact manifest. Все observations связаны с images archive `efeffa174f33884ccd9e25d1759e0008ad8e1b43f7d7a1f1b65452b5f8fa81df`; реальные native IDs различаются ожидаемо. Summary/log подтверждают оба external lifecycles/negatives и format1→2/rollback.
+
+Это изученные CI-запуски; собственный canonical installer run описан ниже. Полную cross-store матрицу и остальные пять installer routes reviewer повторно не запускал. [CI proof](../evidence/TASK-008/reviewer-ci-proof.json).
+
+## Собственная проверка exact immutable kit
+
+- [Artifact13637904971](https://github.com/sa713/cheapshotmods/actions/runs/42532270571/artifacts/13637904971), **131996431bytes**, expires **2026-12-08T23:11:21Z**. Собственно пересчитанные **ZIP SHA256 `137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537`**, **tar SHA256 `ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c`** совпали с official metadata/sidecar. Проверены2 ZIP members,14 tar files,13 checksums,11 packaged deploy sources exact Git blobs и format2 archive config/ordered layers. После проверки удалены только транспортные дубликаты; сохранённый kit дополнительно сверён по всем14 файлам. [Archive proof](../evidence/TASK-008/reviewer-archive-proof.json).
+- Exact CI app `sha256:fa2ba640e4b6ce7c381acc72aa96e4560cea6d3515911596114b96f72a529e26` загружен в managed Docker и проверен повторным export proof. В read-only/no-network контейнере все **30 compiled-файлов** rules/server/web побайтово совпали с собственной проверенной local build; Node24.22.1/SQLite3.53.4 совпали. [Compiled proof](../evidence/TASK-008/reviewer-compiled-proof.json).
+- Reviewer сам выполнил `scripts/task008-upgrade/run.sh` с **этим exact CI kit** и canonical TASK-007 `f944acb6435a9671cef6db5fc500b79a71d21133`, в отдельном Debian13-slim/linux-amd64 на managed Docker29.9.2/vfs. Predecessor независимо сверен по историческим ZIP/tar SHA256,13 checksums и11 Git deploy sources. **Exit0**: schema5 rows/receipts сохранены, старый image отверг копию schema6, homogeneous/mixed replay/undo и raw/worn/late-stock регрессии прошли; capture/ordinary reset/full restore, restart, backup→snapshot/state change→restore→undo/full return, rollback после restore и прежняя image+volume пара восстановили точные состояния/assets. Config и отдельный operator неизменны, новый data volume отдельный. Guards сохранены. [Lifecycle proof](../evidence/TASK-008/reviewer-lifecycle-proof.json), `/tmp/task008-review-canonical.log`.
+- Финальные [update](../TASK-008-update.sh), [rollback](../TASK-008-rollback.sh) и [owner guide](../TASK-008-NEXT-STEPS.md) прочитаны. Bash syntax, embedded Python AST, inline script equality, absence of placeholders и exact artifact/hashes подтверждены. Проверены шесть predecessor/external guards, existing credential, backup/metadata/config/operator preservation, paired rollback и restore caveat. SHA256 всех трёх файлов повторно сверен после lifecycle. [Owner proof](../evidence/TASK-008/reviewer-owner-proof.json).
+
+## Ограничения и следующий шаг
+
+Все обязательные технические критерии устанавливаемого кандидата в порученной области закрыты; исключения из требований не потребовались. Общий [runtime proof](../evidence/TASK-008/reviewer-runtime-proof.json) обновлён до `full_installable_candidate: accepted` с exact artifact/hashes и пятью финальными proofs.
+
+Реальный сервер/БД/proxy/BotFather и живые Telegram/телефон reviewer не использовал. Product acceptance и delivery остаются pending; настоящий Debian обновляет владелец. Разрешённую интеграцию PR9 в main завершает management. Последующие изменения runtime либо другие bytes комплекта требуют актуализации соответствующих проверок; исторические kits/reviews прежних задач сохраняют собственные SHA.

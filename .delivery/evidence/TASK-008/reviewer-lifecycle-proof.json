@@ -1,0 +1,104 @@
+{
+  "reviewer": "independent_review_008",
+  "result": "passed",
+  "command": "bash scripts/task008-upgrade/run.sh EXACT_CI_KIT CANONICAL_TASK007_KIT /tmp/task008-review-canonical",
+  "source": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "artifact": 13637904971,
+  "zip_sha256": "137d70277d444e5466af98b31f9c060e137b46cea59a09d64ab330f97cba5537",
+  "tar_sha256": "ff10cb999695d0ef35b01b755abcb5f9adceb216f373a48ac659fc793a2a2c7c",
+  "images_archive_sha256": "efeffa174f33884ccd9e25d1759e0008ad8e1b43f7d7a1f1b65452b5f8fa81df",
+  "app_config_digest": "sha256:fa2ba640e4b6ce7c381acc72aa96e4560cea6d3515911596114b96f72a529e26",
+  "predecessor_proof": {
+    "source": "f944acb6435a9671cef6db5fc500b79a71d21133",
+    "zip_sha256": "225cf1d60f0f179c18fcc7a776c98deff32448dd2f5fe74601ff6e354f4613eb",
+    "tar_sha256": "e0fef732af099f91f18810954fb48c1e89b19a44c30c7947828f3250ccd4596b",
+    "checksums": 13,
+    "deploy_files_equal_canonical_git": 11,
+    "manifest": {
+      "format": 2,
+      "source_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+      "platform": "linux/amd64",
+      "app_image": "cheapshotmods:f944acb6435a9671cef6db5fc500b79a71d21133",
+      "proxy_image": "caddy:2.10.2-alpine",
+      "builder_observations": {
+        "app_native_id": "sha256:0a8ed0d05e0eee7c480c9f09a05016aed11276ed522fc56f48df91be8d2cc8e8",
+        "proxy_native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510"
+      },
+      "proxy_manifest_digest": "caddy@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+      "node": "24.22.1",
+      "npm": "11.9.0",
+      "base_images": [
+        "node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea",
+        "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+      ],
+      "image_bytes": 350798336,
+      "external_proxy_source": "existing running image; tested Caddy 2.11.4; daemon-local image ID captured in private operator plan",
+      "image_proofs": {
+        "app": {
+          "config_digest": "sha256:0a8ed0d05e0eee7c480c9f09a05016aed11276ed522fc56f48df91be8d2cc8e8",
+          "diff_ids": [
+            "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+            "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+            "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+            "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+            "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+            "sha256:899d105c5f9d1237498d66ae3318f2c537295af3ea337c29bae1b057ea706c72",
+            "sha256:9fdb3fc4c86c18172a658c9f895071011915f400ce576683b28a2ca78d6f3c73",
+            "sha256:eaa30ef7af58487a974e6f01965648ec0ba73f2aab4b10ba20b6868f57da25b2"
+          ],
+          "platform": "linux/amd64",
+          "revision": "f944acb6435a9671cef6db5fc500b79a71d21133"
+        },
+        "proxy": {
+          "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "diff_ids": [
+            "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+            "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+            "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+            "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+            "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+          ],
+          "platform": "linux/amd64",
+          "revision": null
+        }
+      }
+    }
+  },
+  "log": "/tmp/task008-review-canonical.log",
+  "log_sha256": "79cf844cc6256aeb978150f3de8881a6fce3431337b906aa506f3bbbf8642dce",
+  "exit_code": 0,
+  "proof": {
+    "predecessor_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+    "incoming_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+    "platform": "Debian13-slim/linux-amd64; Docker29.9.2 vfs; Node24.22.1/better-sqlite3",
+    "old_assets": {
+      "css_sha256": "55a58405a9a72c53a35f1713bc4d453887587002a8df98494fdf366da5df62e5",
+      "js_sha256": "d0bca71644723933a296409980a40f2aa2f75b7570a1fc9ddf9f5cc45429841d",
+      "sites": true
+    },
+    "new_assets": {
+      "css_sha256": "2f81719e6e7596b5790d07456a8bcf811220e12e0a4865e2cfcce056009c8aff",
+      "js_sha256": "b2378335c979ebe281c9ae13f37e11ef16c0ae960597987233d9f05156a9a9e8",
+      "sites": true
+    },
+    "asset_rollback_exact": true,
+    "old_schema": 5,
+    "new_schema": 6,
+    "separate_new_volume": true,
+    "old_image_schema_compatibility_probe": "rejected_copy6",
+    "config_and_separate_operator_unchanged": true,
+    "new_image_restart_backup_restore": "passed",
+    "baseline_backup_restore_restart": "passed",
+    "schema5_state_rows_receipts_preserved": "passed",
+    "task007_homogeneous_replay_undo": "passed",
+    "baseline_capture_restore_isolation": "passed",
+    "old_mixed_replay_new_mixed_reject": "passed",
+    "raw_equipment_single_batch_undo": "passed",
+    "all_old_undo_late_stock_reset": "passed",
+    "automatic_max_count_worn": "passed",
+    "rollback_old_image_and_volume_exact_state": "passed",
+    "restart_after_rollback": "passed",
+    "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+  },
+  "guards": "unchanged; only scoped temporary verified transport copies cleaned before execution"
+}
