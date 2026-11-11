@@ -1,4 +1,4 @@
-import {boundedInteger, canonicalKind, craft, familyKind, hasCrit, isRaw, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
+import {boundedInteger, canonicalKind, compareGroups, craft, familyKind, hasCrit, isRaw, inputInteger, keys, modKey, record, requireThat, type Group, type Kind, type Mod} from './index.js';
 export interface FuseRequest {kind: Kind; targetTier: number; count: string; items: {id:string;quantity:string;worn:string}[]}
 export interface FuseChoice extends Group {equipped: string}
 export interface Run extends Mod {quantity: string}
@@ -102,8 +102,10 @@ export function homogeneousFuseRequest(raw:unknown):HomogeneousFuseRequest {
   if(r.count!==undefined)boundedInteger(r.count,false,256);
   return {id:r.id,targetTier:r.targetTier as number,includeWorn:r.includeWorn,...(r.quantity!==undefined?{quantity:r.quantity as string}:{}),...(r.count!==undefined?{count:r.count as string}:{})};
 }
-export function parseAnyFuseRequest(raw:unknown):HomogeneousFuseRequest|FuseRequest {
-  return Object.hasOwn(record(raw),'id')?homogeneousFuseRequest(raw):fuseRequest(raw);
+export function parseAnyFuseRequest(raw:unknown):HomogeneousFuseRequest|FuseRequest|GreenFuseRequest {
+  const r=record(raw);
+  if(Object.hasOwn(r,'recipe'))return greenFuseRequest(raw);
+  return Object.hasOwn(r,'id')?homogeneousFuseRequest(raw):fuseRequest(raw);
 }
 function singleSourcePlan(g:FuseChoice,targetTier:number,allowed:bigint,allowWorn:bigint,count?:string):HomogeneousFusePlan {
   requireThat(targetTier>g.tier&&targetTier<=6,'INVALID_TARGET');
@@ -128,4 +130,57 @@ export function planCompatibleFuse(request:FuseRequest,choices:FuseChoice[]):Hom
   const s=request.items[0]!,g=choices.find(g=>g.id===s.id);requireThat(g,'GROUP_NOT_FOUND',404);
   requireThat(familyKind(g.kind)===request.kind,'INCOMPATIBLE_MODS');
   return singleSourcePlan(g,request.targetTier,BigInt(s.quantity),BigInt(s.worn),request.count);
+}
+
+export const greenRecipes={
+  'green-667':[{value:'6',perResult:'2'},{value:'7',perResult:'1'}],
+  'green-788':[{value:'7',perResult:'1'},{value:'8',perResult:'2'}]
+} as const;
+export type GreenRecipe=keyof typeof greenRecipes;
+export interface GreenFuseRequest {recipe:GreenRecipe;includeWorn:boolean;count?:string}
+export interface GreenFusePlan extends FusePlan {
+  recipe:GreenRecipe;maxCount:string;result:Mod;
+  maxima:Record<GreenRecipe,string>;
+  ingredients:{value:string;perResult:string;available:string;total:string;used:string;worn:string;remaining:string;shortfall:string}[];
+}
+export function greenFuseRequest(raw:unknown):GreenFuseRequest {
+  const r=record(raw);keys(r,['recipe','includeWorn','count']);
+  requireThat(typeof r.recipe==='string'&&Object.hasOwn(greenRecipes,r.recipe),'INVALID_RECIPE');
+  requireThat(typeof r.includeWorn==='boolean','INVALID_SELECTION');
+  if(r.count!==undefined)boundedInteger(r.count,false,256);
+  return {recipe:r.recipe as GreenRecipe,includeWorn:r.includeWorn,...(r.count!==undefined?{count:r.count as string}:{})};
+}
+export function planGreenFuse(request:GreenFuseRequest,choices:FuseChoice[]):GreenFusePlan {
+  const recipe=greenRecipes[request.recipe];
+  const available=(value:string)=>choices.filter(g=>g.kind==='raw-green'&&g.tier===0&&g.value===value&&g.crit==null).reduce((q,g)=>q+BigInt(g.quantity)-(request.includeWorn?0n:BigInt(g.equipped)),0n);
+  const q6=available('6'),q7=available('7'),q8=available('8'),min=(a:bigint,b:bigint)=>a<b?a:b;
+  const maxima={'green-667':min(q6/2n,q7).toString(),'green-788':min(q7,q8/2n).toString()};
+  const pools=recipe.map(ingredient=>{
+    const groups=choices.filter(g=>g.kind==='raw-green'&&g.tier===0&&g.value===ingredient.value&&g.crit==null).sort(compareGroups);
+    const total=groups.reduce((q,g)=>q+BigInt(g.quantity),0n),worn=groups.reduce((q,g)=>q+BigInt(g.equipped),0n);
+    requireThat(worn<=total&&groups.every(g=>BigInt(g.equipped)>=0n&&BigInt(g.equipped)<=BigInt(g.quantity)),'INSUFFICIENT_MODS');
+    const available=total-(request.includeWorn?0n:worn);
+    return {...ingredient,groups,total,available};
+  });
+  const poolMaxima=pools.map(p=>p.available/BigInt(p.perResult)),max=poolMaxima.reduce((a,b)=>a<b?a:b);
+  const n=request.count===undefined?max:BigInt(request.count);
+  requireThat(n>=(request.count===undefined?0n:1n)&&n<=max,'FUSE_COUNT_OUT_OF_RANGE');
+  const sample=recipe.flatMap(p=>Array.from({length:Number(p.perResult)},()=>({kind:'raw-green' as const,tier:0,value:p.value,crit:null})));
+  const {result,price:unitPrice}=craft(sample),price=(BigInt(unitPrice)*n).toString();
+  const selected:FusePlan['selected']=[],ingredients:GreenFusePlan['ingredients']=[];
+  for(const p of pools){
+    let remaining=n*BigInt(p.perResult),wornUsed=0n;
+    const used=new Map<string,{free:bigint;worn:bigint}>();
+    // Across even separate equal groups, consume every free unit before worn.
+    for(const g of p.groups){const free=BigInt(g.quantity)-BigInt(g.equipped),take=free<remaining?free:remaining;used.set(g.id,{free:take,worn:0n});remaining-=take;}
+    if(request.includeWorn)for(const g of p.groups){const wear=BigInt(g.equipped),take=wear<remaining?wear:remaining;used.get(g.id)!.worn=take;remaining-=take;wornUsed+=take;}
+    requireThat(remaining===0n,'INSUFFICIENT_MODS');
+    for(const g of p.groups){const u=used.get(g.id)!,amount=u.free+u.worn,allowWorn=request.includeWorn?BigInt(g.equipped):0n,allowed=BigInt(g.quantity)-BigInt(g.equipped)+allowWorn;
+      selected.push({id:g.id,allowed:allowed.toString(),allowWorn:allowWorn.toString(),used:amount.toString(),worn:u.worn.toString(),unused:(allowed-amount).toString(),remaining:(BigInt(g.quantity)-amount).toString()});}
+    const required=n*BigInt(p.perResult);
+    ingredients.push({value:p.value,perResult:p.perResult,available:p.available.toString(),total:p.total.toString(),used:required.toString(),worn:wornUsed.toString(),remaining:(p.total-required).toString(),shortfall:(p.available<BigInt(p.perResult)?BigInt(p.perResult)-p.available:0n).toString()});
+  }
+  const outputs=n?[{...result,quantity:n.toString()}]:[];
+  return {recipe:request.recipe,kind:'🅾',targetTier:1,count:n.toString(),maxCount:max.toString(),maxima,price,result,selected,ingredients,outputs,
+    steps:n?[{fromTier:0,toTier:1,count:n.toString(),unitPrice,price,inputs:pools.map(p=>({kind:'raw-green',tier:0,value:p.value,crit:null,quantity:(n*BigInt(p.perResult)).toString()})),outputs}]:[]};
 }

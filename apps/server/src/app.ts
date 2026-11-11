@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import cookie from '@fastify/cookie';
 import serveStatic from '@fastify/static';
 import { resolve } from 'node:path';
-import { DomainError, keys, record, requireThat } from '@chm/rules';
+import { DomainError, inputInteger, keys, record, requireThat } from '@chm/rules';
 import { Auth, issuer, type Config, type Transport } from './auth.js';
 import { Store } from './store.js';
 import { LoginLimiter } from './login-limiter.js';
@@ -50,11 +50,13 @@ export async function app(store: Store, config: Config, remote?: Transport) {
   f.get('/api/session',async req=>{const s=session(req);return {csrf:s.csrf,account:auth.hash('account:'+s.owner)};});
   f.get('/api/state',async req=>store.db.transaction(()=>store.summary(session(req).owner))());
   f.get('/api/inventory',async req=>{
-    const q=record(req.query); keys(q,['scope','after','limit']);
+    const q=record(req.query); keys(q,['scope','after','limit','revision']);
     requireThat(typeof q.scope==='string' && (q.after===undefined || typeof q.after==='string'));
     requireThat(q.limit===undefined || typeof q.limit==='string' && /^[1-9][0-9]{0,2}$/.test(q.limit));
+    if(q.revision!==undefined)inputInteger(q.revision,true);
     const owner=session(req).owner;
-    return store.db.transaction(()=>({revision:store.player(owner).revision,items:store.inventory(owner,q.scope as string,q.after as string|undefined,q.limit===undefined?100:Number(q.limit))}))();
+    return store.db.transaction(()=>{const revision=store.player(owner).revision;requireThat(q.revision===undefined||q.revision===revision,'REVISION_CONFLICT',409);
+      return {revision,items:store.inventory(owner,q.scope as string,q.after as string|undefined,q.limit===undefined?100:Number(q.limit))};})();
   });
   f.post('/api/fuse-preview',async req=>store.preview(session(req,true).owner,req.body));
   f.post('/api/commands',async req=>store.command(session(req,true).owner,req.body));

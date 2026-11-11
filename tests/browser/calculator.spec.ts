@@ -1,3 +1,4 @@
+import {selectChoice} from './choices.js';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import Database from 'better-sqlite3';
@@ -29,8 +30,8 @@ async function saved(page:Page) {await expect(page.getByRole('status')).toHaveTe
 async function add(page:Page,kind='🅾',tier='1',value='10',quantity='6') {
   await page.getByRole('button',{name:'Исходный набор',exact:true}).click();
   await page.getByRole('button',{name:'Добавить моды',exact:true}).click();
-  await page.getByRole('combobox',{name:'Тип мода',exact:true}).selectOption(kind);await page.getByRole('combobox',{name:'Уровень мода',exact:true}).selectOption(tier);
-  const parameter=page.getByRole(tier==='1'&&kind!=='💚'?'combobox':'textbox',{name:'Параметр мода',exact:true});if(tier==='1'&&kind!=='💚')await parameter.selectOption(value);else await parameter.fill(value);
+  await selectChoice(page.getByRole('combobox',{name:'Тип мода',exact:true}),kind);await selectChoice(page.getByRole('combobox',{name:'Уровень мода',exact:true}),tier);
+  const parameter=page.getByRole(tier==='1'&&kind!=='💚'?'combobox':'textbox',{name:'Параметр мода',exact:true});if(tier==='1'&&kind!=='💚')await selectChoice(parameter,value);else await parameter.fill(value);
   if(['💢','🧿'].includes(kind))await page.getByLabel('Крит мода',{exact:true}).fill('0');
   await page.getByLabel('Количество модов',{exact:true}).fill(quantity);await page.getByRole('button',{name:'Сохранить группу',exact:true}).click();await saved(page);
 }
@@ -135,7 +136,7 @@ test('S-02: large integers and derived 129 digits survive UI/API/reload; invalid
   const health=((9007199254740993n*(100n+BigInt(derived))+99n)/100n).toString();await expect(page.getByTestId('health')).toHaveText(health);
   const api=(await(await page.request.get('/api/inventory?scope=work')).json()).items as Group[];expect(api.find(g=>g.tier===3)?.value).toBe(derived);
   await page.reload();await saved(page);await expect(page.getByTestId('health')).toHaveText(health);await noOverflow(page,360);await noOverflow(page,390);
-  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();await page.getByRole('button',{name:'Добавить моды'}).click();await page.getByRole('combobox',{name:'Тип мода',exact:true}).selectOption('💚');await page.getByLabel('Параметр мода',{exact:true}).fill('1.5');await page.getByRole('button',{name:'Сохранить группу'}).click();await expect(page.getByTestId('original-group')).toHaveCount(1);
+  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();await page.getByRole('button',{name:'Добавить моды'}).click();await selectChoice(page.getByRole('combobox',{name:'Тип мода',exact:true}),'💚');await page.getByLabel('Параметр мода',{exact:true}).fill('1.5');await page.getByRole('button',{name:'Сохранить группу'}).click();await expect(page.getByTestId('original-group')).toHaveCount(1);
   await page.getByRole('button',{name:'Закрыть редактор'}).click();page.once('dialog',d=>d.accept());await page.getByTestId('original-group').getByRole('button',{name:'Удалить',exact:true}).click();await saved(page);await expect(page.getByTestId('original-group')).toHaveCount(0);await work(page);await expect(page.getByTestId('work-group')).toHaveCount(2);
 });
 

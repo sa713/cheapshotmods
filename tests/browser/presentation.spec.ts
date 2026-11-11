@@ -1,3 +1,4 @@
+import {selectChoice} from './choices.js';
 import {test,expect,type Page} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import {readFileSync,writeFileSync} from 'node:fs';
@@ -145,13 +146,13 @@ test('128 digit inputs and 129 digit derived values stay fully visible in new la
   await expect(page.getByTestId('craft-preview')).toContainText('+'+derived+'%');
   for(const width of [1440,360,390]){
     await page.setViewportSize({width,height:1000});await noOverflow(page,width);await targets(page);
-    await expect(page.locator('.full-number').first()).toContainText(n);
+    await expect(page.locator('.level-form .full-number')).toContainText(n);
     const broken=await page.locator('.exact,.stat-value,.fusion-slot strong,.fusion-output strong').evaluateAll(nodes=>nodes.filter(n=>{
       const e=n as HTMLElement;if(e.closest('.sr-only'))return false;const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&e.scrollWidth>r.width+2;
     }).map(n=>n.className));expect(broken).toEqual([]);
-    await page.screenshot({path:testInfo.outputPath('exact-values-'+width+'.png'),fullPage:true});
+    await page.screenshot({path:testInfo.outputPath('exact-values-'+width+'.png'),fullPage:true,animations:'disabled',timeout:30000});
   }
-  await page.getByRole('button',{name:'Добавить моды',exact:true}).click();await page.getByRole('combobox',{name:'Тип мода',exact:true}).selectOption('💚');
+  await page.getByRole('button',{name:'Добавить моды',exact:true}).click();await selectChoice(page.getByRole('combobox',{name:'Тип мода',exact:true}),'💚');
   await page.getByLabel('Параметр мода',{exact:true}).fill(n);await page.getByLabel('Количество модов',{exact:true}).fill(n);
   await expect(page.getByRole('dialog').locator('.full-number')).toHaveCount(2);
   await noOverflow(page,390);await targets(page);await page.screenshot({path:testInfo.outputPath('exact-editor.png'),fullPage:true});

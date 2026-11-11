@@ -23,6 +23,7 @@ const historyRows=(compactStore.db.prepare('SELECT count(*) AS n FROM history').
 const undoStart=performance.now();compactCommand({type:'undo'});const undoMs=performance.now()-undoStart;
 assert.equal(compactStore.inventory('999','work')[0]!.quantity,(729n*resultCount).toString());
 assert.equal(compactPlan.steps.length,6);assert.equal(compactPlan.maxCount,resultCount.toString());
+assert.ok('inputPerResult' in compactPlan);
 const compactHugeBatch={maxCount:compactPlan.maxCount,inputPerResult:compactPlan.inputPerResult,rawKind:'raw-green',targetTier:6,steps:compactPlan.steps.length,inputUnits:(729n*resultCount).toString(),resultCount:resultCount.toString(),price:compactPlan.price,previewMs,commitMs,undoMs,heapDeltaBytes:process.memoryUsage().heapUsed-heapBefore,physicalWorkLots,historyRows,planJsonBytes:Buffer.byteLength(JSON.stringify(compactPlan))};
 const derivedInput='9'.repeat(128);for(let i=0;i<4;i++)compactCommand({type:'original.put',kind:'🅾',tier:1,value:'10',quantity:derivedInput});
 const derivedGroup=compactStore.inventory('999','work').find(g=>g.kind==='🅾')!,derivedState=compactStore.summary('999'),derivedStart=performance.now();
@@ -30,6 +31,15 @@ const derivedPlan=compactStore.preview('999',{revision:derivedState.revision,exp
 assert.ok(derivedPlan.maxCount.length>128);assert.equal(derivedPlan.maxCount,(4n*BigInt(derivedInput)/3n).toString());
 compactCommand({type:'fuse',fuse:{id:derivedGroup.id,targetTier:2,includeWorn:false,count:derivedPlan.maxCount}});compactCommand({type:'undo'});
 const derivedMaximum={inputDigits:128,additions:4,maxDigits:derivedPlan.maxCount.length,maxCount:derivedPlan.maxCount,previewCommitUndoMs:performance.now()-derivedStart,planJsonBytes:Buffer.byteLength(JSON.stringify(derivedPlan))};compactStore.close();
+const greenStore=new Store(':memory:');
+const greenCommand=(action:Record<string,unknown>)=>{const s=greenStore.summary('999');return greenStore.command('999',{key:randomUUID(),revision:s.revision,experiment:s.experiment,action});};
+for(const [value,multiplier] of [['6',10n],['7',6n],['8',8n]] as const)greenCommand({type:'original.put',kind:'raw-green',tier:0,value,quantity:(multiplier*resultCount).toString()});
+const greenBefore=greenStore.summary('999'),greenStart=performance.now(),greenRequest={recipe:'green-667',includeWorn:false};
+const greenPlan=greenStore.preview('999',{revision:greenBefore.revision,experiment:greenBefore.experiment,fuse:greenRequest});assert.ok('recipe' in greenPlan);assert.equal(greenPlan.maxCount,(5n*resultCount).toString());assert.equal(greenPlan.price,(140n*resultCount).toString());
+const greenPreviewMs=performance.now()-greenStart,greenCommitStart=performance.now();greenCommand({type:'fuse',fuse:greenRequest});const greenCommitMs=performance.now()-greenCommitStart;
+const greenRows=(greenStore.db.prepare('SELECT count(*) AS n FROM history').get() as {n:number}).n,greenLots=(greenStore.db.prepare('SELECT count(*) AS n FROM work_lots').get() as {n:number}).n;assert.equal(greenRows,1);assert.equal(greenLots,3);
+const greenUndoStart=performance.now();greenCommand({type:'undo'});const greenUndoMs=performance.now()-greenUndoStart;assert.equal(greenStore.inventory('999','work').find(g=>g.value==='7')!.quantity,(6n*resultCount).toString());
+const greenRecipeBatch={maxCount:greenPlan.maxCount,price:greenPlan.price,previewMs:greenPreviewMs,commitMs:greenCommitMs,undoMs:greenUndoMs,historyRows:greenRows,physicalWorkLots:greenLots,planJsonBytes:Buffer.byteLength(JSON.stringify(greenPlan))};greenStore.close();
 try {
   command({type:'reset'});const start=performance.now();
   store.db.transaction(()=>{for(let i=1;i<=10000;i++)command({type:'original.put',kind:'💚',tier:2,value:String(i),quantity:'1'});}).immediate();
@@ -64,5 +74,5 @@ try {
   const baselineLots=(store.db.prepare('SELECT count(*) AS n FROM work_lots').get() as {n:number}).n;assert.equal(restoredWorkGroups,10002);assert.equal(baselineLots,10002);assert.deepEqual(restored.baseline,captured.baseline);
   const inventoryBaseline={entries:captured.baseline!.entries,quantity:captured.baseline!.quantity,captureMs,restoreMs,restoredWorkGroups,physicalWorkLots:baselineLots};
   const bytes=statSync(path).size+(existsSync(path+'-wal')?statSync(path+'-wal').size:0);
-  console.log(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,cpu:cpus()[0]?.model,logicalCpus:cpus().length,hostMemoryMiB:Math.round(totalmem()/1048576),compactHugeBatch,derivedMaximum,inventoryBaseline,dataset:{distinctGroups:10000,millionGroup:'1000000',exactQuantity:'9007199254740993'},batchSetup:{groups:10000,outerTransaction:true,elapsedMs:batchSetupMs},sequentialHttp:{sampleSize,commitPerRequest:true,totalMs:durations.reduce((a,b)=>a+b,0),p95Ms:[...durations].sort((a,b)=>a-b)[Math.ceil(sampleSize*0.95)-1]},oversizedInteger:{digits:1000000,rejectMs:oversizedRejectMs},resetMs,paginatedLoadMs:loadMs,tenSameRevisionInjectedRequestsMs:concurrentMs,dbAndWalBytes:bytes,rssMiB:process.memoryUsage().rss/1048576,peakRssMiB:process.resourceUsage().maxRSS/1024},null,2));
+  console.log(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,cpu:cpus()[0]?.model,logicalCpus:cpus().length,hostMemoryMiB:Math.round(totalmem()/1048576),compactHugeBatch,derivedMaximum,greenRecipeBatch,inventoryBaseline,dataset:{distinctGroups:10000,millionGroup:'1000000',exactQuantity:'9007199254740993'},batchSetup:{groups:10000,outerTransaction:true,elapsedMs:batchSetupMs},sequentialHttp:{sampleSize,commitPerRequest:true,totalMs:durations.reduce((a,b)=>a+b,0),p95Ms:[...durations].sort((a,b)=>a-b)[Math.ceil(sampleSize*0.95)-1]},oversizedInteger:{digits:1000000,rejectMs:oversizedRejectMs},resetMs,paginatedLoadMs:loadMs,tenSameRevisionInjectedRequestsMs:concurrentMs,dbAndWalBytes:bytes,rssMiB:process.memoryUsage().rss/1048576,peakRssMiB:process.resourceUsage().maxRSS/1024},null,2));
 }finally{await server.close();store.close();rmSync(dir,{recursive:true,force:true});}

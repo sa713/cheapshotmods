@@ -39,10 +39,10 @@ jobs:
         run: bash scripts/test-install.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
       - name: Test external shared ingress on isolated Debian
         run: bash scripts/test-external.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64"
-      - name: Test TASK007 schema5 to schema6 and all supported predecessors on isolated Debian
+      - name: Test TASK008 schema6 recipes and all supported predecessors on isolated Debian
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash scripts/test-task008-upgrades.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/upgrades
+        run: bash scripts/test-task009-upgrades.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/upgrades
       - name: Upload migration evidence
         uses: actions/upload-artifact@v4
         if: always()

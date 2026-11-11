@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { validateDatabasePath } from './database-path.js';
-import { boundedInteger, craft, parseAnyFuseRequest, hasCrit, integer, inputInteger, keys, mod, modKey, planCompatibleFuse, planHomogeneousFuse, record, requireThat, stats, type Equipped, type Group, type Mod } from '@chm/rules';
+import { boundedInteger, compareGroups, craft, parseAnyFuseRequest, hasCrit, integer, inputInteger, keys, kinds, mod, modKey, planCompatibleFuse, planGreenFuse, planHomogeneousFuse, record, requireThat, stats, type Equipped, type Group, type Mod } from '@chm/rules';
 import {migrateModStacks} from './mod-stacks.js';
 import {migrateCrit,type History} from './crit-migration.js';
 import {Lots,type Piece,type Range} from './lots.js';
@@ -94,7 +94,24 @@ export class Store {
   }
   inventory(owner:string,scope:string,after='',limit=100) {
     requireThat(['original','work'].includes(scope)&&Number.isInteger(limit)&&limit>=1&&limit<=200,'INVALID_PAGE');
-    return this.sql("SELECT id,kind,tier,value,quantity,NULLIF(crit,'') AS crit FROM groups WHERE owner=? AND scope=? AND id>? ORDER BY id LIMIT ?").all(owner,scope,after,limit) as Group[];
+    // Positive canonical decimal TEXT orders numerically by length, then bytes.
+    // Keyset predicates use this SAME full tuple before LIMIT, never a JS page sort.
+    const typeOrder='CASE kind '+kinds.map((k,i)=>`WHEN '${k}' THEN ${i}`).join(' ')+' END';
+    const fields=[typeOrder,'tier','length(value)','value','length(crit)','crit','id'],directions=['ASC','DESC','DESC','DESC','DESC','DESC','ASC'];
+    return this.db.transaction(()=>{
+      const args:(string|number)[]=[owner,scope];let cursor='';
+      if(after){
+        const g=this.sql('SELECT kind,tier,value,crit,id FROM groups WHERE owner=? AND scope=? AND id=?').get(owner,scope,after) as Group|undefined;
+        requireThat(g,'REVISION_CONFLICT',409);
+        const values=[kinds.indexOf(g.kind),g.tier,g.value.length,g.value,(g.crit??'').length,g.crit??'',g.id];
+        cursor=' AND ('+fields.map((field,i)=>{
+          args.push(...values.slice(0,i+1));
+          return '('+fields.slice(0,i).map(f=>f+'=?').concat(field+(directions[i]==='ASC'?'>':'<')+'?').join(' AND ')+')';
+        }).join(' OR ')+')';
+      }
+      args.push(limit);
+      return this.sql("SELECT id,kind,tier,value,quantity,NULLIF(crit,'') AS crit FROM groups WHERE owner=? AND scope=?"+cursor+' ORDER BY '+fields.map((f,i)=>f+' '+directions[i]).join(',')+' LIMIT ?').all(...args) as Group[];
+    })();
   }
   private all(owner:string,scope:string) {return this.sql("SELECT id,kind,tier,value,quantity,NULLIF(crit,'') AS crit FROM groups WHERE owner=? AND scope=? ORDER BY id").all(owner,scope) as Group[];}
   private lots(p:Player) {return new Lots(this.sql("SELECT origin,start,quantity,born,kind,tier,value,NULLIF(crit,'') AS crit FROM work_lots WHERE owner=?").all(p.owner) as Piece[],JSON.parse(p.worn_ranges) as Range[]);}
@@ -126,7 +143,7 @@ export class Store {
   private originalLots(p:Player) {const lots=new Lots();for(const g of this.all(p.owner,'original'))lots.add(g,integer(g.quantity),p.revision);return lots;}
   summary(owner:string) {
     const p=this.player(owner),equipment=JSON.parse(p.equipment) as Equipped[];
-    const items=equipment.map(e=>({...this.group(owner,'work',e.id),quantity:e.quantity}));
+    const items=equipment.map(e=>({...this.group(owner,'work',e.id),quantity:e.quantity})).sort(compareGroups);
     const last=this.sql('SELECT body FROM history WHERE owner=? ORDER BY seq DESC LIMIT 1').get(owner) as {body:string}|undefined;
     const baseline=this.sql('SELECT captured_at AS capturedAt,quantity,entries FROM baselines WHERE owner=?').get(owner) as Baseline|undefined;
     return {revision:p.revision,level:p.level,experiment:p.experiment,started:!!p.started,spent:p.spent,equipment,equippedMods:items,stats:stats(p.level,items),lastCraft:last?JSON.parse(last.body) as History:null,baseline:baseline??null};
@@ -141,6 +158,10 @@ export class Store {
   private fusePlan(p:Player,raw:unknown) {
     const request=parseAnyFuseRequest(raw),equipment=JSON.parse(p.equipment) as Equipped[];
     const choice=(id:string)=>({...this.group(p.owner,'work',id),equipped:equipment.find(e=>e.id===id)?.quantity??'0'});
+    if('recipe' in request){
+      const groups=this.sql("SELECT id,kind,tier,value,quantity,NULLIF(crit,'') AS crit FROM groups WHERE owner=? AND scope='work' AND kind='raw-green' AND tier=0 AND value IN ('6','7','8')").all(p.owner) as Group[];
+      return planGreenFuse(request,groups.map(g=>({...g,equipped:equipment.find(e=>e.id===g.id)?.quantity??'0'})));
+    }
     if('id' in request)return planHomogeneousFuse(request,choice(request.id));
     requireThat(request.items.length===1,'HOMOGENEOUS_GROUP_REQUIRED');
     return planCompatibleFuse(request,request.items.map(s=>choice(s.id)));
@@ -228,7 +249,7 @@ export class Store {
         }
         case 'fuse':{
           keys(a,['type','fuse']);const plan=this.fusePlan(p,a.fuse);requireThat(plan.count!=='0','INSUFFICIENT_MODS');this.afterMods?.('plan');const worn=structuredClone(lots.worn),equipment=JSON.parse(p.equipment) as Equipped[],pieces:Piece[]=[],consumed:Group[]=[];
-          for(const s of plan.selected)if(s.used!=='0'){const g=this.group(owner,'work',s.id);pieces.push(...lots.take(modKey(g),BigInt(s.used),BigInt(s.worn)));consumed.push({...g,quantity:s.used});}
+          for(const s of plan.selected)if(s.used!=='0'){const g=this.group(owner,'work',s.id);pieces.push(...lots.take(modKey(g),BigInt(s.used),BigInt(s.worn)));consumed.push({...g,quantity:s.used});this.afterMods?.('consumed');}
           const outputs=plan.outputs.map(o=>lots.add(o,integer(o.quantity),p.revision));this.afterMods?.('intermediate');
           history={type:'batch',consumed,output:{...plan.outputs[0]!,id:'',quantity:plan.outputs[0]!.quantity},outputs:plan.outputs.map(o=>({...o,id:''})),equipment,price:plan.price,plan,
             ledger:{inputs:pieces,outputs:outputs.map(o=>({origin:o.origin,quantity:o.quantity})),worn}};
