@@ -111,7 +111,11 @@ test('S-01: response lost after commit, same key replay, stale conflict and real
 });
 
 test('expired session recovers via signed Mini login and retains the exact pending action',async({page})=>{
-  const id=await login(page),db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
+  const id=await login(page);
+  // Expire the command session after the automatic read has settled. The next
+  // test separately exercises expiry on reads, including background previews.
+  await expect(page.getByTestId('green-preview')).toBeVisible();await expect(page.getByTestId('green-loading')).toHaveCount(0);
+  const db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
   db.prepare('UPDATE sessions SET expires=1 WHERE owner=?').run(id);db.close();
   await levelAttempt(page,'200');await expect(page.getByRole('heading',{name:'Ваш инвентарь. Ваш эксперимент.'})).toBeVisible();
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await expect(page.getByRole('button',{name:'Повторить ту же команду'})).toBeVisible();

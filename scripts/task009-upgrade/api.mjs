@@ -188,7 +188,11 @@ fields.hash=crypto.createHmac('sha256',secret).update(Object.keys(fields).sort()
     const replay=await fetch(base+'/api/commands',{method:'POST',headers,body:receipt.payload});assert.equal(replay.status,200);assert.deepEqual(await replay.json(),JSON.parse(receipt.result));assert.deepEqual(await snapshot(),latest);process.stdout.write('changed snapshot and state; old capture retry preserved both');return;
   }
   if(mode==='baseline-after-restore'){
-    const checkpoint=JSON.parse(process.argv[2]);assert.deepEqual(await snapshot(),checkpoint);await command({type:'undo'});await command({type:'baseline.restore'});const restored=await snapshot();assert.deepEqual(restored.original,checkpoint.original);assert.deepEqual(restored.baselineGroups,checkpoint.baselineGroups);assert.deepEqual(restored.state.baseline,checkpoint.state.baseline);assert.equal(restored.state.spent,'0');assert.equal(restored.state.lastCraft,null);process.stdout.write('restored snapshot A and active undo; restart/full return passed');return;
+    const checkpoint=JSON.parse(process.argv[2]);assert.deepEqual(await snapshot(),checkpoint);await command({type:'undo'});await command({type:'baseline.restore'});const restored=await snapshot();
+    // Green scenarios deliberately appended stock AFTER capture A. Full return
+    // must discard those additions, restoring A rather than editable original.
+    const expected=stableRows(checkpoint.baselineGroups.map(g=>({id:g.id,kind:g.kind,tier:g.tier,value:g.value,quantity:g.quantity,crit:g.crit===''?null:g.crit})));
+    assert.deepEqual(restored.original,expected);assert.deepEqual(grouped(restored.work),grouped(expected));assert.deepEqual(restored.baselineGroups,checkpoint.baselineGroups);assert.deepEqual(restored.state.baseline,checkpoint.state.baseline);assert.equal(restored.state.spent,'0');assert.equal(restored.state.lastCraft,null);process.stdout.write('restored snapshot A and active undo; restart/full return passed');return;
   }
   if(mode==='check-checkpoint'){assert.deepEqual(await snapshot(),JSON.parse(process.argv[2]));process.stdout.write('restored state exact');return;}
   if(mode==='rollback'){

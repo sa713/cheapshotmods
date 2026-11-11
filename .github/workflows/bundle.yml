@@ -43,6 +43,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/test-task009-upgrades.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/upgrades
+      - name: Test real classic and containerd stores
+        run: bash scripts/test-image-stores.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/image-stores
       - name: Upload migration evidence
         uses: actions/upload-artifact@v4
         if: always()
@@ -51,8 +53,6 @@ jobs:
           path: artifacts/upgrades
           if-no-files-found: error
           retention-days: 30
-      - name: Test real classic and containerd stores
-        run: bash scripts/test-image-stores.sh "artifacts/cheapshotmods-$REQUESTED_SHA-linux-amd64" artifacts/image-stores
       - name: Upload image-store evidence
         uses: actions/upload-artifact@v4
         if: always()
