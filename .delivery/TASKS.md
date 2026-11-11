@@ -2,7 +2,7 @@
 
 ## Текущий этап
 
-[TASK-009](tasks/TASK-009.md) — **accepted для code/integration**, 2026-11-11. Меню, глобальная сортировка и два зелёных рецепта проверены; [review с границами](reviews/TASK-009-review.md). Интеграция — [PR10→main](https://github.com/sa713/cheapshotmods/pull/10), завершает management с **[skip ci]**, без новых Actions.
+[TASK-009](tasks/TASK-009.md) — **accepted, код в main**, 2026-11-11. Меню, глобальная сортировка и два зелёных рецепта проверены; [review с границами](reviews/TASK-009-review.md). [PR10](https://github.com/sa713/cheapshotmods/pull/10) merged в main; дерево результата проверено. Merge с **[skip ci]**, без новых Actions.
 
 Следующий внешний шаг — **владелец** по [готовому update/check/rollback](TASK-009-NEXT-STEPS.md): actualSHA/HTTPS/space и loaded image proof до app stop/data, затем receipt и живые меню/порядок/рецепты/undo. Installation/product acceptance/delivery pending. Полная новая CCC Docker-store matrix не выполнена и не выдана за success; ограничения и решение о допустимости code integration в review. Предварительная установка TASK-008 не требуется.
 
@@ -21,6 +21,7 @@
 | [TASK-006](tasks/TASK-006.md) | Сырьевые моды и экипировка | accepted, код в main |
 | [TASK-007](tasks/TASK-007.md) | Однородный массовый фьюз с автоматическим максимумом | accepted, код в main |
 | [TASK-008](tasks/TASK-008.md) | Фиксация исходного набора и полный возврат к нему | accepted, код в main |
+| [TASK-009](tasks/TASK-009.md) | Меню, общий порядок и два зелёных рецепта | accepted для кода, в main; delivery pending |
 
 Здесь accepted означает завершённую техническую приёмку и интеграцию кода. Точные версии, CI, комплекты и ограничения внешней приёмки сохранены в карточках и [STATE](STATE.md). Для TASK-008 подтверждены 96 native / 47 Chromium, все обязательные exact CI и [независимая приёмка](reviews/TASK-008-review.md) комплекта 13637904971; [полные доказательства](TASK-008-VALIDATION.md).
 

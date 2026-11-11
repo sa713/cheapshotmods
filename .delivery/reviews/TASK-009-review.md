@@ -62,4 +62,8 @@ Management использует делегированные карточкой 
 
 ## Следующий шаг
 
-Management завершает PR10→main с проверкой ожидаемого HEAD и результата. Затем владелец выполняет [готовый операторский блок](../TASK-009-NEXT-STEPS.md); он проверяет actual serverSHA/HTTPS/место и imported config/layers до остановки. Нужны фактический receipt/runtime/check и живые сценарии меню/порядка/обоих рецептов/undo. До этого installation, product_acceptance и delivery **pending**, TASK-009 не done. Реальные Debian/БД/proxy/BotFather этой приёмкой не изменялись.
+Management завершил PR10→main; результат проверен ниже. Следующий исполнитель — владелец, который выполняет [готовый операторский блок](../TASK-009-NEXT-STEPS.md); он проверяет actual serverSHA/HTTPS/место и imported config/layers до остановки. Нужны фактический receipt/runtime/check и живые сценарии меню/порядка/обоих рецептов/undo. До этого installation, product_acceptance и delivery **pending**, TASK-009 не done. Реальные Debian/БД/proxy/BotFather этой приёмкой не изменялись.
+
+## Фактическая интеграция — 2026-11-11
+
+[PR10](https://github.com/sa713/cheapshotmods/pull/10) **merged в main**, merge `16ab3fb9ec3139e837710c758ef4fa1c5f5fee35`. Перед слиянием проверен ожидаемый HEAD `5ab8725ab42cb1f61230f4804212ccbb1258f385`; он отличается от проверенной передачи e783009 только7 файлами .delivery с review/состоянием. GitHub после операции подтвердил merged=true, main на merge и полное совпадение tree принятой передачи с merge (compare без файлов). Merge commit содержит [skip ci]. Принятый runtime/operator/kit не пересобирались и не менялись. Последующая управляющая актуализация фиксирует этот факт, не является новой реализацией/приёмкой. Целевой сервер не обновлялся; внешние gates/installation/product acceptance/delivery остаютсяpending.

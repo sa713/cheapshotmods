@@ -1,6 +1,6 @@
 # TASK-009 — меню, порядок модов и два зелёных рецепта
 
-- Статус: **accepted для code/integration**, 2026-11-11; установка/пользовательское принятие/delivery pending. Границы и доказательства — [review](../reviews/TASK-009-review.md).
+- Статус: **accepted для кода, интегрирована в main**, 2026-11-11; установка/пользовательское принятие/delivery pending. Границы и доказательства — [review](../reviews/TASK-009-review.md).
 - Риск: **повышенный** — расход нескольких групп, атомарность/отмена и совместимость сохранённой истории; также общий UI выбора и постраничные списки.
 - Основание: [PRODUCT — дополнение 2026-11-11](../../PRODUCT.md#меню-порядок-модов-и-два-зелёных-рецепта--2026-11-11), прямое поручение владельца в управляющем чате.
 - Репозиторий: **sa713/cheapshotmods**.
@@ -131,7 +131,7 @@ Developer подготавливает полный пакет для management
 
 - technical_acceptance: **accepted для code/integration**, [review](../reviews/TASK-009-review.md); полная новая CCC store matrix и внешняя доставка не объявлены проверенными.
 - product_acceptance: **pending** — демонстрация и проверка владельцем.
-- Слияние: по связанному PR, пока не выполнено.
+- Слияние: **PR10 merged в main**, [фактический результат проверен](../reviews/TASK-009-review.md#фактическая-интеграция--2026-11-11).
 - delivery_package: **prepared, private transfer verified** — unchanged runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`, tar SHA256 `1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6`. Новых Actions/Actions artifacts нет. Исторический quota failure не переименован в success.
 - installation: **pending owner execution after independent acceptance**. Действующего SSH identity/agent developer не предоставлено, настоящий сервер не изменялся. Operator проверяет фактический installedSHA/HTTPS/место/backup/loaded proof до миграции; точные update/check/rollback готовы.
 - Следующий ответственный: **владелец**, [готовая установка/check/rollback](../TASK-009-NEXT-STEPS.md) после GitHub-интеграции management. Перед остановкой обязательны actual HTTPS/space/loaded proof. Integration — по PR10, commits/merge с **[skip ci]**.
@@ -140,3 +140,5 @@ Developer подготавливает полный пакет для management
 ## Приёмка management — 2026-11-11
 
 [Отдельная независимая проверка app/API и решение об интеграции](../reviews/TASK-009-review.md) относятся к runtime eb655846 и передаче e783009. Подтверждённых блокирующих дефектов не найдено. Native110/111 независимые,111/58 первичные CI,30compiled/11deploy hashes и operator pin сверены; browser/Docker ограничения не скрыты. Интеграция кода разрешена; exact CCC full matrix не считается завершённой. Перед настоящим update остаётся обязательный target loaded proof до app stop/data; installation/product acceptance/delivery pending, задача не done. Новые Actions и серверные действия management не выполняет.
+
+Интеграция завершена: PR10 merged в main; [доказательство](../reviews/TASK-009-review.md#фактическая-интеграция--2026-11-11). Management проверил совпадение дерева и отсутствие функциональных правок в своей актуализации. Следующий шаг — операторское обновление владельцем; runtime/kit pins прежние, delivery pending.

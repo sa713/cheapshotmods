@@ -38,5 +38,12 @@
   },
   "decision": "accepted for code integration; installation/product acceptance/delivery pending; target imported proof required before app stop/data",
   "actions_started": 0,
-  "server_actions": false
+  "server_actions": false,
+  "integration": {
+    "merged": true,
+    "merge_sha": "16ab3fb9ec3139e837710c758ef4fa1c5f5fee35",
+    "review_docs_head": "5ab8725ab42cb1f61230f4804212ccbb1258f385",
+    "tree_equal": true,
+    "merge_commit_skip_ci": true
+  }
 }

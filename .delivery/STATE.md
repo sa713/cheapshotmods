@@ -2,7 +2,7 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **accepted для технической интеграции кода**; [независимая проверка и решение management](reviews/TASK-009-review.md). Подтверждённых блокирующих дефектов нет. [PR10](https://github.com/sa713/cheapshotmods/pull/10) интегрирует код в main; фактическое merge/HEAD читать из GitHub.
+[TASK-009](tasks/TASK-009.md) — **accepted, код интегрирован в main**; [независимая проверка и решение management](reviews/TASK-009-review.md). Подтверждённых блокирующих дефектов нет. [PR10](https://github.com/sa713/cheapshotmods/pull/10) merged; [доказательство проверенного результата](reviews/TASK-009-review.md#фактическая-интеграция--2026-11-11). Фактический текущий HEAD читать из GitHub.
 
 Отдельный reviewer проверил app/rules/API, получил110/111native (все15новых прошли); один прежний тест и запуск Chromium остановлены ограничениями песочницы. Management непосредственно прочитал exact runtime CI logs:111native/58Chromium и вычислительные Debian/store steps прошли, jobs verify/debian-kit остаютсяfailure на quota. Собственный build совпал с паспортом по30compiled/11deploy;14image-proof/4ingress проверки и7synthetic parser fixtures прошли. Это разные области доказательств, не один полный независимый end-to-end прогон.
 
@@ -13,7 +13,7 @@
 **Следующий ответственный — владелец:** выполнить готовый root update/check/rollback блок [TASK-009-NEXT-STEPS](TASK-009-NEXT-STEPS.md) и вернуть receipt/check/результат живых сценариев. SSH identity/agent у management/developer не предоставлены; настоящий сервер этой проверкой не менялся. Неизвестный installedSHA, недостаток места, HTTPS/import/proof failure останавливают update без обходов. Устанавливать TASK-008 предварительно не требуется.
 
 - technical_acceptance: **accepted для code/integration**, границы — в review.
-- integration: по факту [PR10](https://github.com/sa713/cheapshotmods/pull/10), завершает management.
+- integration: **completed**, PR10 merged; дерево результата проверено.
 - delivery_package: **prepared**, точный кандидат и авторские lifecycle proofs сохранены.
 - installation / product_acceptance / delivery: **pending**; задача не done.
 - Последнее подтверждение: **2026-11-11**, независимый code review, собственные проверки management и первичные GitHub logs.
