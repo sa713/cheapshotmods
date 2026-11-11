@@ -1,0 +1,360 @@
+{
+  "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "attempt": 2,
+  "run_id": 42992435564,
+  "job_id": 130440796592,
+  "evidence_kind": "parsed CI log reports; upload blocked by quota; not independent review or new local runs",
+  "upgrades": [
+    {
+      "predecessor_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "2f81719e6e7596b5790d07456a8bcf811220e12e0a4865e2cfcce056009c8aff",
+        "js_sha256": "b2378335c979ebe281c9ae13f37e11ef16c0ae960597987233d9f05156a9a9e8",
+        "sites": true
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 6,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "accepted_schema6_and_undid_new_green_recipe",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "schema5_or_6_state_rows_receipts_snapshot_preserved": "passed",
+      "task007_homogeneous_replay_undo": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "old_mixed_replay_new_mixed_reject": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "all_old_undo_late_stock_reset": "passed",
+      "automatic_max_count_worn": "passed",
+      "green_recipes_worn_shared_stock_undo_snapshot": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "f944acb6435a9671cef6db5fc500b79a71d21133",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "55a58405a9a72c53a35f1713bc4d453887587002a8df98494fdf366da5df62e5",
+        "js_sha256": "d0bca71644723933a296409980a40f2aa2f75b7570a1fc9ddf9f5cc45429841d",
+        "sites": true
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 5,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "schema5_or_6_state_rows_receipts_snapshot_preserved": "passed",
+      "task007_homogeneous_replay_undo": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "old_mixed_replay_new_mixed_reject": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "all_old_undo_late_stock_reset": "passed",
+      "automatic_max_count_worn": "passed",
+      "green_recipes_worn_shared_stock_undo_snapshot": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "d6cb0e9404f07b5573b64131281d29569a010442",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "b190ff09b143c7d035d0e8554f9b2ff1d070221bc79ada65a065ff858a3b40b1",
+        "js_sha256": "f1ec9fbc8e5b022e6b1df2e3e2f008bbff63ff2a206602c4078eeff801c17b07",
+        "sites": true
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 5,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "schema5_or_6_state_rows_receipts_snapshot_preserved": "passed",
+      "task007_homogeneous_replay_undo": "not_applicable",
+      "baseline_capture_restore_isolation": "passed",
+      "old_mixed_replay_new_mixed_reject": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "all_old_undo_late_stock_reset": "passed",
+      "automatic_max_count_worn": "passed",
+      "green_recipes_worn_shared_stock_undo_snapshot": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "4e74e85e848e7b377545f77421b164994ce96f195850493cd8ef632cb7120b47",
+        "js_sha256": "7067d93ed47135db7596df6a8b3e0900d1c0a8c12d4c1f965b525072d05a991c",
+        "sites": true
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 4,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "schema4_state_rows_receipts_preserved": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "all_old_undo_late_stock_reset": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "0c93266d7ede7d8ece86e19d8fe4a82348659ae1de954618c61ca3aa3f627b07",
+        "js_sha256": "4bd06a3383ce75cbaa697787c7ab45b4402f2e733e3a37cd393d03883918ac17",
+        "sites": false
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 2,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "migration": "passed",
+      "new_crafts_worn_and_all_legacy_undo": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "batch_refine_add_undo_known_crit": "passed",
+      "reset": "passed",
+      "receipts_and_stale_revision": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "19a6fdde785eb90b01bd78318deeab1a539dde7b",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "0c93266d7ede7d8ece86e19d8fe4a82348659ae1de954618c61ca3aa3f627b07",
+        "js_sha256": "4bd06a3383ce75cbaa697787c7ab45b4402f2e733e3a37cd393d03883918ac17",
+        "sites": false
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 3,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "migration": "passed",
+      "new_crafts_worn_and_all_legacy_undo": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "batch_refine_add_undo_known_crit": "passed",
+      "reset": "passed",
+      "receipts_and_stale_revision": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    },
+    {
+      "predecessor_sha": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+      "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+      "platform": "Debian13-slim/linux-amd64; Docker28.0.4 overlay2; Node24.22.1/better-sqlite3",
+      "old_assets": {
+        "css_sha256": "56392be793e25c2c181850ca748dfbb29d4a256ffd6b4600e119ade025889a42",
+        "js_sha256": "c5ed587526a4840a284d1be405724bccc5bd544b8b2338cf3c2715edbe4f8e86",
+        "sites": true
+      },
+      "new_assets": {
+        "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+        "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+        "sites": true
+      },
+      "asset_rollback_exact": true,
+      "old_schema": 3,
+      "new_schema": 6,
+      "separate_new_volume": true,
+      "old_image_schema_compatibility_probe": "rejected_copy6",
+      "config_and_separate_operator_unchanged": true,
+      "new_image_restart_backup_restore": "passed",
+      "baseline_backup_restore_restart": "passed",
+      "raw_equipment_single_batch_undo": "passed",
+      "migration": "passed",
+      "new_crafts_worn_and_all_legacy_undo": "passed",
+      "baseline_capture_restore_isolation": "passed",
+      "batch_refine_add_undo_known_crit": "passed",
+      "reset": "passed",
+      "receipts_and_stale_revision": "passed",
+      "rollback_old_image_and_volume_exact_state": "passed",
+      "restart_after_rollback": "passed",
+      "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+    }
+  ],
+  "stores": [
+    {
+      "driver": "vfs",
+      "driver_status": null,
+      "images": {
+        "app": {
+          "config_digest": "sha256:148edf44878acff5d856c39739398dbedc2a9a55ceaa390321316397f544dec8",
+          "diff_ids": [
+            "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+            "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+            "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+            "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+            "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+            "sha256:e7d091c30f0cb6b85b885fb1ce6cec40fb6a5e4ab3f0fa53aa8c62adc2d1fc70",
+            "sha256:862db9fcc84353e3a97ef87d6bc639f590fc7eaf232f84199b5c10251d0981e8",
+            "sha256:831932e928f2c9364202c7fa7a140a38cf8dd320fef43dac57c1acfabb54f573"
+          ],
+          "native_id": "sha256:148edf44878acff5d856c39739398dbedc2a9a55ceaa390321316397f544dec8",
+          "platform": "linux/amd64"
+        },
+        "proxy": {
+          "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "diff_ids": [
+            "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+            "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+            "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+            "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+            "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+          ],
+          "native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "platform": "linux/amd64"
+        }
+      },
+      "images_archive_sha256": "f16216ed51c9a71dcdb327f3d498d6d3714a5692997cbc6298a353d4002ffd8b",
+      "mode": "classic",
+      "server": "29.8.0"
+    },
+    {
+      "driver": "native",
+      "driver_status": [
+        [
+          "driver-type",
+          "io.containerd.snapshotter.v1"
+        ]
+      ],
+      "images": {
+        "app": {
+          "config_digest": "sha256:148edf44878acff5d856c39739398dbedc2a9a55ceaa390321316397f544dec8",
+          "diff_ids": [
+            "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+            "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+            "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+            "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+            "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+            "sha256:e7d091c30f0cb6b85b885fb1ce6cec40fb6a5e4ab3f0fa53aa8c62adc2d1fc70",
+            "sha256:862db9fcc84353e3a97ef87d6bc639f590fc7eaf232f84199b5c10251d0981e8",
+            "sha256:831932e928f2c9364202c7fa7a140a38cf8dd320fef43dac57c1acfabb54f573"
+          ],
+          "native_id": "sha256:964407a41343b2015a5034712e93e33b2b3d966444c9c5c4354585cbe2fd1d2d",
+          "platform": "linux/amd64"
+        },
+        "proxy": {
+          "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "diff_ids": [
+            "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+            "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+            "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+            "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+            "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+          ],
+          "native_id": "sha256:5bf74fd0ea8316ea9934240b594242392bcc0e4f2678d4e06d5c5d3fb9f5932d",
+          "platform": "linux/amd64"
+        }
+      },
+      "images_archive_sha256": "f16216ed51c9a71dcdb327f3d498d6d3714a5692997cbc6298a353d4002ffd8b",
+      "mode": "containerd",
+      "server": "29.8.0"
+    },
+    {
+      "driver": "vfs",
+      "driver_status": null,
+      "images": {
+        "app": {
+          "config_digest": "sha256:148edf44878acff5d856c39739398dbedc2a9a55ceaa390321316397f544dec8",
+          "diff_ids": [
+            "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+            "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+            "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+            "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+            "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+            "sha256:e7d091c30f0cb6b85b885fb1ce6cec40fb6a5e4ab3f0fa53aa8c62adc2d1fc70",
+            "sha256:862db9fcc84353e3a97ef87d6bc639f590fc7eaf232f84199b5c10251d0981e8",
+            "sha256:831932e928f2c9364202c7fa7a140a38cf8dd320fef43dac57c1acfabb54f573"
+          ],
+          "native_id": "sha256:148edf44878acff5d856c39739398dbedc2a9a55ceaa390321316397f544dec8",
+          "platform": "linux/amd64"
+        },
+        "proxy": {
+          "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "diff_ids": [
+            "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+            "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+            "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+            "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+            "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+          ],
+          "native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+          "platform": "linux/amd64"
+        }
+      },
+      "images_archive_sha256": "f16216ed51c9a71dcdb327f3d498d6d3714a5692997cbc6298a353d4002ffd8b",
+      "mode": "classic",
+      "server": "29.8.0"
+    }
+  ],
+  "messages": [
+    "2026-11-11T10:00:14.6932727Z Real Docker29 cross-store matrix passed: one exact kit on classic/containerd, native IDs differ, config/layer proof equal, external lifecycle/negatives both stores, incoming v2 upgrade/legacy rollback, containerd export -> fresh classic.",
+    "2026-11-11T10:00:37.7643101Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours.",
+    "2026-11-11T10:00:38.1111399Z ##[error]Failed to CreateArtifact: Artifact storage quota has been hit. Unable to upload any new artifacts. Usage is recalculated every 6-12 hours."
+  ]
+}

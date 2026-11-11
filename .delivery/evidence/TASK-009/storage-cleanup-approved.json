@@ -155,5 +155,13 @@
     "bytes": 2366881840,
     "verification": "remaining artifact IDs exactly equal pre-cleanup IDs minus the 21 approved IDs; all other 168 preserved"
   },
-  "deleted_bytes": 2769488380
+  "deleted_bytes": 2769488380,
+  "post_cleanup_reference_check": {
+    "scope": [
+      "scripts",
+      "deploy",
+      ".github"
+    ],
+    "deleted_artifact_ids_referenced": []
+  }
 }

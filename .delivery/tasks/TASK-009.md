@@ -116,6 +116,6 @@ Preview показывает рецепт, выход, максимум, выб�
 - technical_acceptance: **pending**.
 - product_acceptance: **pending** — демонстрация и проверка владельцем.
 - Слияние: по связанному PR, пока не выполнено.
-- delivery: **pending** — runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`, новый local immutable kit и canonical lifecycle существуют; exact CI artifact publication блокирована квотой. После отдельного разрешения владельца удалены21указанный неканонический artifact, все остальные168сохранены; attempt2 выполняется.
+- delivery: **pending** — runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`, новый local immutable kit и canonical lifecycle существуют; exact CI artifact publication блокирована квотой. После отдельного разрешения владельца удалены21указанный неканонический artifact, все остальные168сохранены; attempt2 завершился с тем же quota upload failure; все вычислительные проверки снова прошли. [Итог CI](../evidence/TASK-009/ci-jobs.json); активных прогонов нет.
 - Следующий ответственный: **облачный Codex developer**, завершить публикацию и сверку exact CI kit/owner-команд, передать management для отдельного reviewer. [111native/58Chromium, capacity,7predecessors иstores](../TASK-009-VALIDATION.md); [передача и ограничения](../TASK-009-NEXT-STEPS.md).
 - Последнее содержательное подтверждение: **2026-11-11**, прямое поручение владельца и чтение текущего репозитория management.

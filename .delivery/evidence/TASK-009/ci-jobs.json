@@ -1,6 +1,7 @@
 {
   "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
-  "evidence_kind": "GitHub API metadata read by developer; latest attempt2, kit still running; attempt1 retained separately",
+  "attempt": 2,
+  "evidence_kind": "final GitHub API metadata read by developer; all jobs completed, verify and kit failed on quota uploads",
   "checks": {
     "jobs": [
       {
@@ -144,8 +145,8 @@
       {
         "id": 130440796592,
         "name": "debian-kit",
-        "status": "in_progress",
-        "conclusion": null,
+        "status": "completed",
+        "conclusion": "failure",
         "run_id": 42992435564,
         "logs_url": null,
         "steps": [
@@ -199,42 +200,51 @@
           },
           {
             "name": "Test TASK008 schema6 recipes and all supported predecessors on isolated Debian",
-            "status": "in_progress",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "success",
             "number": 9
           },
           {
             "name": "Test real classic and containerd stores",
-            "status": "pending",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "success",
             "number": 10
           },
           {
             "name": "Upload migration evidence",
-            "status": "pending",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "failure",
             "number": 11
           },
           {
             "name": "Upload image-store evidence",
-            "status": "pending",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "failure",
             "number": 12
           },
           {
             "name": "Run actions/upload-artifact@v4",
-            "status": "pending",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "skipped",
             "number": 13
           },
           {
             "name": "Post Run actions/checkout@v4",
-            "status": "pending",
-            "conclusion": null,
+            "status": "completed",
+            "conclusion": "success",
             "number": 26
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 27
           }
         ]
       }
     ]
+  },
+  "kit_artifacts": {
+    "artifacts": []
   }
 }
