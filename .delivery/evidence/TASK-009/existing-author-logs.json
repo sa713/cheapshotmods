@@ -1,0 +1,20 @@
+[
+  {
+    "file": "existing-author-verify.log",
+    "kind": "existing author log from earlier TASK-009 work, not a new run",
+    "source_mtime_UTC": "2026-11-11T08:32:24.380712+00:00",
+    "sha256": "5b8ac592fb21022dadfcfdf2bf7bb53d1efade22525dd41b8f9e47d01aa8168b"
+  },
+  {
+    "file": "existing-author-browser-eb.log",
+    "kind": "existing author log from earlier TASK-009 work, not a new run",
+    "source_mtime_UTC": "2026-11-11T09:28:24.619142+00:00",
+    "sha256": "1b1bb698854ee85e20ec9eb572417620b0c40b564e4825159a5ac7aa88081966"
+  },
+  {
+    "file": "existing-author-capacity.log",
+    "kind": "existing author log from earlier TASK-009 work, not a new run",
+    "source_mtime_UTC": "2026-11-11T08:34:39.895187+00:00",
+    "sha256": "21ee9ba65cb07053c4eb7c01d52b18d10ca727216b17c1945986c55e13b8b8a4"
+  }
+]

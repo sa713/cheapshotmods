@@ -1,0 +1,17 @@
+{
+  "scope": "exact preserved local archive store-matrix attempt in Codex; not a successful matrix",
+  "original_harness": "scripts/test-image-stores.sh from runtime eb655846",
+  "initial_exit": 1,
+  "initial_failure": "official DinD bootstrap cannot create /sys/fs/cgroup/init: Permission denied; failure occurred before app image import/tests",
+  "managed_daemon": {
+    "version": "29.9.2",
+    "rootless": true,
+    "driver": "vfs",
+    "cgroup_driver": "none"
+  },
+  "rootless_bootstrap_probe": "stopped: separate rootless daemon requires ROOTLESSKIT_STATE_DIR",
+  "proper_rootlesskit_probe": "stopped: newuidmap write to uid_map failed: Operation not permitted",
+  "diagnostic_cli_error": "one preliminary probe used unsupported --features CLI flag; corrected to daemon.json before the rootless probe; not an application failure",
+  "result": "new full exact-archive classic/containerd matrix not completed; prior successful real Docker29.8 CI matrices remain separate code-level evidence for the same runtime; local archive config/layers and canonical lifecycle verified",
+  "infrastructure": "managed daemon/backend/settings unchanged; only disposable test containers/volumes used and cleaned"
+}

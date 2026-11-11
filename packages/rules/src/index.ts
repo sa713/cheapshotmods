@@ -58,6 +58,17 @@ export function formatCrit(value: string | null | undefined): string {
 }
 export interface Mod { kind: Kind; tier: number; value: string; crit?: string | null }
 export interface Group extends Mod { id: string; quantity: string }
+// Shared display order. Canonical decimal integers stay exact at every size.
+export function compareGroups(a:Group,b:Group):number {
+  const type=kinds.indexOf(a.kind)-kinds.indexOf(b.kind);if(type)return type;
+  if(a.tier!==b.tier)return b.tier-a.tier;
+  const av=BigInt(a.value),bv=BigInt(b.value);if(av!==bv)return av>bv?-1:1;
+  if(hasCrit(a.kind)){
+    if(a.crit==null&&b.crit!=null)return 1;if(a.crit!=null&&b.crit==null)return -1;
+    if(a.crit!=null&&b.crit!=null){const ac=BigInt(a.crit),bc=BigInt(b.crit);if(ac!==bc)return ac>bc?-1:1;}
+  }
+  return a.id===b.id?0:a.id<b.id?-1:1;
+}
 export interface Equipped { id: string; quantity: string }
 export interface Selection extends Equipped { worn: string }
 export function mod(value: unknown): Mod {

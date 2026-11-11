@@ -1,0 +1,26 @@
+{
+  "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "archive_sha256": "1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6",
+  "archive_bytes": 132005139,
+  "entries_checked": 13,
+  "deploy_sources_checked": 11,
+  "app_config_digest": "sha256:ccc2ffc10c50c9968433243e23ed652e610dc7a42a84642459cb1622a29ac520",
+  "same_previously_tested_archive": true,
+  "evidence_kind": "author resumed integrity check, no rebuild or new test-suite run",
+  "files": {
+    "manifest.json": "44f0b708e38f54e73b0dcac516dc6d9db55af4b53510d75260aac18b81935b43",
+    "image-proof.py": "76d6631545bce4871b5fdc1ddc290163c787d0684c675d11795b5b3aaaaa8f05",
+    "env.example": "9ccee3b444b604a5d3af784d44a8fa59b945cc05705c9490af4aee3e6a3594f2",
+    "Caddyfile.internal": "2e1153bbc2058fccb27ecd69c10fde91f0543f31a6861c8dc472a72cc812a013",
+    "chm.sh": "7e677749fbb6ecec206a20997d3989ef543f710d23d5a653775f144764ad010a",
+    "compose.yml": "4787945f88d176fb536cf22c65087aee8fe949d37aaa90811104c984e9141a33",
+    "ingress.py": "884aad4f03bc774add681c228e6e7345641c6c074bb07b2f1b604d4f0b4d8011",
+    "images.tar.gz": "cf54e5899380034eedbd752fb158ad79e3ec27bd858507b7d59b8aa54c94c6bc",
+    "compose.external.yml": "20a3cc0b49f4444da66f8f57f839bf572982d80948f1269833e9c9276f75bdd5",
+    "Caddyfile": "cedc6ab4846783b4b72d4a79af833a7f9ae05d50a5a759ae25aa4ef9cd9f8384",
+    "SHA256SUMS": "6c2f4b69eb7362ac6ea53c707b75069552ab2746d3423bbef26375bc3c9536c5",
+    "README.md": "75b8b2897e849702cbf400b792213aa510694f2babc5d86a2666d22bf370aa4c",
+    "env.external.example": "a8b7d4e6175298f740f6b10a73ea22e88ada634022fa8cefc255bb8072628357",
+    "EXTERNAL-PROXY.md": "a477d5b2ac04a094e5a9558b209344cad1d1f822ce2ec60c138fcbccca544a28"
+  }
+}

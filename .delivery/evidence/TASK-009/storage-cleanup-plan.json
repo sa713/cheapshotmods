@@ -1,0 +1,188 @@
+{
+  "evidence_kind": "original read-only proposal, later explicitly approved by the owner and executed; see linked receipt",
+  "original_plan_sha256": "37f6622f598d9a75cbc121643df3d867a5e9506e2b2f49bba4cd658de03e3a02",
+  "authorization_and_result": "storage-cleanup-approved.json",
+  "original_proposal": {
+    "scope": "read-only proposal; no deletion authorized or performed",
+    "total_artifacts": 189,
+    "total_bytes": 5136370220,
+    "canonical_sources_preserved": [
+      "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+      "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+      "fbe82aef6008d292515c0efce2fde601c221f3d2",
+      "b008807fa1873de4fd6d926be42bc6bf515d6a66",
+      "19a6fdde785eb90b01bd78318deeab1a539dde7b",
+      "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+      "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+      "d6cb0e9404f07b5573b64131281d29569a010442",
+      "f944acb6435a9671cef6db5fc500b79a71d21133",
+      "0f2cd90c5b672d67409c2687e4e90a8ce9797482"
+    ],
+    "candidate_kit_count": 21,
+    "candidate_bytes": 2769488380,
+    "candidate_kits": [
+      {
+        "artifact_id": 13625693683,
+        "source_sha": "eb3eb3dbb320b8846a5c3581c4c5a9855a6fd1fe",
+        "bytes": 131917141,
+        "same_runtime_tree_as": "feb6a1bf82e70474c482c6a2e1fb0e77c4e20586",
+        "name": "cheapshotmods-eb3eb3dbb320b8846a5c3581c4c5a9855a6fd1fe-linux-amd64"
+      },
+      {
+        "artifact_id": 13615682985,
+        "source_sha": "73b1fff764ecd6d25d3326b7aef9c27cee580c1f",
+        "bytes": 131886853,
+        "same_runtime_tree_as": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+        "name": "cheapshotmods-73b1fff764ecd6d25d3326b7aef9c27cee580c1f-linux-amd64"
+      },
+      {
+        "artifact_id": 13615628001,
+        "source_sha": "6db85432edfa541033599ebfb9af96fe4bbb1498",
+        "bytes": 131898986,
+        "same_runtime_tree_as": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+        "name": "cheapshotmods-6db85432edfa541033599ebfb9af96fe4bbb1498-linux-amd64"
+      },
+      {
+        "artifact_id": 13614944658,
+        "source_sha": "bd8108c8333bac821bbf27d19a249ecb41d02e82",
+        "bytes": 131902691,
+        "same_runtime_tree_as": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+        "name": "cheapshotmods-bd8108c8333bac821bbf27d19a249ecb41d02e82-linux-amd64"
+      },
+      {
+        "artifact_id": 13587370832,
+        "source_sha": "fafbcfb110083c5937fc3b46db8a63c9f9ee6842",
+        "bytes": 131900286,
+        "same_runtime_tree_as": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+        "name": "cheapshotmods-fafbcfb110083c5937fc3b46db8a63c9f9ee6842-linux-amd64"
+      },
+      {
+        "artifact_id": 13585760283,
+        "source_sha": "0b0284129b72cea255876c9b8f2d64e592836ecf",
+        "bytes": 131900549,
+        "same_runtime_tree_as": "6dc8021e58daa9aa16a93a9265315bb810fe9d0a",
+        "name": "cheapshotmods-0b0284129b72cea255876c9b8f2d64e592836ecf-linux-amd64"
+      },
+      {
+        "artifact_id": 13573713906,
+        "source_sha": "2dc350f40a5083f8416a9085722140bc9cbca3f3",
+        "bytes": 131888486,
+        "same_runtime_tree_as": "b008807fa1873de4fd6d926be42bc6bf515d6a66",
+        "name": "cheapshotmods-2dc350f40a5083f8416a9085722140bc9cbca3f3-linux-amd64"
+      },
+      {
+        "artifact_id": 13573036641,
+        "source_sha": "dc75ff58c744b2d2c183c5dc31644afad5740158",
+        "bytes": 131877714,
+        "same_runtime_tree_as": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+        "name": "cheapshotmods-dc75ff58c744b2d2c183c5dc31644afad5740158-linux-amd64"
+      },
+      {
+        "artifact_id": 13571784272,
+        "source_sha": "e7e695f289aade86412ff1b4f5238ed5c355b455",
+        "bytes": 131887541,
+        "same_runtime_tree_as": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+        "name": "cheapshotmods-e7e695f289aade86412ff1b4f5238ed5c355b455-linux-amd64"
+      },
+      {
+        "artifact_id": 13523979248,
+        "source_sha": "cc65deb242fb7ce7ae6200ad01e0950b22ba1f36",
+        "bytes": 131882976,
+        "same_runtime_tree_as": "fbe82aef6008d292515c0efce2fde601c221f3d2",
+        "name": "cheapshotmods-cc65deb242fb7ce7ae6200ad01e0950b22ba1f36-linux-amd64"
+      },
+      {
+        "artifact_id": 13517151981,
+        "source_sha": "6d0e079e708ef902e9856e37b3ca80aa5bfaedce",
+        "bytes": 131887765,
+        "same_runtime_tree_as": "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+        "name": "cheapshotmods-6d0e079e708ef902e9856e37b3ca80aa5bfaedce-linux-amd64"
+      },
+      {
+        "artifact_id": 13516773833,
+        "source_sha": "d4eabf608d8a9e86bc2c3f38accce95401069597",
+        "bytes": 131874594,
+        "same_runtime_tree_as": "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+        "name": "cheapshotmods-d4eabf608d8a9e86bc2c3f38accce95401069597-linux-amd64"
+      },
+      {
+        "artifact_id": 13516694657,
+        "source_sha": "e3d44fa2211d38f27aa85edb900e831daebec58a",
+        "bytes": 131879832,
+        "same_runtime_tree_as": "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+        "name": "cheapshotmods-e3d44fa2211d38f27aa85edb900e831daebec58a-linux-amd64"
+      },
+      {
+        "artifact_id": 13516131142,
+        "source_sha": "396d377d2a19d017c747ecd9fc04f83a703fb425",
+        "bytes": 131865792,
+        "same_runtime_tree_as": "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+        "name": "cheapshotmods-396d377d2a19d017c747ecd9fc04f83a703fb425-linux-amd64"
+      },
+      {
+        "artifact_id": 13513265208,
+        "source_sha": "30090a2dfec9581d6b43beacc3c4a4139c78f81f",
+        "bytes": 131870019,
+        "same_runtime_tree_as": "cf0a793010bc9fc431ad4b6a82bcce36b49e0bcb",
+        "name": "cheapshotmods-30090a2dfec9581d6b43beacc3c4a4139c78f81f-linux-amd64"
+      },
+      {
+        "artifact_id": 13503560385,
+        "source_sha": "cbfe78164daebf5fed041e391f25087b303784d7",
+        "bytes": 131866021,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-cbfe78164daebf5fed041e391f25087b303784d7-linux-amd64"
+      },
+      {
+        "artifact_id": 13501948852,
+        "source_sha": "e681d0a3d42e161abf89d9e869ac1d2bd0c02e38",
+        "bytes": 131858677,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-e681d0a3d42e161abf89d9e869ac1d2bd0c02e38-linux-amd64"
+      },
+      {
+        "artifact_id": 13501533059,
+        "source_sha": "8e42aa89d272fd4bf8ce497c71ec16deffaf317d",
+        "bytes": 131857052,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-8e42aa89d272fd4bf8ce497c71ec16deffaf317d-linux-amd64"
+      },
+      {
+        "artifact_id": 13499124892,
+        "source_sha": "fdbe1b726887a0c6d5e0941f560ded71133cbe2f",
+        "bytes": 131850506,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-fdbe1b726887a0c6d5e0941f560ded71133cbe2f-linux-amd64"
+      },
+      {
+        "artifact_id": 13498528090,
+        "source_sha": "444354ab9319e811d0c17007b2a87a9995028660",
+        "bytes": 131870560,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-444354ab9319e811d0c17007b2a87a9995028660-linux-amd64"
+      },
+      {
+        "artifact_id": 13498392518,
+        "source_sha": "8caca180c52022e03b11a95fbe95faa78f68ebd1",
+        "bytes": 131864339,
+        "same_runtime_tree_as": "8f3dd8a13040daf4b00abd9c8e1eff5aa2815aab",
+        "name": "cheapshotmods-8caca180c52022e03b11a95fbe95faa78f68ebd1-linux-amd64"
+      }
+    ],
+    "preserve": "all other artifacts; browser/capacity/upgrades/store evidence unchanged",
+    "comparison_paths": [
+      "apps",
+      "packages",
+      "deploy",
+      "Dockerfile",
+      "package.json",
+      "package-lock.json",
+      ".dockerignore",
+      "tsconfig.base.json",
+      "tsconfig.check.json",
+      "tsconfig.json",
+      ".nvmrc"
+    ],
+    "caveat": "Same production files, not identical archive bytes: source labels/digests differ. Account storage limit and other repositories are not inspected."
+  }
+}

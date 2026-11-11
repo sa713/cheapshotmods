@@ -1,3 +1,4 @@
+import {selectChoice} from './choices.js';
 import {test,expect,type Page} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import {readFileSync} from 'node:fs';
@@ -17,7 +18,7 @@ async function checks(page:Page,width:number){expect(await page.evaluate(()=>doc
   expect(await page.locator('button,input,select,summary').evaluateAll(nodes=>nodes.filter(n=>{const r=n.getBoundingClientRect();return r.width&&r.height&&!n.closest('[inert]')&&(r.width<43.9||r.height<43.9);}).map(n=>n.getAttribute('aria-label')||n.textContent))).toEqual([]);
   expect(await page.locator('.exact').evaluateAll(nodes=>nodes.filter(n=>{const e=n as HTMLElement,s=getComputedStyle(e),r=e.getBoundingClientRect();return r.width&&r.height&&e.scrollWidth>e.clientWidth+1&&['hidden','clip'].includes(s.overflowX);}).map(n=>n.textContent))).toEqual([]);
 }
-async function batch(page:Page,id:string,tier:number){await page.getByLabel('Исходная группа',{exact:true}).selectOption(id);await page.getByLabel('Целевой уровень',{exact:true}).selectOption(String(tier));await expect(page.getByTestId('batch-preview')).toBeVisible();await expect(page.getByTestId('batch-loading')).toHaveCount(0);}
+async function batch(page:Page,id:string,tier:number){await selectChoice(page.getByLabel('Исходная группа',{exact:true}),id);await selectChoice(page.getByLabel('Целевой уровень',{exact:true}),String(tier));await expect(page.getByTestId('batch-preview')).toBeVisible();await expect(page.getByTestId('batch-loading')).toHaveCount(0);}
 for(const width of [360,390,1440])test('TASK007 automatic max, smaller count, one undo, replenishment and ordinary crit '+width,async({page},info)=>{
   await page.setViewportSize({width,height:1000});await login(page);const added=await command(page,{type:'original.put',kind:'🅾️',tier:1,value:'10',quantity:'20'});await refresh(page);const before=await(await page.request.get('/api/state')).json();
   await batch(page,added.createdId,3);await expect(page.getByTestId('batch-maximum')).toHaveText('Максимум: 2');await expect(page.getByLabel('Количество результатов',{exact:true})).toHaveValue('2');await expect(page.getByTestId('batch-preview')).toContainText('Полная цена: 1008');expect((await(await page.request.get('/api/state')).json()).revision).toBe(before.revision);

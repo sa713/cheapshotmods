@@ -1987,3 +1987,19 @@ input {
 .baseline-card button { width: 100%; white-space: normal; }
 .reset-actions { order: 5; width: 100%; display: grid; gap: 12px; }
 .reset-actions .reset-button { width: 100%; height: auto; min-height: 44px; white-space: normal; text-align: left; }
+
+/* One themed combobox/listbox in the document's current dialog top layer. */
+.select-field { min-width:0; }
+.select-field>label { display:block; margin-bottom:8px; }
+.select-trigger { width:100%; min-height:46px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid #46573a; border-radius:7px; background:#182014; color:#e5efdb; text-align:left; font-size:16px; }
+.select-trigger>span:first-child { min-width:0; overflow-wrap:anywhere; }
+.select-trigger:not(:disabled):hover { background:#26331e; border-color:#7e9666; color:#e5efdb; }
+.select-trigger[aria-expanded=true] { border-color:var(--lime); }
+.select-list { z-index:100; overflow-y:auto; overscroll-behavior:contain; background:#20291a; color:#e5efdb; border:1px solid #778a61; border-radius:8px; padding:5px; box-shadow:0 10px 36px #0009; scroll-padding:5px; }
+.select-option { min-height:44px; padding:11px 12px; border-radius:5px; cursor:pointer; overflow-wrap:anywhere; font-size:15px; line-height:1.5; }
+.select-option[data-active=true],.select-option:hover { background:#3d4c30; outline:1px solid #7e9666; outline-offset:-1px; }
+.select-option[aria-selected=true] { color:#ddf9a8; font-weight:650; background:#344328; }
+.select-option[aria-disabled=true] { opacity:.45; cursor:default; }
+.green-fuse { margin-top:20px; }
+.green-fuse .select-field,.green-fuse>label { margin-top:14px; }
+.green-fuse .batch-preview { margin-top:16px; }

@@ -1,10 +1,10 @@
 # Очередь
 
-## Активная задача
+## Текущий этап
 
-Активных задач разработки нет. [TASK-008](tasks/TASK-008.md) технически принята и включена в main через [PR9](https://github.com/sa713/cheapshotmods/pull/9), merge `db2f43ada73aa14af19d6b1e5ffb2ff25608724b`, 2026-11-09.
+[TASK-009](tasks/TASK-009.md) — **accepted для code/integration**, 2026-11-11. Меню, глобальная сортировка и два зелёных рецепта проверены; [review с границами](reviews/TASK-009-review.md). Интеграция — [PR10→main](https://github.com/sa713/cheapshotmods/pull/10), завершает management с **[skip ci]**, без новых Actions.
 
-Следующий внешний шаг TASK-008 — обновление целевого сервера и живые проверки владельцем по [готовой инструкции](TASK-008-NEXT-STEPS.md). Установка этого патча пока не подтверждена; technical acceptance и GitHub-интеграция завершены. Новые продуктовые доработки ожидают требований владельца.
+Следующий внешний шаг — **владелец** по [готовому update/check/rollback](TASK-009-NEXT-STEPS.md): actualSHA/HTTPS/space и loaded image proof до app stop/data, затем receipt и живые меню/порядок/рецепты/undo. Installation/product acceptance/delivery pending. Полная новая CCC Docker-store matrix не выполнена и не выдана за success; ограничения и решение о допустимости code integration в review. Предварительная установка TASK-008 не требуется.
 
 ## Интегрированная основа
 

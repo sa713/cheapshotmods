@@ -1,0 +1,43 @@
+{
+  "evidence_kind": "CI job log read by developer; upload blocked by quota; not a new local run or independent review",
+  "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "run_id": 42992435564,
+  "job_id": 130428308278,
+  "step": 10,
+  "result": {
+    "driver": "vfs",
+    "driver_status": null,
+    "images": {
+      "app": {
+        "config_digest": "sha256:050b69444e392ff90c10656dd7ba9d46494b09d6a1dd8d9480336bbc4f8b237d",
+        "diff_ids": [
+          "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+          "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+          "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+          "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+          "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+          "sha256:cfc7c1329994251021b7224a45f4f40e5aaf2be15ecf8454702b6116e6d90ecc",
+          "sha256:7cace4d7c92e87f0fd64f423341c1694282694a2690f449c654a953a4ea0246d",
+          "sha256:fe5b6b8b04f26513f40fdca03c3d67008cf3d6f3ff2b00e760fb3a9c5c4656b7"
+        ],
+        "native_id": "sha256:050b69444e392ff90c10656dd7ba9d46494b09d6a1dd8d9480336bbc4f8b237d",
+        "platform": "linux/amd64"
+      },
+      "proxy": {
+        "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "diff_ids": [
+          "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+          "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+          "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+          "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ],
+        "native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "platform": "linux/amd64"
+      }
+    },
+    "images_archive_sha256": "a782786e4eb4e05dc511c9967aebd0da2251e5093011a40888e58bc5000b4632",
+    "mode": "classic",
+    "server": "29.8.0"
+  }
+}

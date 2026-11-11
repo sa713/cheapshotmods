@@ -1,0 +1,42 @@
+{
+  "reviewed_head": "e783009b070cecfa83c7995ea35879df76d24ba4",
+  "runtime_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "date": "2026-11-11",
+  "source_blob_hashes_verified": 153,
+  "independent_reviewer": "pr10_code_review",
+  "native": {
+    "passed": 110,
+    "total": 111,
+    "new_tests_passed": 15,
+    "remaining": "existing 0.0.0.0 main startup test: sandbox os.networkInterfaces uv_interface_addresses error1, separately reproduced"
+  },
+  "typecheck": "passed",
+  "lint": "passed",
+  "build": "passed",
+  "browser": "blocked before tests: Fastify networkInterfaces and direct Chromium socket EPERM; no independent new run",
+  "compiled_hashes_compared": 30,
+  "deploy_hashes_compared": 11,
+  "hash_mismatches": [],
+  "image_proof_tests": 14,
+  "ingress_tests": 4,
+  "synthetic_transport_parser_fixtures": 7,
+  "operator_sha256": "89d1f3296b0cb0cf61c44ea3be6422e2a7efa5b14f8d31bcb8a1a4d9af2aa69e",
+  "delivery_manifest_sha256": "b1138a4772cb0b268c1c164e1d4ff8122ce2d26247120fce5582f096ad62c86a",
+  "delivery_parts_metadata_verified": 32,
+  "full_binary_download_by_management": false,
+  "new_Docker_matrix_by_management": false,
+  "source_primary_CI": {
+    "verify_job": 130440743126,
+    "native": 111,
+    "browser": 58,
+    "job_conclusion": "failure: upload quota",
+    "container_smoke_job": 130440744981,
+    "container_smoke": "success",
+    "kit_job": 130440796592,
+    "compute_steps": "success incl install/external/7predecessors/real classic+containerd+reverse on different CI build bytes",
+    "kit_job_conclusion": "failure: uploads quota, kit skipped"
+  },
+  "decision": "accepted for code integration; installation/product acceptance/delivery pending; target imported proof required before app stop/data",
+  "actions_started": 0,
+  "server_actions": false
+}

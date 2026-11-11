@@ -38,7 +38,7 @@ export function Modal({label,title,onClose,children}:{label:string;title:string;
     // Native modal supplies the focus trap/backdrop. Explicit shell inert/ARIA
     // also prevents background actions and exposes just the active dialog to AT.
     if(shell){shell.inert=true;shell.setAttribute('aria-hidden','true');}
-    dialog.querySelector<HTMLElement>('input, select, [data-autofocus]')?.focus();
+    dialog.querySelector<HTMLElement>('[data-autofocus],input,[role=combobox]')?.focus();
     return ()=>{if(shell){shell.inert=false;shell.removeAttribute('aria-hidden');}dialog.close();if(trigger?.isConnected)trigger.focus({preventScroll:true});};
   },[]);
   return <dialog ref={ref} className="modal" aria-label={label} onCancel={e=>{e.preventDefault();onClose();}} onKeyDown={e=>{

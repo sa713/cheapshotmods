@@ -1,0 +1,7 @@
+{
+  "scope": "isolated Debian13 bootstrap, no app/server update",
+  "private_git_blob_download_and_pinned_operator_hash": "passed",
+  "existing_verified_helper_needs_no_GitHub_credential_or_download": "passed",
+  "tampered_existing_helper_refused_without_overwrite": "passed",
+  "owner_credential": "synthetic Accept-only fixture; Cloud connection authenticates exact private GitHub request"
+}

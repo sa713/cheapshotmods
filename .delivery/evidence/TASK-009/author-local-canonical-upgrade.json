@@ -1,0 +1,34 @@
+{
+  "predecessor_sha": "0f2cd90c5b672d67409c2687e4e90a8ce9797482",
+  "incoming_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "platform": "Debian13-slim/linux-amd64; Docker29.9.2 vfs; Node24.22.1/better-sqlite3",
+  "old_assets": {
+    "css_sha256": "2f81719e6e7596b5790d07456a8bcf811220e12e0a4865e2cfcce056009c8aff",
+    "js_sha256": "b2378335c979ebe281c9ae13f37e11ef16c0ae960597987233d9f05156a9a9e8",
+    "sites": true
+  },
+  "new_assets": {
+    "css_sha256": "a2f7602497d53047db91f77ff0a4969bd782300c19cfa7a89e7eef44b398981e",
+    "js_sha256": "e483503c2f823412a81a9fb12b9ba968ec9572b0f08a657a0c6ab0e99ce19d9d",
+    "sites": true
+  },
+  "asset_rollback_exact": true,
+  "old_schema": 6,
+  "new_schema": 6,
+  "separate_new_volume": true,
+  "old_image_schema_compatibility_probe": "accepted_schema6_and_undid_new_green_recipe",
+  "config_and_separate_operator_unchanged": true,
+  "new_image_restart_backup_restore": "passed",
+  "baseline_backup_restore_restart": "passed",
+  "schema5_or_6_state_rows_receipts_snapshot_preserved": "passed",
+  "task007_homogeneous_replay_undo": "passed",
+  "baseline_capture_restore_isolation": "passed",
+  "old_mixed_replay_new_mixed_reject": "passed",
+  "raw_equipment_single_batch_undo": "passed",
+  "all_old_undo_late_stock_reset": "passed",
+  "automatic_max_count_worn": "passed",
+  "green_recipes_worn_shared_stock_undo_snapshot": "passed",
+  "rollback_old_image_and_volume_exact_state": "passed",
+  "restart_after_rollback": "passed",
+  "test_data": "isolated synthetic signed Mini App; no owner/live Telegram"
+}

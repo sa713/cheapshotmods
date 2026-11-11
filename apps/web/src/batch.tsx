@@ -1,13 +1,15 @@
 import React,{useEffect,useRef,useState} from 'react';
-import {boundedInteger,displayKind,displayTier,formatCrit,hasCrit,homogeneousFuseRequest,type Equipped,type Group,type HomogeneousFusePlan,type HomogeneousFuseRequest} from '@chm/rules';
+import {boundedInteger,compareGroups,displayKind,displayTier,formatCrit,hasCrit,homogeneousFuseRequest,type Equipped,type Group,type HomogeneousFusePlan,type HomogeneousFuseRequest} from '@chm/rules';
 import {ModCardTitle} from './presentation.js';
+import {Select} from './select.js';
 interface Props {
   groups:Group[]; equipment:Equipped[]; revision:string; disabled:boolean;
   onPreview:(request:HomogeneousFuseRequest)=>Promise<HomogeneousFusePlan>;
   onCommit:(request:HomogeneousFuseRequest)=>Promise<boolean>;
   onError:(error:unknown)=>void; errorText:(error:unknown)=>string; onRefine:(g:Group)=>void;
+  children?:React.ReactNode;
 }
-export function BatchFuse({groups,equipment,revision,disabled,onPreview,onCommit,onError,errorText,onRefine}:Props) {
+export function BatchFuse({groups,equipment,revision,disabled,onPreview,onCommit,onError,errorText,onRefine,children}:Props) {
   const [id,setId]=useState(''),[targetTier,setTarget]=useState(2),[includeWorn,setWorn]=useState(false);
   const [quantity,setQuantity]=useState<string>(),[count,setCount]=useState<string>();
   const [calculation,setCalculation]=useState<{basis:string;key:string;plan:HomogeneousFusePlan}>();
@@ -49,16 +51,16 @@ export function BatchFuse({groups,equipment,revision,disabled,onPreview,onCommit
     try{const n=boundedInteger(count,false,256);if(n>BigInt(meta.maxCount)){setCount(meta.maxCount);setNotice('Допустимый максимум: '+meta.maxCount+'. Количество уменьшено до максимума.');}}catch{/* The visible input error remains; no command is sent. */}
   }
   return <section className="section-card batch-fuse" aria-label="Пакетный фьюз">
-    <p className="eyebrow">ОДНА ГРУППА · АВТОМАТИЧЕСКИЙ МАКСИМУМ</p><h2>Массовый фьюз</h2>
+    <p className="eyebrow">АВТОМАТИЧЕСКИЙ МАКСИМУМ</p><h2>Массовый фьюз</h2>
     <p className="note">Выберите одинаковые исходные моды и цель. Максимум и стоимость появятся автоматически. Другие группы и готовые промежуточные моды не расходуются.</p>
-    <label>Исходная группа<select aria-label="Исходная группа" value={id} disabled={disabled} onChange={e=>{
-      const g=groups.find(g=>g.id===e.target.value);setId(e.target.value);setTarget(g?Math.min(g.tier+1,6):2);setWorn(false);setQuantity(undefined);resetCount();
-    }}><option value="">Выберите группу модов</option>{groups.map(g=><option key={g.id} value={g.id}>{displayKind(g.kind)} · {displayTier(g)} · +{g.value}%{hasCrit(g.kind)?' · крит '+formatCrit(g.crit):''} · ×{g.quantity}</option>)}</select></label>
+    <Select label="Исходная группа" value={id} disabled={disabled} onChange={value=>{
+      const g=groups.find(g=>g.id===value);setId(value);setTarget(g?Math.min(g.tier+1,6):2);setWorn(false);setQuantity(undefined);resetCount();
+    }} options={[{value:'',label:'Выберите группу модов'},...[...groups].sort(compareGroups).map(g=>({value:g.id,label:displayKind(g.kind)+' · '+displayTier(g)+' · +'+g.value+'%'+(hasCrit(g.kind)?' · крит '+formatCrit(g.crit):'')+' · ×'+g.quantity}))]}/>
     <p className="note">В списке — загруженные группы. Остальные доступны через «Загрузить ещё группы» в инвентаре.</p>
     {!source&&<p className="soft-note">{id?'Группа сейчас не загружена или уже израсходована. Загрузите нужную страницу либо выберите другую.':'Выберите исходную группу для автоматического расчёта.'}</p>}
     {source&&<>
       <div className="batch-source"><ModCardTitle g={source}/><p className="exact">Всего: {source.quantity} · Надето: {worn.toString()}</p></div>
-      <label>Целевой уровень<select aria-label="Целевой уровень" value={targets.includes(targetTier)?targetTier:''} disabled={disabled||!targets.length} onChange={e=>{setTarget(Number(e.target.value));resetCount();}}>{targets.length?targets.map(t=><option key={t} value={t}>{t}.0</option>):<option value="">Выше 6.0 не крафтится</option>}</select></label>
+      <Select label="Целевой уровень" value={targets.includes(targetTier)?String(targetTier):''} disabled={disabled||!targets.length} onChange={t=>{setTarget(Number(t));resetCount();}} options={targets.length?targets.map(t=>({value:String(t),label:t+'.0'})):[{value:'',label:'Выше 6.0 не крафтится'}]}/>
       <label className="checkbox-control"><input type="checkbox" aria-label="Включить надетые" checked={includeWorn} disabled={disabled} onChange={e=>{setWorn(e.target.checked);setQuantity(undefined);resetCount();}}/>Включить надетые</label>
       <p className="note">Сначала расходуются ненадетые. Опция разрешает только экипировку выбранной группы.</p>
       <p className="exact">Доступно исходных: {available}</p>
@@ -85,5 +87,6 @@ export function BatchFuse({groups,equipment,revision,disabled,onPreview,onCommit
         if(plan&&request)void onCommit({...request,quantity:plan.permitted,count:plan.count});
       }}>Применить пакет</button>
     </>}
+    {children}
   </section>;
 }

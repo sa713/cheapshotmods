@@ -1,0 +1,43 @@
+{
+  "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "evidence_kind": "author checks; independent review not performed",
+  "browser": {
+    "command": "npm run test:browser",
+    "passed": 58,
+    "failed": 0,
+    "duration_reported": "3.5m",
+    "exact_source": true,
+    "screenshots": [
+      "long-source-menu-390.png",
+      "modal-open-type-390.png",
+      "green-open-recipe-1440.png",
+      "green-open-recipe-390.png",
+      "green-open-recipe-360.png",
+      "modal-open-type-1440.png",
+      "modal-open-type-360.png"
+    ],
+    "manual_visual": "developer inspected all seven screenshots of actual modal/open recipe/long source at 360/390/1440; theme/readability/bounds passed"
+  },
+  "verify": {
+    "command": "bash scripts/verify.sh",
+    "passed_native": 111,
+    "failed_native": 0,
+    "typecheck": "passed",
+    "lint": "passed",
+    "production_build": "passed",
+    "scope": "local implementation-tree checks; exact source eb655846 also passed in CI"
+  },
+  "negative_pipeline": {
+    "actual_exit": 17,
+    "negative_control_exit": 0
+  },
+  "image_proof_negatives": 14,
+  "ingress_validation": 4,
+  "structural_check": {
+    "errors": 0
+  },
+  "canonical_installer_lifecycle": "author-local-canonical-upgrade.json",
+  "compiled_bytes": "author-local-compiled-proof.json",
+  "live_server_or_Telegram": "not run",
+  "remote_artifact_deletion": "exactly 21 artifacts deleted after explicit user approval; see storage-cleanup-approved.json"
+}

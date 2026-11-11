@@ -1,6 +1,16 @@
 # Паспорт Cheapshot Mods
 
-## Текущее состояние — 2026-11-09
+## Текущее состояние — 2026-11-11
+
+[TASK-009](tasks/TASK-009.md) — **accepted для технической интеграции кода**, [PR10→main](https://github.com/sa713/cheapshotmods/pull/10). [Независимый code review и решение management](reviews/TASK-009-review.md) фиксируют собственные проверки, первичные GitHub logs, отсутствие подтверждённых дефектов и границы Docker/operator evidence. Runtime eb655846 и kit/operator pins сохранены.
+
+Владелец разрешил разовый маршрут без новых Actions/Actions artifacts/ожидания quota/платных услуг. Management завершает разрешённое слияние с **[skip ci]**, затем владелец выполняет [готовый operator шаг](TASK-009-NEXT-STEPS.md). Workflow/settings/стандарт1.1.0 и реальный сервер не изменяются.
+
+Новая полная classic/containerd matrix CCC не завершена; код интегрируется по доказательствам review, а переносимость этих bytes на фактическом Docker и успешная установка **не объявлены проверенными**. Loaded image/config/layers gate остаётся до остановки/копирования данных; при отказе не продолжать. Installation/product acceptance/delivery pending. Точный serverSHA и место устанавливает preflight; SSH identity/agent не предоставлены.
+
+Текущие состояние/очередь — [STATE](STATE.md)/[TASKS](TASKS.md). TASK-001–008 уже в main; ставить TASK-008 отдельно перед TASK-009 не требуется. Старые kits/reviews сохраняют свои SHA; delivery-only binary ref в main не сливается. Функциональный код и установщик этим решением не переписываются.
+
+## Предыдущий технический этап — 2026-11-09
 
 [TASK-008](tasks/TASK-008.md) — **accepted, интегрирована в main** через [PR9](https://github.com/sa713/cheapshotmods/pull/9), merge `db2f43ada73aa14af19d6b1e5ffb2ff25608724b`. Постоянный независимый снимок всего исходного набора и отдельный полный возврат реализованы; обычный сброс эксперимента сохранён. Активных задач разработки нет.
 

@@ -1,0 +1,157 @@
+
+added 220 packages in 6s
+
+> cheapshotmods@0.1.0 typecheck
+> tsc -b && tsc -p tsconfig.check.json --noEmit
+
+
+> cheapshotmods@0.1.0 lint
+> eslint .
+
+
+> cheapshotmods@0.1.0 pretest
+> tsc -b --force
+
+
+> cheapshotmods@0.1.0 test
+> node --import tsx --test tests/*.test.ts
+
+✔ HTTPS sessions set Secure, HttpOnly, SameSite and rotate after Mini App login (255.405918ms)
+✔ real socket response lost after commit; restart preserves idempotency and exact API integers (138.338967ms)
+{"event":"request_failed","requestId":"req-2","route":"/auth/oidc/start","status":503}
+{"event":"request_failed","requestId":"req-3","route":"/auth/mini","status":503}
+{"event":"request_failed","requestId":"req-1","route":"/api/commands","status":500}
+✔ missing configuration, safe errors, database failure and readiness (30.827295ms)
+✔ Fastify parser errors retain safe 4xx and never mutate saved state (12.533852ms)
+✔ untrusted numeric fields are bounded before conversion; oversized request leaves both players usable (47.782737ms)
+✔ OIDC real signature and every identity/claim validation (127.694378ms)
+✔ Mini App signature, duplicate fields, missing identity and exact time boundaries (5.219945ms)
+✔ issued-at skew is independent of strict expiry/not-before and one-hour age (15.529396ms)
+✔ OIDC callback binds session/state/nonce and PKCE; rotates session and shares Mini App aggregate (190.274834ms)
+✔ wrong PKCE or nonce cannot create identity; one-time flow stays consumed on failure (13.509435ms)
+✔ Online Backup is private from creation under umask 022 and refuses existing paths (169.290427ms)
+✔ backup rejects trimmed path aliases without overwriting existing data or creating a misleading file (179.485786ms)
+✔ baseline HTTP commands use session owner, CSRF/Origin/account and reject client snapshot rows/foreign IDs (257.194358ms)
+✔ real lost HTTP response and restart retry do not repeat baseline.capture (129.354588ms)
+✔ real lost HTTP response and restart retry do not repeat baseline.restore (46.694432ms)
+✔ independent SQLite connections serialize baseline operations capture-edit (307.971329ms)
+✔ independent SQLite connections serialize baseline operations restore-edit (236.654277ms)
+✔ independent SQLite connections serialize baseline operations capture-same-key (276.629876ms)
+✔ explicit snapshot isolates original from fuses and fully restores original/work, spend, equipment and experiment (60.009145ms)
+✔ ordinary reset uses current editable inventory, full restore discards later additions, edits and deletes (9.51875ms)
+✔ capture requires explicit replacement and changes only snapshot/revision, never work/lots/equipment/history (8.056339ms)
+✔ absent and explicitly empty snapshots differ; restore is repeatable without duplicate stock (6.10307ms)
+✔ capture copies every page and separate original ID with all ordinary/raw types, huge TEXT and unknown versus zero crit (283.705847ms)
+✔ snapshot never follows single/batch/undo/reset, added stock, refinement, level or equipment (13.684584ms)
+✔ restore receipts retry before new semantics, preserve later actions and keep KEY_REUSED/expired/owner guarantees (8.299344ms)
+✔ capture and full restoration fault points roll back the entire transaction including receipt (57.10201ms)
+✔ schema5 real mixed history migrates intact to6 with no implicit snapshot; migration and future-version refusal are atomic (423.589688ms)
+✔ online backup includes snapshot A and its active undo state; restore/restart replaces later snapshot B (67.493906ms)
+✔ legacy planner arithmetic for historical mixed fixtures: examples, exact prices and sequential triples; ready selected stock precedes generated stock (8.836153ms)
+✔ pool is an upper permission bound; free stock first even when worn is allowed (1.120785ms)
+✔ crit uses integer thousandths and every intermediate ceiling; unknown is never zero (1.546812ms)
+✔ 10^24 tier-3 outputs stay compact; derived values may exceed 128 input digits (0.926194ms)
+✔ technical pool and plan input bounds reject before heavy conversion without becoming game quantity caps (1.996395ms)
+✔ maximum defaults, floor boundaries, exact prices and leftover source units (5.587815ms)
+✔ raw recipes and health keep all intermediate ceilings and six transitions (11.88544ms)
+✔ server count, target, unknown crit and permission bounds refuse before any mutation (47.832989ms)
+✔ one work group alone determines maximum; new legacy mixed requests are refused, single stays mixed (16.253532ms)
+✔ explicit worn permission and input cap determine maximum; free first and undo keeps current level (9.367017ms)
+✔ preview is read-only, max-zero commit fails; retries and stale revision/experiment remain exact (13.608043ms)
+✔ real canonical schema5 mixed receipts and every old/new undo survive restart and late additions (522.495055ms)
+✔ homogeneous faults roll back lots/history/receipt; derived maximum above128digits is not truncated (30.17791ms)
+✔ old unknown-crit mixed receipt replays with consumed IDs absent, then expires safely; refinement preserves old undo (560.212658ms)
+✔ two worker threads contend on independent SQLite connections and commit exactly once single (384.244183ms)
+✔ two worker threads contend on independent SQLite connections and commit exactly once batch (365.327597ms)
+✔ two worker threads contend on independent SQLite connections and commit exactly once raw-single (318.412296ms)
+✔ two worker threads contend on independent SQLite connections and commit exactly once raw-batch (291.803136ms)
+✔ batch is one undo/revision/receipt; preview is read-only and replay remains exact (54.216364ms)
+✔ active additions and quantity delta preserve history, equipment and later stock across undo (13.562821ms)
+✔ critical work is grouped by all attributes; partial refinement preserves worn and output lineage (9.127532ms)
+✔ real schema-3 history migration: unknown distinct from zero, split/refine crafted output then undo after reopen (381.86833ms)
+✔ failures at batch intermediate/history/receipt roll back all data; preview stale conflicts (45.510268ms)
+✔ original partial crit fill never replenishes a started experiment; known work merge keeps its worn count (282.162588ms)
+✔ schema-3 migration failure rolls back schema, all owners, history and receipt bytes (629.084608ms)
+✔ single → homogeneous batch → single undo survives restart and preserves later replenishment exactly once (23.014005ms)
+✔ huge batch commit and undo use bounded SQLite rows and retain exact counts (8.905587ms)
+✔ refinement/addition exact retry, expired receipts and reset keep permanent key protections (176.081333ms)
+✔ Store rejects empty and whitespace aliases before mkdir or SQLite, preserving memory and internal spaces (1032.608542ms)
+✔ main rejects invalid DATABASE_PATH before creating any directory or SQLite file (2482.759659ms)
+✔ main opens an ordinary DATABASE_PATH with internal spaces and serves HTTP (494.551478ms)
+✔ backup CLI rejects SOURCE aliases when both names exist or only the literal name exists (965.113449ms)
+✔ backup CLI validates both file paths before opening or migrating SOURCE (841.735631ms)
+✔ backup CLI accepts internal spaces and retains a private exact copy (75.494996ms)
+✔ fuse preview/commit enforce session, Origin, CSRF, account, owner, revision and server-calculated plan (367.284701ms)
+✔ single-group HTTP preview computes max without count and rejects forged fields/counts read-only (56.24586ms)
+✔ green HTTP preview and commit enforce authenticated owner, Origin/CSRF/account and server-only stock/output (217.090304ms)
+✔ green commit with an actually lost TCP response survives restart, stock change and exact retry (99.988093ms)
+✔ independent SQLite connections serialize a shared green seven-stock; same key=false (317.540014ms)
+✔ independent SQLite connections serialize a shared green seven-stock; same key=true (298.884788ms)
+✔ fixed recipes match independently calculated maxima, units, output and price for small complete pools (33.775938ms)
+✔ both documented batches share seven-stock; originals, baseline, ledger and atomic undo are preserved (53.312508ms)
+✔ part count, zero shortage and explicit worn permission consume free units first and restore equipment (19.362888ms)
+✔ full server stock includes merged batches and off-page groups; unrelated/foreign mods are never consumed (155.537272ms)
+✔ recipe grammar refuses forged fields/counts and keeps every SQL table unchanged (7.614216ms)
+✔ permanent receipts, KEY_REUSED and stale experiment/revision do not reapply recipes (7.557613ms)
+✔ partial consumption and late SQL/history/receipt failures roll back the entire recipe (37.379576ms)
+✔ huge quantities use compact exact arithmetic; late additions and refinement-safe generic undo remain intact (8.858017ms)
+✔ shared order is type, descending tier/value/known crit, then stable ID with exact integers (1.570882ms)
+✔ real SQLite keyset sorts the complete owner/scope before every bounded page, including ties and huge crit (251.707956ms)
+✔ HTTP pagination checks revision before following a cursor changed by a mutation (154.779564ms)
+✔ identical crafted mods occupy one work row; each undo removes just one result (41.871275ms)
+✔ source batch edits adjust work by attributes, even when their IDs no longer identify the same mod (9.892027ms)
+✔ work totals above 128 digits remain exact without changing editable source batches (6.586696ms)
+✔ real schema2 duplicates/history migrate once; all undo steps, receipts, owners and source data survive (69.117573ms)
+✔ corrupt legacy references fail atomically without partially migrating earlier players (103.302679ms)
+✔ craft into an existing worn stack and undo preserve its previous count and equipment (7.959056ms)
+✔ migration crosses bounded history batches with exact SQLite sequence IDs (642.203387ms)
+✔ stack identity includes owner, kind, tier and value (7.57224ms)
+✔ bounded login windows and five-minute anonymous sessions; cleanup also runs without login (136.322945ms)
+✔ retired command receipts reject old retries permanently without applying or losing newer state (13.89136ms)
+✔ OIDC cancellation binds state, ignores extra fields, checks issuer and has a safe browser error page (17.935811ms)
+✔ Mini signed context takes precedence over another account cookie, and old tabs cannot adopt it (17.516586ms)
+✔ stale signed Mini context only resumes same existing unexpired identity, without issuance or extension (16.382006ms)
+✔ canonical TASK-005 schema4 rows, ledgers, receipt payloads and hashes migrate byte-for-byte and once (346.208942ms)
+✔ schema4 marker fault rolls back every table and old schema marker (347.101706ms)
+✔ raw recipes, every reachable green value and fixed fields match the supplied contract (7.183678ms)
+✔ raw equipment shares the cap, sums before rounding and keeps ordinary unknown crit (37.993968ms)
+✔ raw to tiers 1/2/6 prices; mixed creation rejected and explicit homogeneous steps preserve prices (44.438128ms)
+✔ compact batch equals an independent ordered single-recipe sequence including every crit ceiling (3.325224ms)
+✔ worn raw single consumes only explicit part, output is unworn, undo restores outfit and current level (10.54285ms)
+✔ raw single → homogeneous batch → single, merges/splits/additions preserve later lots once across all undo (15.869592ms)
+✔ invalid raw commands, owners and forbidden worn fail atomically; retries/conflicts/expired receipts retain guarantees (11.876397ms)
+✔ raw batch fault injection rolls back plan/lots/history/receipt and huge six-step counts stay compact (22.65856ms)
+✔ all 20 prices and every tier transition match PRODUCT constants (3.107193ms)
+✔ stats round once after adding percentages and enforce 100 equipped (0.666828ms)
+✔ strict decimal validation and invalid craft combinations (0.787295ms)
+✔ two crafts, repeated undo, worn selection and current level survive SQLite reopen and WAL backup (49.862003ms)
+✔ source changes are isolated; reset clears history, equipment and expenses, changes experiment but keeps level (3.930483ms)
+✔ failed commands and injected write failure roll back every part of craft (5.255157ms)
+✔ sequential stale revisions across connections conflict; quantities stay aggregated and keys are scoped (8.821624ms)
+✔ derived 129-digit mods remain exact, equippable, craftable and reversible (4.992563ms)
+ℹ tests 111
+ℹ suites 0
+ℹ pass 111
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9341.834665
+
+> cheapshotmods@0.1.0 build
+> tsc -b && npm run build -w @chm/web
+
+
+> @chm/web@0.1.0 build
+> vite build
+
+vite v8.3.6 building client environment for production...
+transforming...
+✓ 21 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.42 kB │ gzip:  0.29 kB
+dist/assets/index-DJ6A-GkB.css   29.18 kB │ gzip:  7.01 kB
+dist/assets/index-BdLx679S.js   292.57 kB │ gzip: 88.80 kB
+
+✓ built in 181ms

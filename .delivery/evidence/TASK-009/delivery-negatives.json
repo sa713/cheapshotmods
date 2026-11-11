@@ -1,0 +1,25 @@
+{
+  "scope": "new operator transport integrity/containment tests; no app or server updates",
+  "cases": [
+    {
+      "case": "traversal",
+      "result": "rejected before any installer/app operation",
+      "reason": "Unsafe transport path"
+    },
+    {
+      "case": "wrong_manifest",
+      "result": "rejected before any installer/app operation",
+      "reason": "Transport manifest hash mismatch"
+    },
+    {
+      "case": "missing_parts",
+      "result": "rejected before any installer/app operation",
+      "reason": "Incomplete or corrupt original archive"
+    },
+    {
+      "case": "corrupt_part",
+      "result": "rejected before any installer/app operation",
+      "reason": "Transport part hash mismatch"
+    }
+  ]
+}
