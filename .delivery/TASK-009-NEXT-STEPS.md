@@ -4,7 +4,7 @@ Runtime **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**, schema 6. Пересбор
 
 Владелец отдельно разрешил TASK-009 без новых Actions runs/Actions artifacts/ожидания квоты и платных услуг. Этот маршрут не меняет стандарт 1.1.0/workflows/постоянную инфраструктуру. Исторические CI jobs остаются failure из-за upload quota; их успешные вычислительные шаги не выдаются за зелёный CI.
 
-Независимая техническая приёмка management пока **pending**. Команду установки ниже выполнять после этой приёмки. У developer нет предоставленного SSH identity/agent для Debian, поэтому реальное обновление не выполнялось. Точный установленный SHA, место и рабочий HTTPS проверяет команда на самом сервере. Не требуется предварительно ставить TASK-008.
+[Независимый code review и решение management](reviews/TASK-009-review.md) завершены: **accepted для code/integration**. Передаваемый архив остаётся кандидатом для фактического Docker сервера; полная новая CCC matrix не выполнена. Команда ниже обязана пройти actualSHA/HTTPS/space/imported crypto gates до app stop/data; отказ не обходить. Установка/product acceptance/delivery пока pending. У developer нет предоставленного SSH identity/agent для Debian, поэтому реальное обновление не выполнялось. Точный установленный SHA, место и рабочий HTTPS проверяет команда на самом сервере. Не требуется предварительно ставить TASK-008.
 
 ## Реально доступная приватная передача
 
@@ -109,4 +109,4 @@ python3 -I /root/cheapshotmods-task009-89d1f3296b0c.py rollback
 
 Полная новая classic/containerd матрица для local CCC archive в Codex не запустилась из-за read-only cgroup и запрещённого вложенного UID map. Прежние успешные real Docker 29.8 CI-матрицы того же source сохранены как отдельные code-level доказательства **других build bytes**. Они не называются новым прогоном этого архива. [Ограничение](evidence/TASK-009/codex-store-bootstrap-limitation.json) передано management; обязательный portable loaded-image proof на фактическом Docker Debian остаётся до остановки/миграции. HTTPS probe из Cloud не установил серверный SHA (получен TLS hostname mismatch); это не диагноз сертификата настоящего сервера. Его состояние проверяет preflight на Debian.
 
-Независимая приёмка, integration/main, фактическая установка и живые Telegram/телефон остаются отдельными подтверждениями. Developer PR не сливал и сервер не изменял.
+Приёмка кода и её границы — в [review](reviews/TASK-009-review.md); integration/main — по PR10. Фактическая установка и живые Telegram/телефон остаются отдельными pending подтверждениями. Developer PR не сливал; management сервер не изменял.

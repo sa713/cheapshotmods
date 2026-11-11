@@ -2,13 +2,13 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **review**, ветка `chm-009-dropdowns-green-recipes` / [PR10](https://github.com/sa713/cheapshotmods/pull/10) в main. Runtime **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0** реализует меню, глобальный порядок и оба зелёных рецепта. [Пакет управляющему](TASK-009-MANAGEMENT-HANDOFF.md), [приватный комплект и готовые owner-команды](TASK-009-NEXT-STEPS.md).
+[TASK-009](tasks/TASK-009.md) — **accepted для технической интеграции кода**, [PR10→main](https://github.com/sa713/cheapshotmods/pull/10). [Независимый code review и решение management](reviews/TASK-009-review.md) фиксируют собственные проверки, первичные GitHub logs, отсутствие подтверждённых дефектов и границы Docker/operator evidence. Runtime eb655846 и kit/operator pins сохранены.
 
-По прямому поручению владельца TASK-009 завершается **без новых Actions runs/Actions artifacts, ожидания quota и платных услуг**. Проверки исполняются или переиспользуются по их доказанной области, а сохранённый kit передан через проверенный private Git snapshot. Это исключение карточки; стандарт 1.1.0, workflows и постоянная инфраструктура не меняются. Старые CI failure сохранены. [Результаты и границы](TASK-009-PRIVATE-DELIVERY.md) отдельно отмечают невозможность нового полного Docker-store matrix в этой rootless среде: успешный исторический matrix других build bytes не выдан за новый.
+Владелец разрешил разовый маршрут без новых Actions/Actions artifacts/ожидания quota/платных услуг. Management завершает разрешённое слияние с **[skip ci]**, затем владелец выполняет [готовый operator шаг](TASK-009-NEXT-STEPS.md). Workflow/settings/стандарт1.1.0 и реальный сервер не изменяются.
 
-Прежние 111 native / 58 Chromium и local canonical lifecycle сохранены. Новый owner operator с реальным приватным скачиванием, HTTPS, SQL hashes, backup/update и обычным/аварийным rollback отдельно прошёл. Независимую приёмку организует management; developer не принимает собственную работу и PR не сливает. После приёмки владелец разрешил developer обновить Cheapshot только при действующем серверном доступе. SSH identity/agent здесь не предоставлены, поэтому подготовлен полный операторский шаг владельцу. Реальный Debian, данные, proxy и BotFather не изменялись.
+Новая полная classic/containerd matrix CCC не завершена; код интегрируется по доказательствам review, а переносимость этих bytes на фактическом Docker и успешная установка **не объявлены проверенными**. Loaded image/config/layers gate остаётся до остановки/копирования данных; при отказе не продолжать. Installation/product acceptance/delivery pending. Точный serverSHA и место устанавливает preflight; SSH identity/agent не предоставлены.
 
-TASK-001–008 уже в main; их kits/reviews сохраняют собственные SHA и границы внешней приёмки. Новый kit включает продукт целиком; предварительно устанавливать TASK-008 не нужно. Integration/main завершает management без Actions с **[skip ci]**. Защиты, workflows, публичность и бюджет не меняются.
+Текущие состояние/очередь — [STATE](STATE.md)/[TASKS](TASKS.md). TASK-001–008 уже в main; ставить TASK-008 отдельно перед TASK-009 не требуется. Старые kits/reviews сохраняют свои SHA; delivery-only binary ref в main не сливается. Функциональный код и установщик этим решением не переписываются.
 
 ## Предыдущий технический этап — 2026-11-09
 

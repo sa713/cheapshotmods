@@ -1,12 +1,10 @@
 # Очередь
 
-## Активная задача
+## Текущий этап
 
-[TASK-009](tasks/TASK-009.md) — **review**, 2026-11-11: меню, общий порядок и два зелёных рецепта; [PR10 → main](https://github.com/sa713/cheapshotmods/pull/10), runtime eb655846. Владелец заменил маршрут на Codex checks и private Git delivery **без новых Actions/Actions artifacts, ожидания квоты и платных услуг**. Сохранённый kit побайтно сверён и реально скачан с GitHub. Новая owner-команда с preflight/backup/update/check/rollback проверена на изолированном Debian. [Доказательства и ограничения](TASK-009-PRIVATE-DELIVERY.md), [пакет management](TASK-009-MANAGEMENT-HANDOFF.md), [готовая установка](TASK-009-NEXT-STEPS.md).
+[TASK-009](tasks/TASK-009.md) — **accepted для code/integration**, 2026-11-11. Меню, глобальная сортировка и два зелёных рецепта проверены; [review с границами](reviews/TASK-009-review.md). Интеграция — [PR10→main](https://github.com/sa713/cheapshotmods/pull/10), завершает management с **[skip ci]**, без новых Actions.
 
-Следующий ответственный — **management**: отдельная независимая приёмка и разбор ограничений. После приёмки владелец выполняет готовый операторский шаг; разрешённую интеграцию PR отдельно завершает management с **[skip ci]**. SSH-доступ developer не предоставлен; настоящий сервер не обновлялся. Technical/product acceptance, installation и integration pending. Ожидание quota больше не является следующим шагом.
-
-TASK-008 технически принята и в main; предварительно устанавливать её перед TASK-009 не требуется. Старые kits/reviews и история CI ошибок сохраняются.
+Следующий внешний шаг — **владелец** по [готовому update/check/rollback](TASK-009-NEXT-STEPS.md): actualSHA/HTTPS/space и loaded image proof до app stop/data, затем receipt и живые меню/порядок/рецепты/undo. Installation/product acceptance/delivery pending. Полная новая CCC Docker-store matrix не выполнена и не выдана за success; ограничения и решение о допустимости code integration в review. Предварительная установка TASK-008 не требуется.
 
 ## Интегрированная основа
 

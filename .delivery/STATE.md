@@ -2,25 +2,21 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **review**, ветка `chm-009-dropdowns-green-recipes` / [PR10](https://github.com/sa713/cheapshotmods/pull/10) в main. Runtime **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**; app/rules/deploy/root tests/workflows/lock после него не менялись. Новая передача добавляет README/.delivery: отдельно проверенный owner operator, его tests, документы и доказательства. Стандарт 1.1.0 не обновлялся.
+[TASK-009](tasks/TASK-009.md) — **accepted для технической интеграции кода**; [независимая проверка и решение management](reviews/TASK-009-review.md). Подтверждённых блокирующих дефектов нет. [PR10](https://github.com/sa713/cheapshotmods/pull/10) интегрирует код в main; фактическое merge/HEAD читать из GitHub.
 
-Владелец прямо заменил для TASK-009 Actions jobs соответствующими проверками Codex, а Actions artifacts — доступной приватной передачей, без ожидания квоты и платных услуг. [Разовое решение](tasks/TASK-009.md#разовый-маршрут-по-прямому-разрешению-владельца--2026-11-11). Исторические failure quota/CI сохранены; новых Actions runs нет, workflow/settings не отключались.
+Отдельный reviewer проверил app/rules/API, получил110/111native (все15новых прошли); один прежний тест и запуск Chromium остановлены ограничениями песочницы. Management непосредственно прочитал exact runtime CI logs:111native/58Chromium и вычислительные Debian/store steps прошли, jobs verify/debian-kit остаютсяfailure на quota. Собственный build совпал с паспортом по30compiled/11deploy;14image-proof/4ingress проверки и7synthetic parser fixtures прошли. Это разные области доказательств, не один полный независимый end-to-end прогон.
 
-Сохранённый exact local tar **1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6**, 132005139 байт, app config CCC повторно сверён без пересборки. Реальный private download и reassembly всех 32 частей прошёл: [delivery commit 1a15be22d1e00d50542090786c47e15a76151d18](https://github.com/sa713/cheapshotmods/tree/1a15be22d1e00d50542090786c47e15a76151d18). Прежнего Contents Read-only достаточно. Это не локальный путь и не Actions artifact.
+Исходный runtime остаётся **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**, проверенная передача **e783009b070cecfa83c7995ea35879df76d24ba4**. Управляющая актуализация меняет только документы, не runtime/operator/kit bytes. Закреплённый стандарт1.1.0 сохранён; новых Actions/Actions artifacts/расходов нет. При интеграции — **[skip ci]**.
 
-Прежние 111 native / 58 Chromium/capacity/negative и exact source CI вычислительные результаты переиспользованы, не названы новыми запусками. Новый owner helper/SHA256 89d1f329 отдельно прошёл real Debian 13/HTTPS/private download/update/backup/оба recipe/undo, полные SQL hashes всех 7 игровых таблиц, обычный и аварийный rollback. Config, отдельный b008 и proxy ID/image/mounts сохранены. [Provenance и ограничения](TASK-009-PRIVATE-DELIVERY.md), [owner proof](evidence/TASK-009/owner-helper-integration.json).
+Точный CCC tar и приватный delivery commit указаны в [NEXT-STEPS](TASK-009-NEXT-STEPS.md). Management сверил manifest/tree/operator pin; полный132MBbinary roundtrip и real operator lifecycle остаются авторскими проверками. Новая полная Docker-store matrix CCC не выполнена; это не successful matrix и не принятая область. Management разрешил включить проверенный source; доставка остаётсяpending с обязательным loaded config/layers gate на целевом Docker **до app stop/data**.
 
-Полный exact local CCC classic/containerd matrix не запустился в Codex из-за cgroup/UID-map restrictions. Это не success. Старые successful real Docker 29.8 CI матрицы этого source относятся к другим archive/config bytes и остаются отдельным доказательством кода. Management должен оценить границу; unchanged installer обязательно проверяет loaded crypto на целевом Docker до stop/data. [Ограничение](evidence/TASK-009/codex-store-bootstrap-limitation.json).
+**Следующий ответственный — владелец:** выполнить готовый root update/check/rollback блок [TASK-009-NEXT-STEPS](TASK-009-NEXT-STEPS.md) и вернуть receipt/check/результат живых сценариев. SSH identity/agent у management/developer не предоставлены; настоящий сервер этой проверкой не менялся. Неизвестный installedSHA, недостаток места, HTTPS/import/proof failure останавливают update без обходов. Устанавливать TASK-008 предварительно не требуется.
 
-Следующий ответственный — **management**: [пакет для независимой приёмки](TASK-009-MANAGEMENT-HANDOFF.md). После приёмки — **владелец** по [готовому root update/check/rollback](TASK-009-NEXT-STEPS.md). SSH identity/agent developer не предоставлены, настоящий сервер не изменялся. Его актуальный SHA, место и HTTPS проверяет operator до обновления. Предварительная установка TASK-008 не нужна. При интеграции сохранять **[skip ci]**; новых Actions или постоянных изменений CI/стандарта не поручено.
-
-- technical_acceptance: **pending, independent management/reviewer**.
-- delivery_package: **prepared, private Git transfer roundtrip verified**.
-- installation: **pending owner execution after acceptance; exact commands ready**.
-- product_acceptance/integration: **pending**.
-- Последнее содержательное подтверждение: **2026-11-11**, изменение маршрута владельцем, сверка неизменного архива и новый изолированный operator lifecycle. Это не независимое review или реальный server update.
-
-TASK-001–008 в main; их kits/reviews сохраняют собственные SHA. Текущий serverSHA не предполагается по прежнему сообщению о работоспособности.
+- technical_acceptance: **accepted для code/integration**, границы — в review.
+- integration: по факту [PR10](https://github.com/sa713/cheapshotmods/pull/10), завершает management.
+- delivery_package: **prepared**, точный кандидат и авторские lifecycle proofs сохранены.
+- installation / product_acceptance / delivery: **pending**; задача не done.
+- Последнее подтверждение: **2026-11-11**, независимый code review, собственные проверки management и первичные GitHub logs.
 
 ## Предыдущий технический этап — 2026-11-09
 
