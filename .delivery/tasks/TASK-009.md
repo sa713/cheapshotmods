@@ -1,12 +1,12 @@
 # TASK-009 — меню, порядок модов и два зелёных рецепта
 
-- Статус: **implementing**, 2026-11-11.
+- Статус: **review**, 2026-11-11; приватный комплект и owner-команды подготовлены, независимая приёмка pending.
 - Риск: **повышенный** — расход нескольких групп, атомарность/отмена и совместимость сохранённой истории; также общий UI выбора и постраничные списки.
 - Основание: [PRODUCT — дополнение 2026-11-11](../../PRODUCT.md#меню-порядок-модов-и-два-зелёных-рецепта--2026-11-11), прямое поручение владельца в управляющем чате.
 - Репозиторий: **sa713/cheapshotmods**.
 - База: **main**, полный SHA **cf1e0cd531dad2f19f98a2069410f096f1b3d3d6**.
 - Рабочая ветка: **chm-009-dropdowns-green-recipes**, от указанной базы. Подготовка management меняет только документацию.
-- PR: **[PR10](https://github.com/sa713/cheapshotmods/pull/10)**, draft, эта ветка → **main**. Реализацию продолжать в нём; текущие HEAD/CI/merge читать непосредственно из GitHub.
+- PR: **[PR10](https://github.com/sa713/cheapshotmods/pull/10)**, эта ветка → **main**. Реализацию продолжать в нём; текущие HEAD/CI/merge читать непосредственно из GitHub.
 - Зависимости: TASK-001–008 и исправление группировки уже включены в main. Открытых PR/других активных реализаций при подготовке нет.
 - Регламент: закреплённая **1.1.0**, source **2ff5fe41b5c91f539dda4fce8944007aa0eb425f**; читать локальную .ai-development/START.md, не обновлять стандарт попутно.
 - Точный установленный SHA на реальном Debian не установлен. Установка TASK-008 отдельно не подтверждена и не является обязательным предварительным действием владельца для разработки TASK-009.
@@ -93,6 +93,20 @@ Preview показывает рецепт, выход, максимум, выб�
 
 ## Проверка и доставка
 
+### Разовый маршрут по прямому разрешению владельца — 2026-11-11
+
+После сохранённых ошибок quota владелец поручил закончить TASK-009 **без новых запусков GitHub Actions, без Actions artifacts, ожидания квоты и платных услуг**. Для этой задачи обязательные Actions jobs заменяются соответствующими проверками в облачной среде Codex, а artifact upload — доступной приватной передачей. Это исключение TASK-009; закреплённый стандарт1.1.0, workflows и постоянная инфраструктура не меняются.
+
+Runtime остаётся **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**. Сохранённый local tar: **1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6**,132005139байт; его сохранность/13checksums/source/config/layers повторно сверяются без пересборки. Успешные source-level verify/browser/capacity/negative и прежний canonical lifecycle сохраняют доказательства и без причины не повторяются. Проверки, которых нет для именно этого архива, выполняются в изолированной Codex среде; матрица соответствия jobs и локальных доказательств прикладывается. Ошибки CI/upload остаются failure в истории, не становятся зелёным CI.
+
+Фактическая передача — [private Git delivery snapshot](https://github.com/sa713/cheapshotmods/tree/1a15be22d1e00d50542090786c47e15a76151d18), commit `1a15be22d1e00d50542090786c47e15a76151d18`,32части и закреплённый manifest. API download/reassembly выполнен реально и восстановил исходный tar побайтно. Прежнего Contents Read-only credential достаточно. Первая попытка Release asset upload вернулаHTTP400 даже для140байт checksum; assets не появились, пустой собственный draft удалён после успешной альтернативы. [Receipt](../evidence/TASK-009/private-transfer.json). Это разовый transport-only ref, не application source и не ветка для main.
+
+Новая owner-команда отдельно прошла real Debian13/HTTPS/private download/update/backup/оба recipe/undo/обычный и аварийный rollback. Все SQL rows/hashes семи игровых таблиц сохранены; config, отдельный b008 и proxy ID/image/mounts неизменны. [Proof](../evidence/TASK-009/owner-helper-integration.json), [bootstrap](../evidence/TASK-009/bootstrap-integration.json), [готовые команды](../TASK-009-NEXT-STEPS.md). Новый full exact local-archive Docker-store matrix не стартовал из-заcgroup/UID-map ограниченийCodex; он не считается success. Исторические успешные real matrices этого source, но иных build bytes, остаются отдельным доказательством кода. [Граница для независимой приёмки](../TASK-009-PRIVATE-DELIVERY.md). Target loaded-image proof до app stop/data не отключается.
+
+Developer подготавливает полный пакет для management: точные source/HEAD/asset IDs/hashes, результаты и ограничения, готовые preflight/download/update/check/rollback. Независимую приёмку по-прежнему организует management. Владелец отдельно разрешил developer после приёмки выполнить обновление **только при наличии действующего доступа к его серверу**. Иначе установку выполняет владелец по готовым командам. Установка до приёмки, изменение proxy/инвентарей/истории вне штатной миграции, обход disk guard, очистка соседних ресурсов и новые расходы не разрешены. На начале продолжения SSH identity/agent в среде не предоставлены; доступ не считается существующим по наличию GitHub-доступа.
+
+Ниже сохранён исходный маршрут карточки; в части обязательного исполнителя проверок и канала публикации он заменён только приведённым разрешением владельца.
+
 Закреплённые Node24.22.1/npm11.9.0, настоящий better-sqlite3/SQLite и Chromium; изолированная Debian13/linux-amd64/Docker среда. Выполнить действующий scripts/verify.sh, test:browser и применимые capacity/negative-pipeline/container-smoke; получить новые успешные **verify, container-smoke, debian-kit** с обязательными шагами. Сохранить доказательства команд/CI, fixtures и снимки. Не ослаблять старые проверки; обоснованное изменение UI tests с native select на новые доступные роли объяснить reviewer.
 
 Сортировка/оформление сами по себе миграции данных не требуют. Если новый persisted command/ledger формат действительно несовместим со старым binary, developer обосновывает версию/миграцию и проверяет отказ старого binary и откат. Не вводить миграцию ради удобства, не позволять старой версии молча портить новую историю. Поддерживаемые предыдущие данные, snapshot schema6 и historical receipts сохраняются.
@@ -111,11 +125,14 @@ Preview показывает рецепт, выход, максимум, выб�
 
 ## Передача и результаты
 
+Текущий handoff: [пакет management](../TASK-009-MANAGEMENT-HANDOFF.md), [новый маршрут и provenance](../TASK-009-PRIVATE-DELIVERY.md), [готовая установка владельцу](../TASK-009-NEXT-STEPS.md). Ниже подготовка management сохранена как история; фактическая реализация и авторские результаты описаны в связанных отчётах.
+
 Подготовка management: прочитаны закреплённый стандарт и шаблон, AGENTS, PROJECT/STATE/TASKS/PRODUCT, TASK-006–008, RUNBOOK, UI/rules/batch/Store/mod-stacks и актуальные метаданные main/PR. Формулы рецептов и цена сверены с кодом; новый UI/API не реализован, проверки новой версии не выполнялись. В этой подготовке меняются только документы.
 
 - technical_acceptance: **pending**.
 - product_acceptance: **pending** — демонстрация и проверка владельцем.
 - Слияние: по связанному PR, пока не выполнено.
-- delivery: **pending** — runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`, новый local immutable kit и canonical lifecycle существуют; exact CI artifact publication блокирована квотой. После отдельного разрешения владельца удалены21указанный неканонический artifact, все остальные168сохранены; attempt2 завершился с тем же quota upload failure; все вычислительные проверки снова прошли. [Итог CI](../evidence/TASK-009/ci-jobs.json); активных прогонов нет.
-- Следующий ответственный: **облачный Codex developer**, завершить публикацию и сверку exact CI kit/owner-команд, передать management для отдельного reviewer. [111native/58Chromium, capacity,7predecessors иstores](../TASK-009-VALIDATION.md); [передача и ограничения](../TASK-009-NEXT-STEPS.md).
-- Последнее содержательное подтверждение: **2026-11-11**, прямое поручение владельца и чтение текущего репозитория management.
+- delivery_package: **prepared, private transfer verified** — unchanged runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`, tar SHA256 `1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6`. Новых Actions/Actions artifacts нет. Исторический quota failure не переименован в success.
+- installation: **pending owner execution after independent acceptance**. Действующего SSH identity/agent developer не предоставлено, настоящий сервер не изменялся. Operator проверяет фактический installedSHA/HTTPS/место/backup/loaded proof до миграции; точные update/check/rollback готовы.
+- Следующий ответственный: **management**, отдельная независимая приёмка кода/exact kit/operator и явная оценка границы Docker-store evidence, затем разрешённая integration с **[skip ci]** и передача владельцу. Developer PR не сливает и самопроверку не называет независимой.
+- Последнее содержательное подтверждение: **2026-11-11**, прямое изменение маршрута владельцем, сохранённый exact runtime/archive и новый Codex operator lifecycle; не независимое review или server update.

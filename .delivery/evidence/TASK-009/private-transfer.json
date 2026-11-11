@@ -1,0 +1,25 @@
+{
+  "channel": "private Git delivery snapshot in existing sa713/cheapshotmods; Release asset endpoint rejected uploads with HTTP400",
+  "repository_visibility": "private",
+  "runtime_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "delivery_commit": "1a15be22d1e00d50542090786c47e15a76151d18",
+  "delivery_tree": "0d493baf5f846a338c252306a987c5a47c1b5138",
+  "delivery_ref": "refs/heads/delivery/task-009-eb655846-1487bedc",
+  "manifest_sha256": "b1138a4772cb0b268c1c164e1d4ff8122ce2d26247120fce5582f096ad62c86a",
+  "archive_sha256": "1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6",
+  "archive_bytes": 132005139,
+  "parts": 32,
+  "source_url": "https://github.com/sa713/cheapshotmods/tree/1a15be22d1e00d50542090786c47e15a76151d18",
+  "download_url": "https://api.github.com/repos/sa713/cheapshotmods/tarball/1a15be22d1e00d50542090786c47e15a76151d18",
+  "roundtrip_download": "passed: authenticated API tarball download from private GitHub, all 32 parts and original archive bytes verified",
+  "uploader_note": "all 32 blob writes verified; initial uploader footer accessed the already-closed local stream and returned1; this validation checked the persisted complete receipt without repeating uploads",
+  "transport_tarball_sha256_observed": "4142f409f8890880c5db2059b53dda4b81069b54c79c836b4af49d07498cbcbd",
+  "transport_note": "GitHub generated source wrapper may vary; immutable delivery commit, pinned manifest, part SHA256 and original archive SHA256 are authoritative",
+  "unused_empty_draft_release": {
+    "id": 441646215,
+    "assets": 0,
+    "deleted_after_fallback_verified": true,
+    "http_status": 204
+  },
+  "release_upload_error": "HTTP400 invalid request for 140-byte checksum, including documented Content-Length/API headers; not an Actions quota error; no asset created"
+}

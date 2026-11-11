@@ -1,0 +1,77 @@
+{
+  "scope": "only three explicitly identified unshared reclaimable previous Cheapshot build RUN caches in Codex; no server resources or images/volumes removed",
+  "free_before": 3630137344,
+  "free_after": 7664099328,
+  "records": [
+    {
+      "id": "80qf3dkx0i85jil6zi2zsdpfs",
+      "metadata": {
+        "CreatedAt": "2026-11-08 17:49:45.378682527 +0000 UTC",
+        "Description": "mount / from exec /bin/sh -c if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi;     npm install --global npm@11.9.0 --no-audit --no-fund &&     npm ci --no-audit --no-fund && npm run build &&     npm prune --omit=dev --ignore-scripts --no-audit --no-fund &&     mkdir -p /runtime/packages/rules /runtime/apps/server /runtime/apps/web &&     cp package.json /runtime/ && cp -R node_modules /runtime/ &&     cp packages/rules/package.json /runtime/packages/rules/ && cp -R packages/rules/dist /runtime/packages/rules/ &&     cp apps/server/package.json /runtime/apps/server/ && cp -R apps/server/dist /runtime/apps/server/ &&     cp -R apps/web/dist /runtime/apps/web/ && chmod -R a+rX /runtime &&     rm -rf /root/.npm /root/.cache",
+        "ID": "80qf3dkx0i85jil6zi2zsdpfs",
+        "LastUsedAt": "2 days ago",
+        "Mutable": true,
+        "Parents": [
+          "agk85pcak9chvc7o5mncr3yqm"
+        ],
+        "Reclaimable": true,
+        "Shared": false,
+        "Size": "120.9MB",
+        "Type": "regular",
+        "UsageCount": 1
+      },
+      "output": "ID\t\t\t\t\t\tRECLAIMABLE\tSIZE\t\tLAST ACCESSED\n80qf3dkx0i85jil6zi2zsdpfs*              \ttrue \t\t120.9MB   \t2 days ago\nTotal:\t120.9MB\n"
+    },
+    {
+      "id": "5exaazu039jpf38lrdmsvl9wq",
+      "metadata": {
+        "CreatedAt": "2026-11-08 19:41:46.373172941 +0000 UTC",
+        "Description": "mount / from exec /bin/sh -c if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi;     npm install --global npm@11.9.0 --no-audit --no-fund &&     npm ci --no-audit --no-fund && npm run build &&     npm prune --omit=dev --ignore-scripts --no-audit --no-fund &&     mkdir -p /runtime/packages/rules /runtime/apps/server /runtime/apps/web &&     cp package.json /runtime/ && cp -R node_modules /runtime/ &&     cp packages/rules/package.json /runtime/packages/rules/ && cp -R packages/rules/dist /runtime/packages/rules/ &&     cp apps/server/package.json /runtime/apps/server/ && cp -R apps/server/dist /runtime/apps/server/ &&     cp -R apps/web/dist /runtime/apps/web/ && chmod -R a+rX /runtime &&     rm -rf /root/.npm /root/.cache",
+        "ID": "5exaazu039jpf38lrdmsvl9wq",
+        "LastUsedAt": "2 days ago",
+        "Mutable": true,
+        "Parents": [
+          "h5l6jso6jk3b3or77ofo6r047"
+        ],
+        "Reclaimable": true,
+        "Shared": false,
+        "Size": "120.9MB",
+        "Type": "regular",
+        "UsageCount": 1
+      },
+      "output": "ID\t\t\t\t\t\tRECLAIMABLE\tSIZE\t\tLAST ACCESSED\n5exaazu039jpf38lrdmsvl9wq*              \ttrue \t\t120.9MB   \t2 days ago\nTotal:\t120.9MB\n"
+    },
+    {
+      "id": "92m2bpicfds688ae7h710w3rq",
+      "metadata": {
+        "CreatedAt": "2026-11-08 22:52:27.148120626 +0000 UTC",
+        "Description": "mount / from exec /bin/sh -c if [ -f /run/secrets/proxy_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/proxy_ca; fi;     npm install --global npm@11.9.0 --no-audit --no-fund &&     npm ci --no-audit --no-fund && npm run build &&     npm prune --omit=dev --ignore-scripts --no-audit --no-fund &&     mkdir -p /runtime/packages/rules /runtime/apps/server /runtime/apps/web &&     cp package.json /runtime/ && cp -R node_modules /runtime/ &&     cp packages/rules/package.json /runtime/packages/rules/ && cp -R packages/rules/dist /runtime/packages/rules/ &&     cp apps/server/package.json /runtime/apps/server/ && cp -R apps/server/dist /runtime/apps/server/ &&     cp -R apps/web/dist /runtime/apps/web/ && chmod -R a+rX /runtime &&     rm -rf /root/.npm /root/.cache",
+        "ID": "92m2bpicfds688ae7h710w3rq",
+        "LastUsedAt": "2 days ago",
+        "Mutable": true,
+        "Parents": [
+          "cp8fkqnpg8c223hl7fz698qxl"
+        ],
+        "Reclaimable": true,
+        "Shared": false,
+        "Size": "120.9MB",
+        "Type": "regular",
+        "UsageCount": 1
+      },
+      "output": "ID\t\t\t\t\t\tRECLAIMABLE\tSIZE\t\tLAST ACCESSED\n92m2bpicfds688ae7h710w3rq*              \ttrue \t\t120.9MB   \t2 days ago\nTotal:\t120.9MB\n"
+    }
+  ],
+  "images_and_volumes_unchanged": true,
+  "additional_copy_cache_ids": [
+    "agk85pcak9chvc7o5mncr3yqm",
+    "h5l6jso6jk3b3or77ofo6r047",
+    "cp8fkqnpg8c223hl7fz698qxl"
+  ],
+  "additional_free_before": 4875730944,
+  "additional_free_after": 8517255168,
+  "probe_volume_cleanup": {
+    "id": "70988de01e7c452c5094e283a943d68c9c8fe8571c9258b89eca6f9ae568564c",
+    "created_at": "2026-11-11T12:39:26Z",
+    "result": "removed our empty unreferenced rootless-probe anonymous volume"
+  }
+}

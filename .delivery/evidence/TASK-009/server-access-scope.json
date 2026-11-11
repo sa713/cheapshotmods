@@ -1,0 +1,16 @@
+{
+  "scope": "availability metadata inspected for this continuation, not server login",
+  "managed_environment_observations_current": true,
+  "provided_managed_secret_bindings": 0,
+  "ssh_auth_sock_present": false,
+  "user_ssh_directory_present": false,
+  "root_ssh_directory": "not readable; no root identity supplied",
+  "direct_server_update": "not performed",
+  "public_HTTPS_version_probe": {
+    "exit_code": 60,
+    "result": "TLS hostname mismatch: certificate name openai.com did not match requested numeric IP through Cloud route",
+    "actual_installed_source": "not established",
+    "cause": "unresolved; not attributed to server configuration"
+  },
+  "owner_path": "pinned operator checks actual installed metadata and HTTPS source on Debian before large download/update"
+}

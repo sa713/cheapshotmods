@@ -1,5 +1,7 @@
 # TASK-009 — авторская проверка
 
+**Актуальный маршрут от2026-11-11:** владелец разрешил TASK009 без новых Actions/Actions artifacts. [Приватная доставка и сопоставление проверок](TASK-009-PRIVATE-DELIVERY.md), [готовые owner-команды](TASK-009-NEXT-STEPS.md), [пакет management](TASK-009-MANAGEMENT-HANDOFF.md). Сохранённый local archive стал передаваемым кандидатом через проверенный private Git snapshot; требование зелёного Actions/нового Actions artifact заменено только для этой задачи. Самопроверка/независимая приёмка/установка различаются. Ниже сохранены результаты и история прежнего маршрута; его quota не является текущим каналом доставки.
+
 Реализация в [PR10 → main](https://github.com/sa713/cheapshotmods/pull/10), ветка `chm-009-dropdowns-green-recipes`. Ожидаемый стартовый HEAD `23430c6873f02c6709ff68c47e2e6fbaf0907e8e` подтверждён до изменений. Runtime/source комплекта **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**. Закреплённый стандарт **1.1.0**, source `2ff5fe41b5c91f539dda4fce8944007aa0eb425f`, не изменён.
 
 Это самопроверка developer. Независимую техническую приёмку организует management; technical_acceptance/product_acceptance/delivery остаются pending. PR не слит; настоящий сервер, БД, proxy и BotFather не изменялись.
@@ -45,7 +47,7 @@ Schema остаётся 6: новые recipes хранятся в существ
 
 Откат на сервере выполняется только штатной предыдущей парой image+volume. Новые записи остаются в новом volume. Предварительно ставить TASK-008 ради перехода не требуется: поддерживаемые старые маршруты сохранены.
 
-## Exact CI и блокер публикации
+## Exact CI и блокер публикации — история прежнего маршрута
 
 На source eb655846:
 
@@ -57,8 +59,8 @@ Developer не выключал обязательные upload/checks и не �
 
 Квота — внешний блокер кандидата. Владелец отдельно разрешил конкретный план удаления 21 неканонического архива с повторяющимся production code,2,77 GB. [Удаление выполнено ровно по списку,21 HTTP204; все остальные 168 artifacts сохранены](evidence/TASK-009/storage-cleanup-approved.json), включая канонические predecessors и все proof artifacts. После очистки перезапущены только два failed jobs (attempt2) на том же eb655846; запрос использовал endpoint rerun-failed-jobs. Метаданные attempt2 также содержат container-smoke job130440744981/success. Достаточность очистки не предполагается; GitHub сообщает пересчёт 6–12 ч. Дополнительные расходы/registry/публичность не поручены. Attempt2 verify job130440743126 снова прошёл 111 native/58 Chromium/negative/capacity, но upload09:38:07Z снова отклонён той же quota error; cleanup не обещает немедленного результата. Kit job130440796592 завершился: все вычислительные шаги, семь переходов и real classic/containerd/reverse-export прошли; оба proof uploads 10:00:37Z/10:00:38Z снова отклонены той же quota error, kit upload skipped, job failure. [Окончательные job/step статусы](evidence/TASK-009/ci-jobs.json), [извлечённые протоколы attempt2](evidence/TASK-009/ci-attempt2-reports.json); опубликованных kit artifacts нет. Активных проверок не осталось. После очистки дополнительно проверено отсутствие удалённых artifact ID в scripts/deploy/workflows; требуемые прежние комплекты сохранены. До пересчёта не запускать новые повторные сборки без нового основания.
 
-## Ограничения передачи
+## Ограничения прежнего маршрута
 
-Пока нет успешных всех 3CI jobs и опубликованного exact artifact с ID/expiry/ZIP+tar hashes, criterion10 и готовая серверная доставка остаются блокированными. Нельзя подставить local archive bytes в команды для другого CI artifact. После публикации требуется сверить именно опубликованный архив и завершить owner-команды.
+До нового поручения отсутствие успешных обязательных CI jobs и Actions artifact блокировало delivery. Разовый маршрут владельца заменил только исполнителя проверок/канал публикации: текущие evidence, private transfer и owner-команды находятся в [PRIVATE-DELIVERY](TASK-009-PRIVATE-DELIVERY.md) и [NEXT-STEPS](TASK-009-NEXT-STEPS.md). Исторический CI остаётся failure. Нельзя подставлять local archive bytes в команды другого CI artifact; новый маршрут закрепляет именно local tar SHA256 и operator SHA256.
 
 Live Telegram/телефон владельца, реальный HTTPS/внешняя доступность/текущий serverSHA и установка TASK-009 не проверялись. Chromium360/390/1440 и synthetic signed Mini App не объявляются живой интеграцией или product acceptance.

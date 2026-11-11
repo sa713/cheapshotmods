@@ -1,0 +1,54 @@
+{
+  "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "delivery_commit": "1a15be22d1e00d50542090786c47e15a76151d18",
+  "archive_sha256": "1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6",
+  "operator_sha256": "89d1f3296b0cb0cf61c44ea3be6422e2a7efa5b14f8d31bcb8a1a4d9af2aa69e",
+  "platform": "isolated Debian13/linux-amd64; managed Docker29.9.2/rootless/vfs",
+  "private_GitHub_download_and_reassembly": "passed",
+  "real_HTTPS_CA_IP_SAN": "passed",
+  "unknown_version_bad_credential_low_space_refuse_before_download_stop_or_backup": "passed",
+  "canonical_TASK008_to_TASK009_via_new_owner_helper": "passed",
+  "complete_seeded_original_work_history_equipment_spent_level_baseline_preserved": "passed",
+  "all_seven_game_tables_SQL_rows_and_hashes_equal_after_update_and_both_rollbacks": {
+    "players": {
+      "rows": 8,
+      "sha256": "9fde5f60796a55ab962de56c9a9258ead08b278e224f155842b7c11f3700861f"
+    },
+    "groups": {
+      "rows": 32,
+      "sha256": "cf6554fd60d5dcd60678176248982b4f8289fc220dffa8ba05615e920a0957ee"
+    },
+    "history": {
+      "rows": 12,
+      "sha256": "26f0f584680dfd832138207b2211dbaeaa909c1f700b501582f5e647cbb4b07f"
+    },
+    "commands": {
+      "rows": 47,
+      "sha256": "f6b0eab1e87e8cfa063d3b2cf47b923766a1963a5fe0949308cc167a4c2dd099"
+    },
+    "work_lots": {
+      "rows": 22,
+      "sha256": "b07d389ce1ab2ba575143a56f2d2985ee6891a70a03b25e25748a220d2f6b1ce"
+    },
+    "baselines": {
+      "rows": 1,
+      "sha256": "cc10a3091bb3bf445bc33004fd31b9a2daaea72504bb227b0712fbb329e6eeed"
+    },
+    "baseline_groups": {
+      "rows": 3,
+      "sha256": "b3f3f8d11fedaf7dd0876fadebb92d7fd2b6e35cbc1e52ee6b4cb3afa13830b2"
+    }
+  },
+  "backup_before_update_and_separate_volume": "passed",
+  "already_installed_repeat_refused": "passed",
+  "green_recipes_and_undo": {
+    "bothRecipes": "passed",
+    "undo": "passed",
+    "snapshotAndOriginal": "passed"
+  },
+  "paired_rollback_exact_state": "passed",
+  "injected_postcheck_failure_auto_rollback_exact_state": "passed",
+  "config_separate_b008_helper_and_proxy_ID_image_mounts_unchanged": "passed",
+  "test_data": "synthetic isolated account/secret/CA; no owner data or server access",
+  "independent_review": "not performed by developer"
+}

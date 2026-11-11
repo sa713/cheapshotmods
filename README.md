@@ -40,7 +40,7 @@ npm run test:browser
 
 ## Установка и обновление Debian
 
-Кандидат TASK-009 находится в [PR10](https://github.com/sa713/cheapshotmods/pull/10); [проверки](.delivery/TASK-009-VALIDATION.md) и [статус комплекта](.delivery/TASK-009-NEXT-STEPS.md). Runtime eb655846,111native/58Chromium и Debian lifecycle проверены автором; публикация CI kit заблокирована квотой, независимая приёмка/интеграция ещё pending. Реальный сервер developer не обновляет. Текущий ранее принятый комплект TASK-008 указан ниже.
+Кандидат TASK-009 — [PR10](https://github.com/sa713/cheapshotmods/pull/10), runtime `eb655846db16f3dbc6afdb8ca9f9ad4d710848b0`. По прямому решению владельца он передаётся **без новых Actions/Actions artifacts**: [приватный комплект и готовый root update/check/rollback](.delivery/TASK-009-NEXT-STEPS.md), [проверки и границы](.delivery/TASK-009-PRIVATE-DELIVERY.md), [пакет независимой приёмки management](.delivery/TASK-009-MANAGEMENT-HANDOFF.md). Архив сохранён без пересборки, реальный download проверен; новая owner-команда прошла изолированный Debian/HTTPS/backup/SQL hashes/update/rollback. Самопроверка не является независимой приёмкой. Настоящий сервер не обновлялся: SSH-доступ developer не предоставлен. После приёмки команды выполняет владелец. Предварительно устанавливать TASK-008 не требуется; её ранее принятый комплект ниже остаётся историческим.
 
 - [Операторская инструкция](deploy/README.md).
 - [Работа за существующим proxy](deploy/EXTERNAL-PROXY.md).

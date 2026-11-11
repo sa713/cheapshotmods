@@ -2,22 +2,25 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **implementing**, ветка `chm-009-dropdowns-green-recipes`/[draft PR10](https://github.com/sa713/cheapshotmods/pull/10) вmain. Стартовый HEAD `23430c6873f02c6709ff68c47e2e6fbaf0907e8e` подтверждён; стандарт1.1.0/source2ff5fe41 не изменён. Runtime/source **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0** реализует общий themed combobox, глобальный порядок до пагинации и два зелёных рецепта с server-side stock/atomic undo/retry.
+[TASK-009](tasks/TASK-009.md) — **review**, ветка `chm-009-dropdowns-green-recipes` / [PR10](https://github.com/sa713/cheapshotmods/pull/10) в main. Runtime **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0**; app/rules/deploy/root tests/workflows/lock после него не менялись. Новая передача добавляет README/.delivery: отдельно проверенный owner operator, его tests, документы и доказательства. Стандарт 1.1.0 не обновлялся.
 
-[Авторская проверка](TASK-009-VALIDATION.md):111native,58Chromium, typecheck/lint/build, capacity/negative и собственный canonical TASK008→local TASK009 Debian update/backup/restore/rollback прошли. Schema6 сохранена; actual old TASK008 binary на копии прочитал новую green историю и отменил её. Original/snapshot/прежний reset/старые receipts сохранены. Это самопроверка, не независимое ревью.
+Владелец прямо заменил для TASK-009 Actions jobs соответствующими проверками Codex, а Actions artifacts — доступной приватной передачей, без ожидания квоты и платных услуг. [Разовое решение](tasks/TASK-009.md#разовый-маршрут-по-прямому-разрешению-владельца--2026-11-11). Исторические failure quota/CI сохранены; новых Actions runs нет, workflow/settings не отключались.
 
-Exact CI eb655846: verify111/58/capacity/negative и container-smoke прошли; kit build/fresh/external/7predecessors/classic/containerd/reverse-export прошли. В attempt1 upload proofs/browser был отклонён `Artifact storage quota has been hit`, kit upload skipped; verify/debian-kit поэтому failure. [Шаги CI](evidence/TASK-009/ci-jobs-attempt1.json). Опубликованного CI kit TASK009 пока нет. Local immutable kit не подменяет CI archive.
+Сохранённый exact local tar **1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6**, 132005139 байт, app config CCC повторно сверён без пересборки. Реальный private download и reassembly всех 32 частей прошёл: [delivery commit 1a15be22d1e00d50542090786c47e15a76151d18](https://github.com/sa713/cheapshotmods/tree/1a15be22d1e00d50542090786c47e15a76151d18). Прежнего Contents Read-only достаточно. Это не локальный путь и не Actions artifact.
 
-Владелец отдельно разрешил удалить ровно21неканонический artifact по конкретному списку; [HTTP204receipt и сверка оставшихся168](evidence/TASK-009/storage-cleanup-approved.json). Канонические kits и все proof artifacts сохранены. После очистки запрошен rerun-failed-jobs для обоих runs на том же source. Attempt2 verify130440743126 снова прошёл111/58/negative/capacity, но upload вновь отклонён той же quota error; kit130440796592 завершён: build/install/external/7predecessors/classic/containerd/reverse-export прошли, оба upload proofs снова отклонены quota error, kit upload skipped. [Итоговые шаги](evidence/TASK-009/ci-jobs.json), [протоколы attempt2](evidence/TASK-009/ci-attempt2-reports.json). Container-smoke130440744981/success присутствует в метаданных attempt2. Квота может пересчитываться6–12ч, достаточность очистки не предполагается. Дополнительные удаления/расходы не поручены.
+Прежние 111 native / 58 Chromium/capacity/negative и exact source CI вычислительные результаты переиспользованы, не названы новыми запусками. Новый owner helper/SHA256 89d1f329 отдельно прошёл real Debian 13/HTTPS/private download/update/backup/оба recipe/undo, полные SQL hashes всех 7 игровых таблиц, обычный и аварийный rollback. Config, отдельный b008 и proxy ID/image/mounts сохранены. [Provenance и ограничения](TASK-009-PRIVATE-DELIVERY.md), [owner proof](evidence/TASK-009/owner-helper-integration.json).
 
-Следующий шаг developer после пересчёта квоты — повторить только необходимые failed jobs на exact eb655846, получить и сверить опубликованный архив, завершить curl update и передать review management. Attempt2 завершён, активных проверок нет. Функциональный код после runtime не менялся; handoff меняет только README/.delivery. Подготовленный парный rollback и check/backup сохранены в NEXT-STEPS; готовый download/update блокирован отсутствующим artifact ID/ZIP+tar hashes. До этого criterion10/delivery блокированы квотой публикации. Management затем организует отдельное независимое ревью и разрешённую интеграцию. Developer reviewer не запускает, PR не сливает; настоящий сервер/БД/proxy/BotFather не меняет.
+Полный exact local CCC classic/containerd matrix не запустился в Codex из-за cgroup/UID-map restrictions. Это не success. Старые successful real Docker 29.8 CI матрицы этого source относятся к другим archive/config bytes и остаются отдельным доказательством кода. Management должен оценить границу; unchanged installer обязательно проверяет loaded crypto на целевом Docker до stop/data. [Ограничение](evidence/TASK-009/codex-store-bootstrap-limitation.json).
 
-- technical_acceptance TASK-009: **pending**.
-- product_acceptance TASK-009: **pending**.
-- delivery TASK-009: **pending, CI artifact publication blocked**.
-- Последнее содержательное подтверждение: **2026-11-11**, самопроверка/изученный exact CI и отдельное разрешение владельца на узкую очистку artifacts.
+Следующий ответственный — **management**: [пакет для независимой приёмки](TASK-009-MANAGEMENT-HANDOFF.md). После приёмки — **владелец** по [готовому root update/check/rollback](TASK-009-NEXT-STEPS.md). SSH identity/agent developer не предоставлены, настоящий сервер не изменялся. Его актуальный SHA, место и HTTPS проверяет operator до обновления. Предварительная установка TASK-008 не нужна. При интеграции сохранять **[skip ci]**; новых Actions или постоянных изменений CI/стандарта не поручено.
 
-TASK-001–008 уже вmain. Прежние exact kits/reviews ниже сохраняют исторический смысл; установка TASK008 и точный текущий серверный SHA не подтверждены и не являются предварительным условием разработки TASK009.
+- technical_acceptance: **pending, independent management/reviewer**.
+- delivery_package: **prepared, private Git transfer roundtrip verified**.
+- installation: **pending owner execution after acceptance; exact commands ready**.
+- product_acceptance/integration: **pending**.
+- Последнее содержательное подтверждение: **2026-11-11**, изменение маршрута владельцем, сверка неизменного архива и новый изолированный operator lifecycle. Это не независимое review или реальный server update.
+
+TASK-001–008 в main; их kits/reviews сохраняют собственные SHA. Текущий serverSHA не предполагается по прежнему сообщению о работоспособности.
 
 ## Предыдущий технический этап — 2026-11-09
 
