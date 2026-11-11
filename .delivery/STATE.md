@@ -2,16 +2,20 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **implementing**, существующая ветка `chm-009-dropdowns-green-recipes`/[PR10](https://github.com/sa713/cheapshotmods/pull/10) вmain. Developer подтвердил стартовый `23430c6873f02c6709ff68c47e2e6fbaf0907e8e`, чистое дерево и закреплённый стандарт1.1.0; план сохранён в карточке до кода.
+[TASK-009](tasks/TASK-009.md) — **implementing**, ветка `chm-009-dropdowns-green-recipes`/[draft PR10](https://github.com/sa713/cheapshotmods/pull/10) вmain. Стартовый HEAD `23430c6873f02c6709ff68c47e2e6fbaf0907e8e` подтверждён; стандарт1.1.0/source2ff5fe41 не изменён. Runtime/source **eb655846db16f3dbc6afdb8ca9f9ad4d710848b0** реализует общий themed combobox, глобальный порядок до пагинации и два зелёных рецепта с server-side stock/atomic undo/retry.
 
-Общий themed combobox/listbox, глобальная SQL keyset сортировка и два server-side green recipes реализованы. Схема остаётся6: новые операции используют прежний batch ledger; настоящая совместимость canonical TASK008 binary и новый Debian lifecycle подготавливаются. Самопроверка:111native/typecheck/lint/build прошли; полный Chromium выявил собственную background-preview409 регрессию, исправление и обновлённые проверки проходят повторную верификацию. Это промежуточный результат, не техническая приёмка.
+[Авторская проверка](TASK-009-VALIDATION.md):111native,58Chromium, typecheck/lint/build, capacity/negative и собственный canonical TASK008→local TASK009 Debian update/backup/restore/rollback прошли. Schema6 сохранена; actual old TASK008 binary на копии прочитал новую green историю и отменил её. Original/snapshot/прежний reset/старые receipts сохранены. Это самопроверка, не независимое ревью.
 
-Следующий шаг developer — закончить exact browser/CI/kit/lifecycle и передать доказанную версию management. Затем management организует отдельное независимое ревью и разрешённую интеграцию. Developer reviewer не запускает, PR не сливает; настоящий сервер/БД/proxy/BotFather не меняет.
+Exact CI eb655846: verify111/58/capacity/negative и container-smoke прошли; kit build/fresh/external/7predecessors/classic/containerd/reverse-export прошли. В attempt1 upload proofs/browser был отклонён `Artifact storage quota has been hit`, kit upload skipped; verify/debian-kit поэтому failure. [Шаги CI](evidence/TASK-009/ci-jobs-attempt1.json). Опубликованного CI kit TASK009 пока нет. Local immutable kit не подменяет CI archive.
+
+Владелец отдельно разрешил удалить ровно21неканонический artifact по конкретному списку; [HTTP204receipt и сверка оставшихся168](evidence/TASK-009/storage-cleanup-approved.json). Канонические kits и все proof artifacts сохранены. После очистки запрошен rerun-failed-jobs для обоих runs на том же source. Attempt2 verify130440743126 снова прошёл111/58/negative/capacity, но upload вновь отклонён той же quota error; kit130440796592 ещё выполняется. Container-smoke130440744981/success присутствует в метаданных attempt2. Квота может пересчитываться6–12ч, достаточность очистки не предполагается. Дополнительные удаления/расходы не поручены.
+
+Следующий шаг developer — проверить attempt2, сверить опубликованный exact archive, завершить owner-команды и передать review management. До этого criterion10/delivery блокированы квотой публикации. Management затем организует отдельное независимое ревью и разрешённую интеграцию. Developer reviewer не запускает, PR не сливает; настоящий сервер/БД/proxy/BotFather не меняет.
 
 - technical_acceptance TASK-009: **pending**.
 - product_acceptance TASK-009: **pending**.
-- delivery TASK-009: **pending**.
-- Последнее содержательное подтверждение: **2026-11-11**, авторская реализация/самопроверка.
+- delivery TASK-009: **pending, CI artifact publication blocked**.
+- Последнее содержательное подтверждение: **2026-11-11**, самопроверка/изученный exact CI и отдельное разрешение владельца на узкую очистку artifacts.
 
 TASK-001–008 уже вmain. Прежние exact kits/reviews ниже сохраняют исторический смысл; установка TASK008 и точный текущий серверный SHA не подтверждены и не являются предварительным условием разработки TASK009.
 

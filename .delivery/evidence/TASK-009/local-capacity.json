@@ -1,0 +1,80 @@
+{
+  "evidence_kind": "author local run during TASK-009 implementation, same production sources as eb655846; not a CI artifact",
+  "result": {
+    "node": "v24.22.1",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "logicalCpus": 5,
+    "hostMemoryMiB": 18008,
+    "compactHugeBatch": {
+      "maxCount": "1000000000000000000000000",
+      "inputPerResult": "729",
+      "rawKind": "raw-green",
+      "targetTier": 6,
+      "steps": 6,
+      "inputUnits": "729000000000000000000000000",
+      "resultCount": "1000000000000000000000000",
+      "price": "40824000000000000000000000000",
+      "previewMs": 2.181114999999977,
+      "commitMs": 2.236757999999895,
+      "undoMs": 1.2591380000000072,
+      "heapDeltaBytes": 137024,
+      "physicalWorkLots": 1,
+      "historyRows": 1,
+      "planJsonBytes": 2795
+    },
+    "derivedMaximum": {
+      "inputDigits": 128,
+      "additions": 4,
+      "maxDigits": 129,
+      "maxCount": "133333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333332",
+      "previewCommitUndoMs": 3.0833470000000034,
+      "planJsonBytes": 2504
+    },
+    "greenRecipeBatch": {
+      "maxCount": "5000000000000000000000000",
+      "price": "140000000000000000000000000",
+      "previewMs": 1.7502680000000055,
+      "commitMs": 2.5792249999999513,
+      "undoMs": 0.9570059999999785,
+      "historyRows": 1,
+      "physicalWorkLots": 3,
+      "planJsonBytes": 1665
+    },
+    "inventoryBaseline": {
+      "entries": "10002",
+      "quantity": "9007199255750993",
+      "captureMs": 27.844630000000052,
+      "restoreMs": 202.9463340000002,
+      "restoredWorkGroups": 10002,
+      "physicalWorkLots": 10002
+    },
+    "dataset": {
+      "distinctGroups": 10000,
+      "millionGroup": "1000000",
+      "exactQuantity": "9007199254740993"
+    },
+    "batchSetup": {
+      "groups": 10000,
+      "outerTransaction": true,
+      "elapsedMs": 1193.134661
+    },
+    "sequentialHttp": {
+      "sampleSize": 100,
+      "commitPerRequest": true,
+      "totalMs": 166.9544960000003,
+      "p95Ms": 2.2110130000000936
+    },
+    "oversizedInteger": {
+      "digits": 1000000,
+      "rejectMs": 21.671648000000005
+    },
+    "resetMs": 255.37773700000002,
+    "paginatedLoadMs": 526.1824239999996,
+    "tenSameRevisionInjectedRequestsMs": 318.9140050000001,
+    "dbAndWalBytes": 23771280,
+    "rssMiB": 195.38671875,
+    "peakRssMiB": 197.5625
+  }
+}

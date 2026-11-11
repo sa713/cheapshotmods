@@ -2,7 +2,7 @@
 
 ## Текущее состояние — 2026-11-11
 
-[TASK-009](tasks/TASK-009.md) — **implementing**, `chm-009-dropdowns-green-recipes`/[PR10](https://github.com/sa713/cheapshotmods/pull/10) вmain. Developer выполняет согласованное оформление меню, единый глобальный порядок и два зелёных рецепта; план/авторские результаты — в карточке и STATE. Самопроверка не является независимой приёмкой; новый immutable kit и exact CI/lifecycle ещё готовятся.
+[TASK-009](tasks/TASK-009.md) — **implementing**, `chm-009-dropdowns-green-recipes`/[PR10](https://github.com/sa713/cheapshotmods/pull/10) вmain. Developer выполняет согласованное оформление меню, единый глобальный порядок и два зелёных рецепта; план/авторские результаты — в карточке и STATE. Самопроверка111native/58Chromium и локальный immutable kit/canonical TASK008→TASK009 lifecycle прошли. Exact CI вычислительные проверки,7predecessors иclassic/containerd/reverse-export прошли; публикация artifacts в attempt1 заблокирована квотой. Владелец отдельно разрешил очистку21указанного архива, выполненную с сохранением остальных168; attempt2 выполняется. Новый CI kit ещё не опубликован. [Авторские доказательства](TASK-009-VALIDATION.md), [границы установки](TASK-009-NEXT-STEPS.md). Самопроверка не является независимой приёмкой.
 
 Продолжаем по закреплённому стандарту **1.1.0**, source `2ff5fe41b5c91f539dda4fce8944007aa0eb425f`, без обновления. Самостоятельная реализация и необходимые изолированные проверки/существующий приватный CI разрешены. После передачи management организует отдельного reviewer, разбирает blockers и завершает разрешённое слияние вmain с проверкой результата. Developer PR не сливает и независимого reviewer не организует. Настоящий Debian/рабочая БД/proxy/BotFather/публичность/новые расходы не поручены.
 

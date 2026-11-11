@@ -1,0 +1,159 @@
+{
+  "authorization": "user explicitly approved deletion of exactly 21 artifacts listed in /workspace/cheapshotmods-actions-storage-plan.md; all others preserved",
+  "repository": "sa713/cheapshotmods",
+  "deleted": [
+    {
+      "id": 13625693683,
+      "name": "cheapshotmods-eb3eb3dbb320b8846a5c3581c4c5a9855a6fd1fe-linux-amd64",
+      "bytes": 131917141,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:19.091837+00:00"
+    },
+    {
+      "id": 13615682985,
+      "name": "cheapshotmods-73b1fff764ecd6d25d3326b7aef9c27cee580c1f-linux-amd64",
+      "bytes": 131886853,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:20.491383+00:00"
+    },
+    {
+      "id": 13615628001,
+      "name": "cheapshotmods-6db85432edfa541033599ebfb9af96fe4bbb1498-linux-amd64",
+      "bytes": 131898986,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:21.983773+00:00"
+    },
+    {
+      "id": 13614944658,
+      "name": "cheapshotmods-bd8108c8333bac821bbf27d19a249ecb41d02e82-linux-amd64",
+      "bytes": 131902691,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:23.712278+00:00"
+    },
+    {
+      "id": 13587370832,
+      "name": "cheapshotmods-fafbcfb110083c5937fc3b46db8a63c9f9ee6842-linux-amd64",
+      "bytes": 131900286,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:25.332669+00:00"
+    },
+    {
+      "id": 13585760283,
+      "name": "cheapshotmods-0b0284129b72cea255876c9b8f2d64e592836ecf-linux-amd64",
+      "bytes": 131900549,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:26.253099+00:00"
+    },
+    {
+      "id": 13573713906,
+      "name": "cheapshotmods-2dc350f40a5083f8416a9085722140bc9cbca3f3-linux-amd64",
+      "bytes": 131888486,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:27.911501+00:00"
+    },
+    {
+      "id": 13573036641,
+      "name": "cheapshotmods-dc75ff58c744b2d2c183c5dc31644afad5740158-linux-amd64",
+      "bytes": 131877714,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:29.192098+00:00"
+    },
+    {
+      "id": 13571784272,
+      "name": "cheapshotmods-e7e695f289aade86412ff1b4f5238ed5c355b455-linux-amd64",
+      "bytes": 131887541,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:30.111031+00:00"
+    },
+    {
+      "id": 13523979248,
+      "name": "cheapshotmods-cc65deb242fb7ce7ae6200ad01e0950b22ba1f36-linux-amd64",
+      "bytes": 131882976,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:31.472720+00:00"
+    },
+    {
+      "id": 13517151981,
+      "name": "cheapshotmods-6d0e079e708ef902e9856e37b3ca80aa5bfaedce-linux-amd64",
+      "bytes": 131887765,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:33.030479+00:00"
+    },
+    {
+      "id": 13516773833,
+      "name": "cheapshotmods-d4eabf608d8a9e86bc2c3f38accce95401069597-linux-amd64",
+      "bytes": 131874594,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:34.347880+00:00"
+    },
+    {
+      "id": 13516694657,
+      "name": "cheapshotmods-e3d44fa2211d38f27aa85edb900e831daebec58a-linux-amd64",
+      "bytes": 131879832,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:35.717003+00:00"
+    },
+    {
+      "id": 13516131142,
+      "name": "cheapshotmods-396d377d2a19d017c747ecd9fc04f83a703fb425-linux-amd64",
+      "bytes": 131865792,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:37.141612+00:00"
+    },
+    {
+      "id": 13513265208,
+      "name": "cheapshotmods-30090a2dfec9581d6b43beacc3c4a4139c78f81f-linux-amd64",
+      "bytes": 131870019,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:38.609431+00:00"
+    },
+    {
+      "id": 13503560385,
+      "name": "cheapshotmods-cbfe78164daebf5fed041e391f25087b303784d7-linux-amd64",
+      "bytes": 131866021,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:40.262854+00:00"
+    },
+    {
+      "id": 13501948852,
+      "name": "cheapshotmods-e681d0a3d42e161abf89d9e869ac1d2bd0c02e38-linux-amd64",
+      "bytes": 131858677,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:41.438741+00:00"
+    },
+    {
+      "id": 13501533059,
+      "name": "cheapshotmods-8e42aa89d272fd4bf8ce497c71ec16deffaf317d-linux-amd64",
+      "bytes": 131857052,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:43.082643+00:00"
+    },
+    {
+      "id": 13499124892,
+      "name": "cheapshotmods-fdbe1b726887a0c6d5e0941f560ded71133cbe2f-linux-amd64",
+      "bytes": 131850506,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:44.589216+00:00"
+    },
+    {
+      "id": 13498528090,
+      "name": "cheapshotmods-444354ab9319e811d0c17007b2a87a9995028660-linux-amd64",
+      "bytes": 131870560,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:45.964228+00:00"
+    },
+    {
+      "id": 13498392518,
+      "name": "cheapshotmods-8caca180c52022e03b11a95fbe95faa78f68ebd1-linux-amd64",
+      "bytes": 131864339,
+      "http_status": 204,
+      "observed_at": "2026-11-11T09:32:47.306567+00:00"
+    }
+  ],
+  "after": {
+    "artifacts": 168,
+    "bytes": 2366881840,
+    "verification": "remaining artifact IDs exactly equal pre-cleanup IDs minus the 21 approved IDs; all other 168 preserved"
+  },
+  "deleted_bytes": 2769488380
+}

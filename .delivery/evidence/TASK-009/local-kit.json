@@ -1,0 +1,54 @@
+{
+  "evidence_kind": "author local immutable build; NOT the final CI archive",
+  "tar_sha256": "1487bedc2d7c1cf18b4b1d336ca87a72a2fe1d3b007e9a39c86b29ecf81e08c6",
+  "tar_bytes": 132005139,
+  "manifest": {
+    "format": 2,
+    "source_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+    "platform": "linux/amd64",
+    "app_image": "cheapshotmods:eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+    "proxy_image": "caddy:2.10.2-alpine",
+    "builder_observations": {
+      "app_native_id": "sha256:ccc2ffc10c50c9968433243e23ed652e610dc7a42a84642459cb1622a29ac520",
+      "proxy_native_id": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510"
+    },
+    "proxy_manifest_digest": "caddy@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d",
+    "node": "24.22.1",
+    "npm": "11.9.0",
+    "base_images": [
+      "node:24.22.1-bookworm@sha256:d862bb5d082c5ae0210ac07e8c0344cb8cf7bef6d78e9b8c50c179da923108ea",
+      "node:24.22.1-bookworm-slim@sha256:be8204d4bd327363357f532187b752ff62759c31bedf98e9e18fc08c9cbd605c"
+    ],
+    "image_bytes": 350828544,
+    "external_proxy_source": "existing running image; tested Caddy 2.11.4; daemon-local image ID captured in private operator plan",
+    "image_proofs": {
+      "app": {
+        "config_digest": "sha256:ccc2ffc10c50c9968433243e23ed652e610dc7a42a84642459cb1622a29ac520",
+        "diff_ids": [
+          "sha256:44a87794b739d471ec360bec56cc0ceac640d06bbf579ee7d9061a0b88d09818",
+          "sha256:23f2aab4f776183294beee7beb650a9359824a3ed980d76afce5e09860af7cee",
+          "sha256:3785b052b3c9f4092084fecd6631da41eaf96a84b856c7f47088d631f26aa2d3",
+          "sha256:70afe7f321fea522177500b2fef4cfc55551ef8714a9256067f3b0dc7ffcd34a",
+          "sha256:96c88215b08ea33ee67c605f7d7ec659cbe961da44a7a1f7115ac0c1ca66edd3",
+          "sha256:5a77a7cc56d9dc641621266341551300fac14474420f3bcbbfaa8951ababb78d",
+          "sha256:b140e0b0443a3082b69ddc69f108fb711a1e46ff4ba60b2adbb685264e4b3448",
+          "sha256:a67ba039175f8272bd396ff6c271c9aed5c6c6df9f898295f3d4deacec014027"
+        ],
+        "platform": "linux/amd64",
+        "revision": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0"
+      },
+      "proxy": {
+        "config_digest": "sha256:aac61abc4024c323602ccb9ee38bd68b147601f518626b2a055e06944e01c510",
+        "diff_ids": [
+          "sha256:cce92674e98722970ab3fdce76a2566f54db535beeb24f0b4397f070ab5f6987",
+          "sha256:140bf5211f1c52d6180d8e58e95c0010edc7237fc6744510a3c95fcd0955b1e0",
+          "sha256:f7ceed6effbebf7ab30f32d1d14fdb8790c01a08e4585239620caa9204fc35bd",
+          "sha256:0c3ed47d1e80ab755e312649e1777a324e85401671d88025b804c3a6c8685d35",
+          "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+        ],
+        "platform": "linux/amd64",
+        "revision": null
+      }
+    }
+  }
+}
