@@ -99,7 +99,7 @@ function App() {
   const [kind,setKind]=useState<Kind>('🅾'), [tier,setTier]=useState(1), [value,setValue]=useState('10'), [quantity,setQuantity]=useState('1');
   const [sheet,setSheet]=useState<Group>(), [equipCount,setEquipCount]=useState('1');
   const [crit,setCrit]=useState(''),[refine,setRefine]=useState<{g:Group;scope:Scope}>(),[refineCount,setRefineCount]=useState('1'),[refineWorn,setRefineWorn]=useState('0'),[refineCrit,setRefineCrit]=useState('');
-  const [batchPreset,setBatchPreset]=useState<{id:string;nonce:number}>();
+  const [batchPreset,setBatchPreset]=useState<{id:string;nonce:number;experiment:string}>();
   const [toast,setToast]=useState<{text:string;undo:boolean;id:number}>();
   const lock=useRef(false);
   const wide=useMedia('(min-width: 1100px)');
@@ -158,7 +158,9 @@ function App() {
       // A replay may describe an older revision. Read current committed data.
       remember();setMessage('Изменения сохранены. Загружаем данные…');
       await load(session);setMessage('Все изменения сохранены');
-      const type=String(command.action.type);setToast({text:doneText[type]??'Изменения сохранены',undo:!retry&&(type==='craft'||type==='fuse'),id:Date.now()});
+      const type=String(command.action.type);
+      const text=type==='baseline.capture'&&command.action.applyToWork===true?'Набор зафиксирован, крафт обновлён':doneText[type]??'Изменения сохранены';
+      setToast({text,undo:!retry&&(type==='craft'||type==='fuse'),id:Date.now()});
       return true;
     } catch(e) {
       if (committed) {setConflict(true);setMessage('Изменения сохранены');if(e instanceof ApiError&&e.status===401)readError(e);else setProblem('Не удалось загрузить обновлённый набор. Загрузите сохранённые данные перед следующим действием.');return true;}
@@ -267,6 +269,11 @@ function App() {
     {id:'character',label:'Персонаж',short:'Персонаж',icon:'user'},
   ];
   const equippedTotal=total(state.equipment);
+  function captureBaseline(applyToWork=false){
+    void send({type:'baseline.capture',replace:!!state?.baseline,...(applyToWork?{applyToWork:true}:{})}).then(ok=>{
+      if(ok)setBaselineDialog(undefined);
+    });
+  }
   const logout=()=>void(async()=>{try {const current=await api<Session>('/api/session',{headers:accountHeaders(session.account)});await api('/auth/logout',post({},current.csrf,session.account));if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}catch(e){if(e instanceof ApiError&&e.status===401){if(storageKey)sessionStorage.removeItem(storageKey);location.href='/?logged_out=1';}else setProblem(explain(e));}})();
   const tone=problem||conflict?'error':pending?'warn':busy?'busy':'ok';
 
@@ -381,11 +388,11 @@ function App() {
                 {pickable.length===0?<p className="muted small-text">{pages.work.length?'Нет совместимых загруженных модов.':'В эксперименте пока нет модов.'}</p>:<ul>{pickable.map(g=>{const worn=wornOf(g.id),free=BigInt(g.quantity)-BigInt(worn);return <li key={g.id} className="pick-row" data-testid="craft-pick"><ModIcon kind={g.kind} size="sm"/><span className="pick-text"><ModInline g={g}/><small className="exact">свободно {free.toString()}{worn!=='0'?' · надето '+worn:''}</small></span><button className="icon-button" aria-label={'Добавить в крафт: '+modLabel(g)} title="Добавить свободный" disabled={disabled||free<=0n||selectedCount>=3} onClick={()=>choose(g,false)}><Icon name="plus"/></button>{worn!=='0'&&<button className="secondary small" aria-label={'С персонажа: '+modLabel(g)} disabled={disabled||selectedCount>=3} onClick={()=>choose(g,true)}>С персонажа</button>}</li>;})}</ul>}
               </div>
             </section>
-            <div hidden={craftMode!=='batch'}><BatchFuse groups={pages.work} equipment={state.equipment} revision={state.revision} disabled={disabled} preset={batchPreset} onPreview={batchPreview} onCommit={fuse=>send({type:'fuse',fuse})} onError={batchError} errorText={explain} onRefine={g=>beginRefine(g,'work')}/></div>
+            <div hidden={craftMode!=='batch'}><BatchFuse key={state.experiment} groups={pages.work} equipment={state.equipment} revision={state.revision} disabled={disabled} preset={batchPreset?.experiment===state.experiment?batchPreset:undefined} onPreview={batchPreview} onCommit={fuse=>send({type:'fuse',fuse})} onError={batchError} errorText={explain} onRefine={g=>beginRefine(g,'work')}/></div>
             <div hidden={craftMode!=='green'}><GreenFuse revision={state.revision} experiment={state.experiment} disabled={disabled} onPreview={greenPreview} onCommit={fuse=>send({type:'fuse',fuse})} onError={greenError} errorText={explain}/></div>
           </section>
           <section id="view-original" className="view" tabIndex={-1} hidden={active!=='original'} aria-labelledby="h-original">
-            <div className="view-head"><div><h1 id="h-original">Исходный набор</h1><p className="lead">{state.started?'Моды, которые есть в игре. Новые группы и пополнение тех же модов сразу попадают в эксперимент; другие правки — после сброса эксперимента.':'Моды, которые есть в игре. Пока эксперимент не начат, правки сразу обновляют рабочую копию.'}</p></div><button className="primary" disabled={disabled} onClick={()=>beginEdit(null)}><Icon name="plus"/>Добавить моды</button></div>
+            <div className="view-head"><div><h1 id="h-original">Исходный набор</h1><p className="lead">{state.started?'Новые группы и пополнение тех же модов сразу попадают в эксперимент. Чтобы применить остальные правки, выберите «Зафиксировать и обновить крафт» или сбросьте эксперимент.':'Моды, которые есть в игре. Пока эксперимент не начат, правки сразу обновляют рабочую копию.'}</p></div><button className="primary" disabled={disabled} onClick={()=>beginEdit(null)}><Icon name="plus"/>Добавить моды</button></div>
             <section className="panel baseline" aria-label="Точка возврата">
               <div className="baseline-icon"><Icon name="pin"/></div>
               <div className="baseline-body"><h2>Точка возврата</h2>
@@ -393,7 +400,7 @@ function App() {
                 <p className="muted small-text">Снимок всего исходного набора. Возврат к нему заменит и исходный набор, и эксперимент.</p>
               </div>
               <div className="baseline-actions">
-                <button className="secondary" disabled={disabled} onClick={()=>{if(state.baseline)setBaselineDialog('capture');else void send({type:'baseline.capture',replace:false});}}>Зафиксировать исходный набор модов</button>
+                <button className="secondary" disabled={disabled} onClick={()=>{if(state.baseline||state.started)setBaselineDialog('capture');else captureBaseline();}}>Зафиксировать исходный набор модов</button>
                 <button className="secondary danger-text" aria-describedby="baseline-status" disabled={disabled||!state.baseline} onClick={()=>setBaselineDialog('restore')}>Сбросить набор модов к исходному</button>
               </div>
             </section>
@@ -433,7 +440,7 @@ function App() {
             {worn!=='0'&&<button className="secondary" disabled={disabled||g.tier===6||selectedCount>=3} onClick={()=>choose(g,true)}><Icon name="plus"/>В крафт с персонажа</button>}
           </div>
           <p className="hint">{g.tier===6?'Уровень 6.0 — максимальный.':selectedCount>=3?'Выбраны все три входа. Примените крафт или уберите мод из лотка.':'Выбрано '+selectedCount+' из 3. Надетые экземпляры берутся только явно.'}</p>
-          {g.tier<6?<button className="secondary" disabled={disabled||unknown} onClick={()=>{setSheet(undefined);setBatchPreset({id:g.id,nonce:Date.now()});go('craft','batch');}}><Icon name="layers"/>Массовый фьюз этой группы</button>:null}
+          {g.tier<6?<button className="secondary" disabled={disabled||unknown} onClick={()=>{setSheet(undefined);setBatchPreset({id:g.id,nonce:Date.now(),experiment:state.experiment});go('craft','batch');}}><Icon name="layers"/>Массовый фьюз этой группы</button>:null}
         </div>
         {unknown&&<div className="sheet-section"><p className="banner warn">Крит этой группы неизвестен — он не считается нулём.</p><button className="secondary" disabled={disabled} onClick={()=>beginRefine(g,'work')}>Уточнить крит</button></div>}
         {modalFeedback()}
@@ -454,11 +461,20 @@ function App() {
     {refine&&<Modal label="Уточнение крита" title="Уточнить неизвестный крит" onClose={()=>setRefine(undefined)}><form className="mod-form" onSubmit={e=>{e.preventDefault();try{inputInteger(refineCount);const crit=parseCrit(refineCrit);if(refine.scope==='work')inputInteger(refineWorn,true);void send({type:refine.scope+'.crit',id:refine.g.id,quantity:refineCount,crit,...(refine.scope==='work'?{worn:refineWorn}:{})}).then(ok=>{if(ok)setRefine(undefined);});}catch(e){setProblem(explain(e));}}}><div className="sheet-mod"><ModIcon kind={refine.g.kind} size="lg"/><ModTitle g={refine.g} as="p"/></div><NumberField label="Уточнить экземпляров" value={refineCount} onChange={setRefineCount}/>{refine.scope==='work'&&<NumberField label="Из них надетых" value={refineWorn} onChange={setRefineWorn} zero/>}<label className="field">Уточнённый крит<input aria-label="Уточнённый крит" inputMode="decimal" value={refineCrit} onChange={e=>setRefineCrit(e.target.value)} required autoComplete="off"/></label><p className="hint">Бесплатно. История и расход сохранятся. {refine.scope==='original'?'В начатом эксперименте исходная правка не меняет рабочие моды.':'Укажите точную надетую часть выбранного количества. Экипировка сохранится.'}</p>{modalFeedback()}<div className="actions"><button className="primary" disabled={disabled}>Сохранить крит</button><button type="button" className="secondary" onClick={()=>setRefine(undefined)}>Закрыть уточнение</button></div></form></Modal>}
     {removal&&<Modal label="Подтверждение удаления" title="Удалить группу?" onClose={()=>setRemoval(undefined)}><p className="confirm-text"><ModText g={removal}/> × <span className="exact">{removal.quantity}</span> будет удалена из исходного набора. Начатый эксперимент сохранится.</p>{modalFeedback()}<div className="actions"><button className="danger" disabled={disabled} onClick={()=>void send({type:'original.delete',id:removal.id}).then(ok=>{if(ok)setRemoval(undefined);})}>Удалить группу</button><button className="secondary" data-autofocus onClick={()=>setRemoval(undefined)}>Не удалять</button></div></Modal>}
     {resetOpen&&<Modal label="Подтверждение сброса" title="Начать эксперимент заново?" onClose={()=>setResetOpen(false)}><p className="confirm-text">Заменить рабочий набор актуальным исходным? Экипировка, история крафтов и расход обнулятся. Уровень игрока сохранится.</p>{modalFeedback()}<div className="actions"><button className="danger" disabled={disabled} onClick={()=>void send({type:'reset'}).then(ok=>{if(ok)setResetOpen(false);})}>Подтвердить сброс</button><button className="secondary" data-autofocus onClick={()=>setResetOpen(false)}>Не сбрасывать</button></div></Modal>}
-    {baselineDialog==='capture'&&<Modal label="Подтверждение фиксации набора" title="Заменить точку возврата?" onClose={()=>setBaselineDialog(undefined)}><p className="confirm-text">Текущий исходный набор заменит предыдущую точку возврата. Эксперимент, фьюзы, экипировка и расход сохранятся.</p>{modalFeedback()}<div className="actions"><button className="primary" disabled={disabled} onClick={()=>void send({type:'baseline.capture',replace:true}).then(ok=>{if(ok)setBaselineDialog(undefined);})}>Подтвердить фиксацию</button><button className="secondary" data-autofocus onClick={()=>setBaselineDialog(undefined)}>Не заменять</button></div></Modal>}
+    {baselineDialog==='capture'&&<Modal label="Подтверждение фиксации набора" title={state.baseline?'Заменить точку возврата?':'Зафиксировать исходный набор?'} onClose={()=>setBaselineDialog(undefined)}>
+      <p className="confirm-text">{state.baseline?'Текущий исходный набор заменит предыдущую точку возврата.':'Текущий исходный набор станет точкой возврата.'}</p>
+      {state.started&&<p className="confirm-text">При обновлении крафта эксперимент начнётся заново с этим набором. История крафтов, экипировка и расход обнулятся. Уровень игрока сохранится.</p>}
+      {modalFeedback()}
+      <div className="actions">
+        {state.started&&<button className="danger" disabled={disabled} onClick={()=>captureBaseline(true)}>Зафиксировать и обновить крафт</button>}
+        <button className={state.started?'secondary':'primary'} disabled={disabled} onClick={()=>captureBaseline()}>{state.started?'Только зафиксировать':'Подтвердить фиксацию'}</button>
+        <button className="secondary" data-autofocus onClick={()=>setBaselineDialog(undefined)}>{state.baseline?'Не заменять':'Отмена'}</button>
+      </div>
+    </Modal>}
     {baselineDialog==='restore'&&<Modal label="Подтверждение возврата набора" title="Вернуться к точке возврата?" onClose={()=>setBaselineDialog(undefined)}><p className="confirm-text">Вернуть зафиксированный набор? Моды и правки после фиксации будут удалены из текущих наборов. Фьюзы, экипировка и расход обнулятся. Уровень игрока сохранится.</p>{modalFeedback()}<div className="actions"><button className="danger" disabled={disabled} onClick={()=>void send({type:'baseline.restore'}).then(ok=>{if(ok)setBaselineDialog(undefined);})}>Вернуть набор</button><button className="secondary" data-autofocus onClick={()=>setBaselineDialog(undefined)}>Не возвращать</button></div></Modal>}
     {helpOpen&&<Modal label="Как это работает" title="Как это работает" onClose={()=>setHelpOpen(false)}><div className="rules">
       <details open><summary>Исходный набор и эксперимент</summary><p>Исходный набор — моды, которые есть у персонажа в игре. Эксперимент — его рабочая копия: в ней вы примеряете и крафтите. До первой примерки или крафта правки исходного набора обновляют рабочую копию. После начала эксперимента новые группы и увеличение количества с теми же параметрами сразу пополняют рабочий запас. Уменьшение, удаление и изменение параметров затрагивают только исходный набор до сброса. Уточнение крита исходной записи в начатом эксперименте не меняет рабочий набор.</p></details>
-      <details><summary>Точка возврата и два сброса</summary><p>Явная фиксация сохраняет весь введённый исходный набор как постоянную точку возврата. Фьюзы, примерка, добавления и правки её не меняют. Повторная фиксация заменяет её после подтверждения, не затрагивая эксперимент.</p><p>«Сбросить эксперимент» возвращает рабочие моды к введённому сейчас исходному набору. «Сбросить набор модов к исходному» возвращает и исходный набор, и рабочие моды к последней точке возврата: поздние добавления и правки удаляются. Оба действия очищают историю, экипировку и расход, сохраняя уровень игрока. Пустую точку возврата тоже можно восстановить.</p></details>
+      <details><summary>Точка возврата и два сброса</summary><p>Фиксация сохраняет весь исходный набор как точку возврата. Фьюзы, примерка, добавления и правки её не меняют. Чтобы сразу начать новый эксперимент с этим набором, выберите «Зафиксировать и обновить крафт». Действие «Только зафиксировать» сохраняет текущий эксперимент.</p><p>«Сбросить эксперимент» возвращает рабочие моды к введённому сейчас исходному набору. «Сбросить набор модов к исходному» возвращает и исходный набор, и рабочие моды к последней точке возврата: поздние добавления и правки удаляются. Любое начало нового эксперимента очищает историю, экипировку и расход, сохраняя уровень игрока. Пустую точку возврата тоже можно восстановить.</p></details>
       <details><summary>Урон, здоровье и крит</summary><p>+p превращается в +p% от уровня игрока. Проценты складываются; итог округляется вверх один раз. Базовые урон и здоровье равны уровню. Надеть можно до 100 модов суммарно, включая сырьевые.</p><p>Типы: 🅾️, 💢, 🧿, 🌸 и три сырьевых: фиолетовый, красный, зелёный. Зелёный сырьевой даёт урон и не добавляет крит. Крит есть у 🧿, 💢 и фиолетовых/красных сырьевых: после крафта сумма трёх входов делится на два с округлением вверх до 0,001. Неизвестный крит старых модов не считается нулём. Крит персонажа — сумма крита надетых модов × 3, без процентов и зависимости от уровня.</p></details>
       <details><summary>Три в один</summary><p>Обычный крафт требует три мода одного типа и уровня 1.0–5.0. Три фиолетовых 5/0,013 → 🧿1.0 за 24, красных → 💢1.0 за 22, зелёных 6–10 → 🅾️1.0 за 28 алмазов; разные значения зелёных совместимы. Надетые экземпляры берутся только явно — кнопкой «В крафт с персонажа» в карточке мода. Результат и стоимость видны до применения. Отмена возвращает входы, экипировку и расход последнего крафта.</p></details>
       <details><summary>Массовый фьюз</summary><p>Выберите одну группу полностью одинаковых модов и более высокий целевой уровень. Максимум рассчитывается автоматически, количество результатов можно уменьшить. Надетые включаются только явно; свободные расходуются первыми. Другие группы и промежуточные моды не используются. Неизвестный крит сначала нужно уточнить. Расчёт ничего не записывает, применение и отмена охватывают весь пакет.</p></details>
