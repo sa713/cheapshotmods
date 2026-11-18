@@ -142,6 +142,8 @@ test('expired session on read shows login, and logout can finish after expiry',a
   await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);
+  await expect(page.getByTestId('green-preview')).toBeVisible();
+  await expect(page.getByTestId('green-loading')).toHaveCount(0);
   expire();db.close();await page.getByRole('button',{name:'Выйти',exact:true}).click();
   await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);
 });
