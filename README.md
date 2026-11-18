@@ -51,7 +51,7 @@ TASK-009 технически принята для исходного кода 
 
 ## Структура
 
-- `apps/web` — React-интерфейс.
+- `apps/web` — React-интерфейс «Верстак»: разделы «Эксперимент», «Крафт», «Исходный набор» и панель «Персонаж»; концепция и экраны — [.delivery/design/workbench-v2](.delivery/design/workbench-v2/README.md).
 - `apps/server` — Fastify, Telegram-вход, SQLite, команды и история.
 - `packages/rules` — общие правила, точная арифметика и планировщик фьюза.
 - `tests` — native/API/браузерные проверки.

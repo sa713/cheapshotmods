@@ -38,8 +38,16 @@ export function Select({label,value,options,onChange,disabled=false}:{label:stri
   return <div className="select-field" ref={root}>
     <label htmlFor={id}>{label}</label>
     <button ref={trigger} id={id} type="button" className="select-trigger" role="combobox" aria-label={label} aria-haspopup="listbox" aria-expanded={expanded} aria-controls={expanded?id+'-list':undefined} aria-activedescendant={expanded?id+'-'+current:undefined} disabled={disabled||!enabled.length} data-value={value} onKeyDown={key} onClick={()=>expanded?setOpen(false):show()} onBlur={e=>{if(!root.current?.contains(e.relatedTarget as Node|null))setOpen(false);}}>
-      <span>{options[selected]?.label??'Выберите вариант'}</span><span aria-hidden="true">⌄</span>
+      <span className="select-value">{options[selected]?.label??"Выберите вариант"}</span><svg className="select-caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
     </button>
     {expanded&&<div id={id+'-list'} ref={list} role="listbox" aria-label={label} className="select-list" style={position}>{options.map((o,i)=><div key={o.value} id={id+'-'+i} role="option" aria-selected={o.value===value} aria-disabled={o.disabled||undefined} data-value={o.value} data-active={i===current} className="select-option" onMouseDown={e=>e.preventDefault()} onPointerMove={()=>{if(!o.disabled)setActive(i);}} onClick={()=>choose(i)}>{o.label}{o.value===value&&<span aria-hidden="true"> ✓</span>}</div>)}</div>}
   </div>;
+}
+/** Segmented single choice built on native radios: keyboard, labels and form semantics come from the platform. */
+export function Choices({label,value,options,onChange,disabled=false,describedBy}:{label:string;value:string;options:SelectOption[];onChange:(value:string)=>void;disabled?:boolean;describedBy?:string}) {
+  const name=useId();
+  return <fieldset className="choices" disabled={disabled} aria-describedby={describedBy}>
+    <legend>{label}</legend>
+    <div className="choice-row">{options.map(o=><label key={o.value} className={'choice'+(o.value===value?' selected':'')+(o.disabled?' unavailable':'')}><input type="radio" name={name} value={o.value} checked={o.value===value} disabled={o.disabled} onChange={()=>onChange(o.value)}/><span>{o.label}</span></label>)}</div>
+  </fieldset>;
 }

@@ -1,6 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {boundedInteger,greenFuseRequest,type GreenFusePlan,type GreenFuseRequest,type GreenRecipe} from '@chm/rules';
-import {Select} from './select.js';
+import {Choices} from './select.js';
+import {ModIcon} from './presentation.js';
 const titles={'green-667':'6 + 6 + 7 → 🅾️ 1.0 / 10','green-788':'7 + 8 + 8 → 🅾️ 1.0 / 12'};
 interface Props {
   revision:string;experiment:string;disabled:boolean;
@@ -25,18 +26,25 @@ export function GreenFuse({revision,experiment,disabled,onPreview,onCommit,onErr
   },[key,onPreview]);
   const plan=calculation?.key===key&&!disabled&&!inputError&&!serverError?calculation.plan:undefined,displayed=count??meta?.count??'';
   function finish(){if(!count||!meta||meta.maxCount==='0')return;try{if(boundedInteger(count,false,256)>BigInt(meta.maxCount)){setCount(meta.maxCount);setNotice('Количество уменьшено до максимума: '+meta.maxCount+'.');}}catch{/* Visible error keeps apply disabled. */}}
-  return <section className="green-fuse" aria-label="Зелёные рецепты"><h3>Зелёные рецепты</h3><p className="note">Две фиксированные комбинации сырья. Запас берётся из всего эксперимента, включая незагруженные группы. Один результат стоит 28 💎.</p>
-    <Select label="Зелёный рецепт" value={recipe} disabled={disabled} onChange={v=>setRecipe(v as GreenRecipe)} options={(Object.keys(titles) as GreenRecipe[]).map(value=>({value,label:titles[value]}))}/>
-    <label className="checkbox-control"><input type="checkbox" aria-label="Включить надетое сырьё" checked={includeWorn} disabled={disabled} onChange={e=>setWorn(e.target.checked)}/>Включить надетое сырьё</label><p className="note">Свободные расходуются первыми. Результат не надевается автоматически.</p>
-    <p className="batch-maximum exact" id="green-maximum" data-testid="green-maximum" aria-live="polite">Максимум рецепта: {meta?.maxCount??'—'}</p>
-    {meta&&<p className="exact" data-testid="green-maxima">Максимумы сейчас: 6 + 6 + 7 — {meta.maxima['green-667']}; 7 + 8 + 8 — {meta.maxima['green-788']}. Запас 7 общий: после применения остатки пересчитываются.</p>}
-    <label>Количество результатов рецепта<input aria-label="Количество результатов рецепта" aria-describedby="green-maximum" inputMode="numeric" value={displayed} disabled={disabled||!meta||meta.maxCount==='0'} aria-invalid={!!inputError} onChange={e=>{setCount(e.target.value);setNotice('');}} onBlur={finish} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();finish();}}}/></label><p className="full-number exact">Выбрано результатов рецепта: {displayed||'—'}</p>
-    {notice&&<p className="soft-note" role="status">{notice}</p>}{inputError&&<p className="notice" role="alert">{inputError}</p>}{loading&&<p className="note" data-testid="green-loading">Рассчитываем зелёный рецепт…</p>}
-    {serverError&&<div className="notice" role="alert"><p>{serverError}</p><button className="secondary" disabled={disabled} onClick={()=>setAttempt(n=>n+1)}>Повторить расчёт рецепта</button></div>}
-    {plan&&<div className="batch-preview" data-testid="green-preview"><h4>Предварительный расчёт</h4><p className="exact">{titles[recipe]} · Результатов: {plan.count}</p>
-      {plan.ingredients.map(i=><div key={i.value}><p className="exact">Зелёный {i.value}: доступно {i.available} · расход {i.used} · с персонажа {i.worn} · остаток {i.remaining}</p>{i.shortfall!=='0'&&<p className="notice exact">Для одного результата не хватает сырья {i.value}: {i.shortfall}.</p>}</div>)}
-      <p className="batch-total exact">Полная цена рецепта: {plan.price} 💎</p><p className="note">Одна операция и одна отмена. Исходный и зафиксированный наборы сохраняются.</p>
-    </div>}
-    <button disabled={disabled||loading||!plan||plan.count==='0'} onClick={()=>{if(request&&plan)void onCommit({...request,count:plan.count});}}>Применить зелёный рецепт</button>
+  return <section className="panel fuse-panel green-fuse" aria-label="Зелёные рецепты">
+    <p className="panel-intro">Две фиксированные комбинации зелёного сырья. Запас берётся из всего эксперимента, включая незагруженные группы. Один результат стоит 28 💎.</p>
+    <Choices label="Зелёный рецепт" value={recipe} disabled={disabled} onChange={v=>setRecipe(v as GreenRecipe)} options={(Object.keys(titles) as GreenRecipe[]).map(value=>({value,label:titles[value]+(meta?' · макс. '+meta.maxima[value]:'')}))}/>
+    <label className="switch"><input type="checkbox" role="switch" aria-label="Включить надетое сырьё" checked={includeWorn} disabled={disabled} onChange={e=>setWorn(e.target.checked)}/><span className="switch-track" aria-hidden="true"/><span>Включить надетое сырьё<small>Свободные расходуются первыми. Результат не надевается автоматически.</small></span></label>
+    <div className="field"><label htmlFor="green-count">Количество результатов рецепта</label><div className="input-with-action"><input id="green-count" aria-label="Количество результатов рецепта" aria-describedby="green-maximum" inputMode="numeric" value={displayed} disabled={disabled||!meta||meta.maxCount==='0'} aria-invalid={!!inputError} onChange={e=>{setCount(e.target.value);setNotice('');}} onBlur={finish} onKeyDown={e=>{if(e.key==='Enter'){e.preventDefault();finish();}}} autoComplete="off"/><button type="button" className="secondary small" aria-label="Установить максимум рецепта" disabled={disabled||!meta||meta.maxCount==='0'||count===undefined} onClick={()=>{setCount(undefined);setNotice('');}}>Макс</button></div>
+      <span className="hint exact batch-maximum" id="green-maximum" data-testid="green-maximum" aria-live="polite">Максимум рецепта: {meta?.maxCount??'—'}</span>{displayed.length>20&&<span className="full-number exact">{displayed}</span>}</div>
+    {meta&&<p className="hint exact" data-testid="green-maxima">Максимумы сейчас: 6 + 6 + 7 — {meta.maxima['green-667']}; 7 + 8 + 8 — {meta.maxima['green-788']}. Запас 7 общий: после применения остатки пересчитываются.</p>}
+    {notice&&<p className="banner info" role="status">{notice}</p>}{inputError&&<p className="banner error" role="alert">{inputError}</p>}
+    {serverError&&<div className="banner error" role="alert"><p>{serverError}</p><button className="secondary" disabled={disabled} onClick={()=>setAttempt(n=>n+1)}>Повторить расчёт рецепта</button></div>}
+    <div className={'plan'+(loading?' is-loading':'')} aria-busy={loading}>
+      {loading&&<p className="plan-loading" data-testid="green-loading">Рассчитываем зелёный рецепт…</p>}
+      {plan&&<div className="plan-body" data-testid="green-preview">
+        <div className="plan-result"><span className="plan-count exact">{plan.count} ×</span><ModIcon kind="🅾"/><span className="exact">{titles[recipe]}<span className="sr-only"> · Результатов: {plan.count}</span></span></div>
+        <table className="ingredients"><thead><tr><th scope="col">Сырьё</th><th scope="col">Доступно</th><th scope="col">Расход</th><th scope="col">С персонажа</th><th scope="col">Остаток</th></tr></thead>
+          <tbody>{plan.ingredients.map(i=><tr key={i.value}><th scope="row">Зелёный {i.value}</th><td className="exact">{i.available}</td><td className="exact">{i.used}</td><td className="exact">{i.worn}</td><td className="exact">{i.remaining}</td></tr>)}</tbody></table>
+        {plan.ingredients.filter(i=>i.shortfall!=='0').map(i=><p key={i.value} className="banner warn exact">Для одного результата не хватает сырья {i.value}: {i.shortfall}.</p>)}
+        <p className="plan-total exact">Полная цена рецепта: {plan.price} 💎</p>
+      </div>}
+    </div>
+    <div className="apply-row"><p className="hint">Одна операция и одна отмена. Исходный набор и точка возврата сохраняются.</p><button className="primary" disabled={disabled||loading||!plan||plan.count==='0'} onClick={()=>{if(request&&plan)void onCommit({...request,count:plan.count});}}>Применить зелёный рецепт</button></div>
   </section>;
 }
