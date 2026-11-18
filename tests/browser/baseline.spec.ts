@@ -2,7 +2,7 @@ import {test,expect,type Page} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import {initData} from '../helpers.js';
 import type {Group} from '@chm/rules';
-import {add as addGroup,batchSource,capture,editOriginal,equip,layoutChecks,level,loggedIn,original as toOriginal,pick,refresh,reset,restore,saved,status,undoDisabled,view,work} from './ui.js';
+import {add as addGroup,apply,batchSource,capture,choose,craftMode,editOriginal,equip,group,layoutChecks,level,loggedIn,original as toOriginal,pick,refresh,reset,restore,saved,status,undoDisabled,view,work} from './ui.js';
 test.use({baseURL:'http://localhost:3100'});
 let seq=0;
 async function login(page:Page,id=(BigInt(Date.now())*1000n+BigInt(seq++)).toString(),oidc=false){
@@ -32,6 +32,40 @@ test('TASK008 empty snapshot and confirmed replacement persist without changing 
   await login(page);await capture(page);await expect(page.getByTestId('baseline-quantity')).toHaveText('0');const empty=(await state(page)).baseline;await add(page,'raw-green','0','10','9');await work(page);const g=page.getByTestId('work-group');for(let i=0;i<3;i++)await g.getByRole('button',{name:'В крафт',exact:true}).click();await page.getByRole('button',{name:'Применить крафт',exact:true}).click();await saved(page);expect((await state(page)).baseline).toEqual(empty);
   const active=await state(page),working=await inventory(page);await toOriginal(page);await page.getByRole('button',{name:'Зафиксировать исходный набор модов',exact:true}).click();await expect(page.getByRole('button',{name:'Не заменять',exact:true})).toBeFocused();await page.getByRole('button',{name:'Не заменять',exact:true}).click();expect(await state(page)).toEqual(active);await restore(page);expect(await inventory(page)).toEqual([]);expect(await inventory(page,'original')).toEqual([]);expect((await state(page)).baseline).toEqual(empty);
   await add(page);await work(page);const id=(await inventory(page))[0]!.id;await command(page,{type:'craft',items:[{id,quantity:'3',worn:'0'}]});await refresh(page);const before=await state(page);await capture(page,true);const after=await state(page);expect({...after,revision:before.revision,baseline:before.baseline}).toEqual(before);expect(await inventory(page)).not.toEqual(working);expect(after.baseline.quantity).toBe('20');await restore(page);expect((await inventory(page))[0]!.quantity).toBe('20');
+});
+
+test('confirmed capture and apply immediately updates the single and batch craft menus',async({page})=>{
+  await login(page);await add(page);await capture(page);
+  await work(page);await choose(group(page));await apply(page);
+  await equip(page,group(page),'2');await level(page,'307');
+  await toOriginal(page);
+  await editOriginal(page.getByTestId('original-group'));
+  await pick(page,'Параметр мода','11');
+  await page.getByLabel('Количество модов',{exact:true}).fill('9');
+  await page.getByRole('button',{name:'Сохранить группу',exact:true}).click();await saved(page);
+  const fresh=(await inventory(page,'original'))[0]!,previous=await state(page);
+  await craftMode(page,'Три в один');
+  await expect(page.getByTestId('craft-pick')).toHaveCount(2);
+  await expect(page.getByTestId('craft-pick').first()).toContainText('+15%');
+  await toOriginal(page);
+  await page.getByRole('button',{name:'Зафиксировать исходный набор модов',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'Подтверждение фиксации набора',exact:true});
+  await expect(dialog).toContainText('История крафтов, экипировка и расход обнулятся');
+  await dialog.getByRole('button',{name:'Зафиксировать и обновить крафт',exact:true}).click();
+  await saved(page);await expect(dialog).toHaveCount(0);
+  await expect(page.getByTestId('baseline-quantity')).toHaveText('9');
+  const current=await state(page);
+  expect(current.level).toBe('307');expect(current.spent).toBe('0');expect(current.equipment).toEqual([]);
+  expect(current.lastCraft).toBeNull();expect(current.experiment).not.toBe(previous.experiment);
+  await craftMode(page,'Три в один');
+  await expect(page.getByTestId('craft-pick')).toHaveCount(1);
+  await expect(page.getByTestId('craft-pick')).toContainText('+11%');
+  await expect(page.getByTestId('craft-pick')).toContainText('свободно 9');
+  await batchSource(page,fresh.id,2);
+  await expect(page.getByTestId('batch-maximum')).toHaveText('Максимум: 3');
+  await page.reload();await saved(page);await craftMode(page,'Три в один');
+  await expect(page.getByTestId('craft-pick')).toHaveCount(1);
+  await expect(page.getByTestId('craft-pick')).toContainText('+11%');
 });
 
 test('TASK008 captures unloaded pages and huge counts; snapshot is shared between site and Mini owner',async({page,browser})=>{

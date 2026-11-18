@@ -49,6 +49,32 @@ test('capture requires explicit replacement and changes only snapshot/revision, 
   }finally{s.close();}
 });
 
+test('capture and apply replaces the craft stock with the complete current inventory in one command',()=>{
+  const s=new Store(':memory:');try{
+    const id=add(s,'20'),removed=add(s,'4','💚',2,'12');command(s,capture);
+    command(s,{type:'craft',items:[choice(id)]});
+    command(s,{type:'equip',items:[{id,quantity:'2'}]});command(s,{type:'level',value:'307'});
+    command(s,{type:'original.put',id,kind:'🅾',tier:1,value:'11',quantity:'9'});
+    command(s,{type:'original.delete',id:removed});
+    const original=all(s,'original'),previous=s.summary('111');
+    assert.notDeepEqual(all(s),original);assert.ok(previous.lastCraft);
+    const action={...capture,replace:true,applyToWork:true},request=envelope(s,action);
+    const result=s.command('111',request);
+    assert.deepEqual(all(s),original);assert.deepEqual(all(s,'original'),original);
+    assert.equal(result.baseline?.quantity,'9');assert.equal(result.baseline?.entries,'1');
+    assert.equal(result.level,'307');assert.equal(result.spent,'0');
+    assert.deepEqual(result.equipment,[]);assert.equal(result.lastCraft,null);
+    assert.notEqual(result.experiment,previous.experiment);
+    assert.equal(result.revision,(BigInt(previous.revision)+1n).toString());
+    assert.throws(()=>s.preview('111',{revision:previous.revision,experiment:previous.experiment,fuse:{id,targetTier:2,includeWorn:false}}),/REVISION_CONFLICT/);
+    assert.equal(s.preview('111',{revision:result.revision,experiment:result.experiment,fuse:{id,targetTier:2,includeWorn:false}}).maxCount,'3');
+    command(s,{type:'craft',items:[choice(id)]});
+    const later=s.db.serialize();assert.deepEqual(s.command('111',request),result);assert.deepEqual(s.db.serialize(),later);
+    assert.throws(()=>s.command('111',{...request,action:{...action,applyToWork:false}}),/KEY_REUSED/);
+    command(s,{type:'undo'});assert.deepEqual(all(s),original);
+  }finally{s.close();}
+});
+
 test('absent and explicitly empty snapshots differ; restore is repeatable without duplicate stock',()=>{
   const s=new Store(':memory:');try{
     assert.equal(s.summary('111').baseline,null);const bytes=s.db.serialize();assert.throws(()=>command(s,restore),/BASELINE_REQUIRED/);assert.deepEqual(s.db.serialize(),bytes);
@@ -90,8 +116,8 @@ test('restore receipts retry before new semantics, preserve later actions and ke
   }finally{s.close();}
 });
 
-test('capture and full restoration fault points roll back the entire transaction including receipt',()=>{
-  for(const [action,phases] of [[{...capture,replace:true},['baseline-capture-cleared','baseline-captured','receipt']],[restore,['baseline-original-cleared','baseline-original-restored','baseline-work-cleared','baseline-history-cleared','baseline-work-restored','receipt']]] as const)for(const phase of phases){
+test('capture, capture and apply, and full restoration faults roll back the entire transaction including receipt',()=>{
+  for(const [action,phases] of [[{...capture,replace:true},['baseline-capture-cleared','baseline-captured','receipt']],[{...capture,replace:true,applyToWork:true},['baseline-captured','receipt']],[restore,['baseline-original-cleared','baseline-original-restored','baseline-work-cleared','baseline-history-cleared','baseline-work-restored','receipt']]] as const)for(const phase of phases){
     let armed=false;const s=new Store(':memory:',p=>{if(armed&&p===phase)throw Error('injected baseline fault');});try{
       const id=add(s,'20');command(s,capture);command(s,{type:'craft',items:[choice(id)]});add(s,'3','💚',2,'12');command(s,{type:'equip',items:[{id,quantity:'1'}]});const before=s.db.serialize();armed=true;
       assert.throws(()=>command(s,action),/injected baseline fault/);assert.deepEqual(s.db.serialize(),before,phase);

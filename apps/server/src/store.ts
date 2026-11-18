@@ -141,6 +141,12 @@ export class Store {
     this.sql('INSERT INTO work_lots VALUES (?,?,?,?,?,?,?,?,?)').run(p.owner,randomUUID(),'0',n.toString(),p.revision,g.kind,g.tier,g.value,g.crit??'');
   }
   private originalLots(p:Player) {const lots=new Lots();for(const g of this.all(p.owner,'original'))lots.add(g,integer(g.quantity),p.revision);return lots;}
+  private resetExperiment(p:Player) {
+    const lots=this.originalLots(p);
+    p.spent='0';p.started=1;p.experiment=randomUUID();
+    this.sql('DELETE FROM history WHERE owner=?').run(p.owner);
+    return lots;
+  }
   summary(owner:string) {
     const p=this.player(owner),equipment=JSON.parse(p.equipment) as Equipped[];
     const items=equipment.map(e=>({...this.group(owner,'work',e.id),quantity:e.quantity})).sort(compareGroups);
@@ -185,8 +191,10 @@ export class Store {
         requireThat(previous.payload===expected,'KEY_REUSED',409);requireThat(previous.result!=='','COMMAND_EXPIRED',410);
         return JSON.parse(previous.result) as ReturnType<Store['summary']>&{createdId?:string};}
       requireThat(p.revision===c.revision&&p.experiment===c.experiment,'REVISION_CONFLICT',409);
-      const save=!(a.type==='level'||a.type==='baseline.capture'||(p.started&&['original.put','original.delete','original.crit'].includes(a.type as string)));
-      let lots=save&&!['reset','baseline.restore'].includes(a.type as string)?this.lots(p):new Lots(),createdId:string|undefined,history:History|undefined;let restoreIds:Group[]=[];
+      const applyCapture=a.type==='baseline.capture'&&a.applyToWork===true;
+      const resetWork=applyCapture||a.type==='reset'||a.type==='baseline.restore';
+      const save=resetWork||!(a.type==='level'||a.type==='baseline.capture'||(p.started&&['original.put','original.delete','original.crit'].includes(a.type as string)));
+      let lots=save&&!resetWork?this.lots(p):new Lots(),createdId:string|undefined,history:History|undefined;let restoreIds:Group[]=[];
       switch(a.type){
         case 'original.put':{
           keys(a,['type','id','kind','tier','value','quantity','crit']);const old=a.id!==undefined?this.group(owner,'original',a.id):undefined,m=mod(a);
@@ -216,23 +224,25 @@ export class Store {
         }
         case 'level':keys(a,['type','value']);p.level=a.value as string;break;
         case 'baseline.capture':{
-          keys(a,['type','replace']);requireThat(typeof a.replace==='boolean');
+          keys(a,['type','replace','applyToWork']);
+          requireThat(typeof a.replace==='boolean'&&(a.applyToWork===undefined||typeof a.applyToWork==='boolean'));
           requireThat(a.replace||!this.sql('SELECT 1 FROM baselines WHERE owner=?').get(owner),'BASELINE_REPLACE_REQUIRED',409);
           let quantity=0n,entries=0n;
           for(const row of this.sql("SELECT quantity FROM groups WHERE owner=? AND scope='original'").iterate(owner)){quantity+=BigInt((row as {quantity:string}).quantity);entries++;}
           this.sql('INSERT INTO baselines(owner,captured_at,quantity,entries) VALUES (?,?,?,?) ON CONFLICT(owner) DO UPDATE SET captured_at=excluded.captured_at,quantity=excluded.quantity,entries=excluded.entries').run(owner,new Date().toISOString(),quantity.toString(),entries.toString());
           this.sql('DELETE FROM baseline_groups WHERE owner=?').run(owner);this.afterMods?.('baseline-capture-cleared');
-          this.sql("INSERT INTO baseline_groups SELECT owner,id,kind,tier,value,quantity,crit FROM groups WHERE owner=? AND scope='original'").run(owner);this.afterMods?.('baseline-captured');break;
+          this.sql("INSERT INTO baseline_groups SELECT owner,id,kind,tier,value,quantity,crit FROM groups WHERE owner=? AND scope='original'").run(owner);this.afterMods?.('baseline-captured');
+          if(applyCapture)lots=this.resetExperiment(p);
+          break;
         }
         case 'baseline.restore':{
           keys(a,['type']);requireThat(this.sql('SELECT 1 FROM baselines WHERE owner=?').get(owner),'BASELINE_REQUIRED');
           this.sql("DELETE FROM groups WHERE owner=? AND scope='original'").run(owner);this.afterMods?.('baseline-original-cleared');
           this.sql("INSERT INTO groups(owner,scope,id,kind,tier,value,quantity,crit) SELECT owner,'original',id,kind,tier,value,quantity,crit FROM baseline_groups WHERE owner=?").run(owner);this.afterMods?.('baseline-original-restored');
           this.sql("DELETE FROM groups WHERE owner=? AND scope='work'").run(owner);this.afterMods?.('baseline-work-cleared');
-          lots=this.originalLots(p);p.spent='0';p.started=1;p.experiment=randomUUID();
-          this.sql('DELETE FROM history WHERE owner=?').run(owner);this.afterMods?.('baseline-history-cleared');break;
+          lots=this.resetExperiment(p);this.afterMods?.('baseline-history-cleared');break;
         }
-        case 'reset':keys(a,['type']);lots=this.originalLots(p);p.spent='0';p.started=1;p.experiment=randomUUID();this.sql('DELETE FROM history WHERE owner=?').run(owner);break;
+        case 'reset':keys(a,['type']);lots=this.resetExperiment(p);break;
         case 'equip':{
           keys(a,['type','items']);requireThat(Array.isArray(a.items)&&a.items.length<=100,'EQUIPMENT_LIMIT');const seen=new Set<string>();
           lots.equip(a.items.map(raw=>{const e=record(raw);keys(e,['id','quantity']);const g=this.group(owner,'work',e.id);requireThat(!seen.has(g.id),'INSUFFICIENT_MODS');seen.add(g.id);return {key:modKey(g),quantity:boundedInteger(e.quantity,false,256)};}));p.started=1;break;
