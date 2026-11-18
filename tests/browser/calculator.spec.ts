@@ -109,10 +109,16 @@ test('expired session recovers via signed Mini login and retains the exact pendi
 test('expired session on read shows login, and logout can finish after expiry',async({page})=>{
   const id=await login(page),db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
   const expire=()=>db.prepare('UPDATE sessions SET expires=1 WHERE owner=?').run(id);
+  const settledPreview=async()=>{
+    await expect(page.getByTestId('green-maximum')).toHaveText('Максимум рецепта: 0');
+    await expect(page.getByTestId('green-loading')).toHaveCount(0);
+  };
+  await settledPreview();
   expire();await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();
   await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();
   await expect(loggedIn(page)).toHaveCount(0);
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);
+  await settledPreview();
   expire();db.close();await page.getByRole('button',{name:'Выйти',exact:true}).click();
   await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();await expect(loggedIn(page)).toHaveCount(0);
 });
