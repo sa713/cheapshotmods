@@ -1,4 +1,5 @@
 import {selectChoice} from './choices.js';
+import {reloadSavedState, recoverSavedState} from './saved-state.js';
 import {test,expect,type Page,type Locator} from '@playwright/test';
 import {randomUUID} from 'node:crypto';
 import Database from 'better-sqlite3';
@@ -43,6 +44,17 @@ async function apply(page:Page){await page.getByRole('button',{name:'Приме�
 async function level(page:Page,n:string){await page.getByLabel('Уровень игрока',{exact:true}).fill(n);await page.getByRole('button',{name:'Сохранить уровень'}).click();await saved(page);}
 async function reset(page:Page){await page.getByRole('button',{name:'Сбросить эксперимент',exact:true}).click();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'Подтвердить сброс',exact:true}).click();await saved(page);}
 async function noOverflow(page:Page,width:number){await page.setViewportSize({width,height:800});expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);}
+async function seedInventoryPages(page:Page,count:number) {
+  const csrf=(await(await page.request.get('/api/session')).json()).csrf;
+  for(let i=0;i<count;i++){
+    const state=await(await page.request.get('/api/state')).json();
+    const result=await page.request.post('/api/commands',{headers:{origin:'http://localhost:3100','x-csrf-token':csrf},data:{key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'original.put',kind:'💚',tier:6,value:String(i+1),quantity:'1000000'}}});
+    expect(result.ok()).toBeTruthy();
+  }
+  await reloadSavedState(page);
+  await expect(page.getByTestId('green-preview')).toBeVisible();
+  await expect(page.getByTestId('green-loading')).toHaveCount(0);
+}
 
 for(const width of [360,390])test('S-01–06: mobile craft, equipment, repeated undo, source isolation, reset '+width,async({page},testInfo)=>{
   await page.setViewportSize({width,height:800});const id=await login(page);await level(page,'200');
@@ -104,7 +116,7 @@ test('S-01: response lost after commit, same key replay, stale conflict and real
   await page.getByRole('button',{name:'Повторить ту же команду'}).click();await saved(page);await expect(page.getByTestId('spent')).toHaveText('84');await expect(group(page)).toContainText('В наборе: 3');
   const s=await (await page.request.get('/api/state')).json(),csrf=(await(await page.request.get('/api/session')).json()).csrf;
   await page.request.post('/api/commands',{headers:{origin:'http://localhost:3100','x-csrf-token':csrf},data:{key:randomUUID(),revision:s.revision,experiment:s.experiment,action:{type:'level',value:'300'}}});
-  await levelAttempt(page,'200');await expect(page.getByRole('alert')).toContainText('другом окне');await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();await expect(page.getByLabel('Уровень игрока',{exact:true})).toHaveValue('300');
+  await levelAttempt(page,'200');await expect(page.getByRole('alert')).toContainText('другом окне');await recoverSavedState(page);await expect(page.getByLabel('Уровень игрока',{exact:true})).toHaveValue('300');
   const db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');db.exec("CREATE TRIGGER fail_browser BEFORE UPDATE ON players WHEN OLD.owner='"+id+"' BEGIN SELECT RAISE(ABORT,'fixture private failure'); END");
   await levelAttempt(page,'400');await expect(page.getByRole('status')).toHaveText('Результат записи не подтверждён');await expect(page.getByTestId('damage')).not.toHaveText('400');
   db.exec('DROP TRIGGER fail_browser');db.close();await page.getByRole('button',{name:'Повторить ту же команду'}).click();await saved(page);await expect(page.getByLabel('Уровень игрока',{exact:true})).toHaveValue('400');
@@ -123,9 +135,10 @@ test('expired session recovers via signed Mini login and retains the exact pendi
 });
 
 test('expired session on read shows login, and logout can finish after expiry',async({page})=>{
-  const id=await login(page),db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
+  const id=await login(page);await seedInventoryPages(page,101);
+  const db=new Database(process.env.CHM_BROWSER_DIR!+'/browser.sqlite');
   const expire=()=>db.prepare('UPDATE sessions SET expires=1 WHERE owner=?').run(id);
-  expire();await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();
+  expire();await page.getByRole('button',{name:'Загрузить ещё группы',exact:true}).click();
   await expect(page.getByRole('button',{name:'Войти в Mini App',exact:true})).toBeVisible();
   await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);
@@ -145,18 +158,15 @@ test('S-02: large integers and derived 129 digits survive UI/API/reload; invalid
 });
 
 test('S-01/02: two users isolated and inventory pages have no game limit',async({page,browser})=>{
-  await login(page);const csrf=(await(await page.request.get('/api/session')).json()).csrf;
-  for(let i=0;i<205;i++){
-    const state=await(await page.request.get('/api/state')).json();const r=await page.request.post('/api/commands',{headers:{origin:'http://localhost:3100','x-csrf-token':csrf},data:{key:randomUUID(),revision:state.revision,experiment:state.experiment,action:{type:'original.put',kind:'💚',tier:6,value:String(i+1),quantity:'1000000'}}});expect(r.ok()).toBeTruthy();
-  }
-  await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();await expect(page.getByTestId('work-group')).toHaveCount(100);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(200);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(205);await expect(page.getByRole('button',{name:'Загрузить ещё группы'})).toHaveCount(0);
+  await login(page);await seedInventoryPages(page,205);
+  await expect(page.getByTestId('work-group')).toHaveCount(100);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(200);await page.getByRole('button',{name:'Загрузить ещё группы'}).click();await expect(page.getByTestId('work-group')).toHaveCount(205);await expect(page.getByRole('button',{name:'Загрузить ещё группы'})).toHaveCount(0);
   const context=await browser.newContext({baseURL:'http://localhost:3100'}),other=await context.newPage();await login(other);await expect(other.getByTestId('work-group')).toHaveCount(0);await expect(other.getByTestId('damage')).toHaveText('1');await context.close();
 });
 
 test('shared cookies cannot replace signed Mini identity or leak data into an old tab',async({page,context})=>{
-  const first=await login(page);await level(page,'200');await add(page);await work(page);
+  const first=await login(page);await level(page,'200');await add(page);await seedInventoryPages(page,100);
   const second=await context.newPage();await login(second);await expect(second.getByTestId('damage')).toHaveText('1');await expect(second.getByTestId('work-group')).toHaveCount(0);
-  await page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true}).click();await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);await expect(page.getByRole('status')).toContainText('Учётная запись изменилась');
+  await page.getByRole('button',{name:'Загрузить ещё группы',exact:true}).click();await expect(page.getByRole('heading',{name:'Мастерская модов'})).toHaveCount(0);await expect(page.getByRole('status')).toContainText('Учётная запись изменилась');
   await page.getByRole('button',{name:'Войти в Mini App',exact:true}).click();await saved(page);await expect(page.getByTestId('damage')).toHaveText('200');await expect(group(page)).toContainText('В наборе: 6');
   // Same account cookie rotation in another tab must not strand a stale CSRF.
   const same=await context.newPage();await login(same,first);await level(page,'201');await expect(page.getByTestId('damage')).toHaveText('201');

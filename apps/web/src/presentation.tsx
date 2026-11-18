@@ -27,8 +27,8 @@ export function ModIcon({kind}:{kind:Kind}){
   const boxes={'raw-purple':'50 88 390 394','raw-red':'516 88 392 394','raw-green':'982 88 394 394'};
   return <span className={'mod-icon '+(isRaw(kind)?'raw-icon':colors[kind])} aria-hidden="true">{isRaw(kind)?<svg viewBox={boxes[kind]} preserveAspectRatio="xMidYMid slice"><image href="/raw-mods.jpg" width="1536" height="538"/></svg>:displayKind(kind)}</span>;
 }
-export function ModCardTitle({g}:{g:Pick<Group,'kind'|'tier'|'value'|'crit'>}) {
-  return <div className="card-heading"><ModIcon kind={g.kind}/><div className="mod-info"><h3 className="mod-title"><span className="sr-only">{displayKind(g.kind)} {displayTier(g)} · +{g.value}%</span><strong className="exact" aria-hidden="true">+{g.value}%</strong><span className="tier-badge" aria-hidden="true">{displayTier(g)}</span></h3><p className="mod-description">{isRaw(g.kind)?displayKind(g.kind)+' · Урон':g.kind==='💚'?'Здоровье':'Урон'} · бонус к уровню</p>{hasCrit(g.kind)&&<p className="mod-crit">Крит: <span className="exact">{formatCrit(g.crit)}</span></p>}</div></div>;
+export function ModCardTitle({g,showDescription=true}:{g:Pick<Group,'kind'|'tier'|'value'|'crit'>;showDescription?:boolean}) {
+  return <div className="card-heading"><ModIcon kind={g.kind}/><div className="mod-info"><h3 className="mod-title"><span className="sr-only">{displayKind(g.kind)} {displayTier(g)} · +{g.value}%</span><strong className="exact" aria-hidden="true">+{g.value}%</strong><span className="tier-badge" aria-hidden="true">{displayTier(g)}</span></h3>{showDescription&&<p className="mod-description">{isRaw(g.kind)?displayKind(g.kind)+' · Урон':g.kind==='💚'?'Здоровье':'Урон'} · бонус к уровню</p>}{hasCrit(g.kind)&&<p className="mod-crit">Крит: <span className="exact">{formatCrit(g.crit)}</span></p>}</div></div>;
 }
 export function Modal({label,title,onClose,children}:{label:string;title:string;onClose:()=>void;children:ReactNode}) {
   const ref=useRef<HTMLDialogElement>(null);

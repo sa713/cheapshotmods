@@ -14,7 +14,7 @@ async function login(page:Page){
   await page.context().setExtraHTTPHeaders({'x-forwarded-for':'198.51.100.'+(sequence%250+1)});
   await page.route('https://telegram.org/**',r=>r.abort());
   await page.addInitScript(raw=>Object.assign(window,{Telegram:{WebApp:{initData:raw,ready(){},expand(){}}}}),initData(id));
-  await page.goto('/');await expect(page.getByRole('heading',{name:'Мастерская модов',exact:true})).toBeVisible();return id;
+  await page.goto('/');await expect(page.getByRole('button',{name:'Добавить моды',exact:true})).toBeVisible();return id;
 }
 async function command(page:Page,action:Record<string,unknown>){
   const state=await(await page.request.get('/api/state')).json(),session=await(await page.request.get('/api/session')).json();
@@ -70,8 +70,24 @@ for(const width of [1440,360,390])test('Sites reference and real app visual stat
   };
   const navigationRevision=(await(await page.request.get('/api/state')).json()).revision;
   if(width===1440){const nav=page.getByRole('navigation',{name:'Лаборатория',exact:true});await nav.getByRole('button',{name:'Мой инвентарь',exact:true}).click();await expect(page.getByTestId('original-group')).toHaveCount(6);await nav.getByRole('button',{name:'Примерка',exact:true}).click();await expect(page.getByTestId('work-group')).toHaveCount(6);}
-  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();await refView('inventory');await capture('inventory');
-  await page.getByRole('button',{name:'Эксперимент',exact:true}).click();await refView('equip');await capture('equip');
+  await page.getByRole('button',{name:'Исходный набор',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Исходный инвентарь',exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Загрузить сохранённые данные',exact:true})).toHaveCount(0);
+  const original=page.getByTestId('original-group').first();
+  await expect(original).not.toContainText('бонус к уровню');
+  const originalBox=(await original.boundingBox())!, edit=(await original.getByRole('button',{name:'Изменить',exact:true}).boundingBox())!, quantity=(await original.locator('.mod-quantity').boundingBox())!;
+  expect(originalBox.height).toBeLessThan(60);
+  expect(Math.abs(edit.y+edit.height/2-quantity.y-quantity.height/2)).toBeLessThan(1);
+  await refView('inventory');await capture('inventory');
+  await page.getByRole('button',{name:'Эксперимент',exact:true}).click();
+  const worn=group(page), rows=await worn.locator('.row-actions button').evaluateAll(buttons=>buttons.map(button=>button.getBoundingClientRect().top));
+  expect(rows).toHaveLength(3);
+  expect(new Set(rows).size).toBe(1);
+  expect((await worn.boundingBox())!.height).toBeLessThan(110);
+  const stats=await page.locator('.stat-value').evaluateAll(values=>values.map(value=>value.getBoundingClientRect().top));
+  expect(stats).toHaveLength(3);
+  expect(new Set(stats).size).toBe(1);
+  await refView('equip');await capture('equip');
   for(let i=0;i<3;i++)await group(page).getByRole('button',{name:'В крафт',exact:true}).click();
   await expect(page.getByTestId('craft-preview')).toContainText('Цена операции: 84');
   await page.getByRole('button',{name:'Крафт',exact:true}).click();await expect(page.locator('#craft-panel')).toBeFocused();

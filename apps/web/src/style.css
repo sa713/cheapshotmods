@@ -354,14 +354,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .workspace {
   max-width:1480px;
   margin:auto;
-  padding:39px 42px 0;
+  padding:20px 42px 0;
   min-width:0
 }
-.page-heading {
+.workspace-actions {
   display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:24px;
+  justify-content:flex-end;
   margin-bottom:12px
 }
 .eyebrow {
@@ -372,15 +370,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   font-weight:650;
   letter-spacing:1.5px;
   color:#a4b09a
-}
-.eyebrow>span {
-  width:5px;
-  height:5px;
-  border:1px solid var(--lime);
-  transform:rotate(45deg)
-}
-.add-main {
-  flex-shrink:0
 }
 .sync-actions {
   display:flex;
@@ -510,13 +499,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .mod-list {
   padding:0 13px 12px
 }
+.tabs + .filters {
+  margin:10px 0
+}
 .mod-card {
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,110px) auto;
-  gap:12px;
+  grid-template-columns:minmax(0,1fr) minmax(0,7rem) auto;
+  gap:4px 8px;
   align-items:center;
   border-top:1px solid #2a3027;
-  padding:15px 12px;
+  padding:4px 8px;
   min-width:0
 }
 .card-heading {
@@ -534,6 +526,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   font-size:25px;
   border-radius:12px;
   border:1px solid
+}
+.mod-list .card-heading {
+  gap:8px
+}
+.mod-list .mod-icon {
+  width:32px;
+  height:32px;
+  flex-basis:32px;
+  font-size:20px;
+  border-radius:8px
 }
 .mod-icon.orange {
   background:#382a23;
@@ -570,6 +572,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   min-width:0;
   max-width:100%
 }
+.mod-list .mod-title {
+  gap:3px 6px
+}
+.mod-list .mod-title>strong {
+  font-size:17px;
+  line-height:1.25
+}
 .tier-badge {
   display:inline-block;
   border:1px solid #444b3c;
@@ -587,13 +596,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   color:#9ca891;
   margin-top:5px
 }
+.mod-list .mod-description,.mod-list .mod-crit {
+  margin:2px 0 0;
+  line-height:1.4
+}
 .mod-quantity {
   font-size:12px;
   color:#a5b39b;
   overflow-wrap:anywhere;
   min-width:0;
   text-align:right;
-  line-height:1.7
+  line-height:1.4
 }
 .mod-quantity strong {
   color:var(--text);
@@ -601,25 +614,52 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 }
 .row-actions {
   display:flex;
-  gap:4px;
   align-items:center;
   justify-content:flex-end;
   min-width:0
 }
 .work-card {
-  grid-template-columns:minmax(0,1fr) minmax(0,130px) 250px
+  grid-template-columns:minmax(0,1fr) minmax(0,8rem) minmax(0,42%)
 }
 .work-card .row-actions {
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:6px
+  flex-wrap:wrap;
+  gap:0 4px
 }
 .row-actions>.secondary {
+  position:relative;
+  isolation:isolate;
+  flex:1;
+  border:0;
+  padding:4px 6px;
+  background:transparent;
   font-size:12px;
-  padding:8px
+  line-height:1.25
 }
-.worn-action {
-  grid-column:1/-1
+/* Draw a shorter button surface inside the 44px touch target. */
+.row-actions>.secondary::before {
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:4px 0;
+  border:1px solid #414b3a;
+  border-radius:8px;
+  background:#282f24
+}
+.row-actions>.secondary:not(:disabled):hover {
+  background:transparent
+}
+.row-actions>.secondary:not(:disabled):hover::before {
+  background:#35412b;
+  border-color:#62714e
+}
+.row-actions>.refine-action {
+  flex-basis:100%
+}
+.original-card>.refine-action {
+  grid-column:1/-1;
+  justify-self:start;
+  font-size:12px;
+  padding:4px 8px
 }
 .mod-equipped {
   background:#c5f46905
@@ -725,41 +765,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   border-radius:20px;
   clip-path:inset(0)
 }
-.build-heading {
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin-bottom:20px
-}
-.build-heading .eyebrow {
-  font-size:11px;
-  letter-spacing:1.1px;
-  color:#b1c499
-}
-.live-label {
-  font-size:10px;
-  letter-spacing:.5px;
-  display:flex;
-  align-items:center;
-  gap:5px;
-  color:#bade8e;
-  flex-shrink:0
-}
-.live-label>span {
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  background:var(--lime)
-}
 .level-form {
   position:relative;
   display:flex;
   align-items:flex-start;
   gap:6px;
   border-bottom:1px solid #435137;
-  padding-bottom:16px
+  padding-bottom:8px
 }
 .level-form .number-field {
   flex:1;
@@ -792,8 +804,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 }
 .character-stats {
   display:grid;
-  gap:22px;
-  padding:22px 0
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px 10px;
+  padding:8px 0
 }
 .stat-block {
   min-width:0
@@ -801,25 +814,24 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 .stat-label {
   display:flex;
   align-items:center;
-  gap:7px;
+  gap:4px;
   color:#b8c8a7;
   font-size:12px
 }
 .stat-label>svg {
-  width:18px;
-  height:18px
+  width:14px;
+  height:14px
 }
 .health .stat-label>svg {
   color:#9cdb9b
 }
 .stat-value {
   display:block;
-  position:relative;
-  font-size:43px;
-  letter-spacing:-1.7px;
+  font-size:clamp(18px,5.6vw,23px);
+  letter-spacing:-.45px;
   font-weight:650;
-  line-height:1.2;
-  margin:6px 0 5px
+  line-height:1.16;
+  margin:2px 0
 }
 .health .stat-value {
   color:#bcefa3
@@ -828,13 +840,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
   font-size:12px;
   color:#9cad8b
 }
+.crit-incomplete {
+  grid-column:1/-1
+}
+.crit-incomplete>.stat-value {
+  font-size:14px
+}
 .slot-count {
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:8px;
   border-top:1px solid #405034;
-  padding-top:18px;
+  padding-top:8px;
   font-size:12px;
   color:#a4b692
 }
@@ -1350,17 +1368,10 @@ input {
     gap:28px
   }
   .workspace {
-    padding-top:48px
+    padding-top:24px
   }
   .build-card {
     padding:25px
-  }
-  .character-stats {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:12px
-  }
-  .stat-value {
-    font-size:37px
   }
 }
 @media(max-width:1190px) {
@@ -1378,7 +1389,7 @@ input {
     margin-left:196px
   }
   .workspace {
-    padding:30px 25px 0
+    padding:16px 25px 0
   }
   .topbar {
     padding:12px 25px
@@ -1473,16 +1484,6 @@ input {
   .inventory-intro .outline-badge {
     max-width:none
   }
-  .mod-card {
-    padding:15px 6px;
-    gap:10px
-  }
-  .original-card {
-    grid-template-columns:minmax(0,1fr) minmax(0,100px)
-  }
-  .original-card .row-actions {
-    grid-column:1/-1
-  }
   .fusion-flow {
     gap:8px
   }
@@ -1495,25 +1496,12 @@ input {
   .fusion-slot small {
     font-size:11px
   }
-  .page-heading {
-    align-items:flex-start;
-    gap:15px
-  }
-  .page-heading h1 {
-    font-size:29px
-  }
   .add-main {
     font-size:12px;
     padding:10px
   }
   .breadcrumb {
     display:none
-  }
-  .build-heading {
-    flex-wrap:wrap
-  }
-  .live-label {
-    font-size:10px
   }
   .level-form label {
     flex-wrap:wrap
@@ -1560,7 +1548,7 @@ input {
     color:#a1b18e
   }
   .workspace {
-    padding:28px 22px 0
+    padding:14px 22px 0
   }
   .dashboard {
     grid-template-columns:minmax(0,1fr) 250px
@@ -1588,41 +1576,13 @@ input {
     margin-left:auto
   }
   .workspace {
-    padding:25px 16px 0
+    padding:12px 16px 0
   }
-  .page-heading {
-    position:relative;
-    display:block;
+  .workspace-actions {
     margin-bottom:10px
   }
-  .page-heading>.add-main {
-    position:absolute;
-    right:0;
-    top:0;
-    padding:9px 10px;
-    font-size:12px
-  }
-  .page-heading .eyebrow {
-    max-width:170px;
-    font-size:10px;
-    letter-spacing:1.2px;
-    line-height:1.7
-  }
-  .page-heading h1 {
-    font-size:29px;
-    max-width:220px;
-    margin:12px 0 10px
-  }
-  .page-heading h1>span {
-    display:block
-  }
-  .page-heading .note {
-    font-size:13px;
-    max-width:285px
-  }
   .sync-actions {
-    justify-content:flex-start;
-    margin-bottom:18px
+    justify-content:flex-start
   }
   .dashboard {
     display:flex;
@@ -1650,14 +1610,6 @@ input {
   .reset-button {
     order:4
   }
-  .build-heading {
-    margin-bottom:12px;
-    flex-wrap:nowrap
-  }
-  .level-form {
-    border:0;
-    padding-bottom:12px
-  }
   .level-form label {
     flex-wrap:nowrap;
     font-size:12px
@@ -1669,22 +1621,6 @@ input {
   }
   .level-form>.icon-button {
     align-self:flex-start
-  }
-  .character-stats {
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:14px;
-    padding:15px 0 18px
-  }
-  .stat-value {
-    font-size:35px;
-    letter-spacing:-1.2px
-  }
-  .stat-detail {
-    font-size:12px
-  }
-  .slot-count {
-    font-size:12px;
-    padding-top:16px
   }
   .slot-help {
     font-size:12px
@@ -1742,10 +1678,11 @@ input {
   .mod-list {
     padding:0 10px 10px
   }
-  .mod-card,.work-card,.original-card {
-    grid-template-columns:minmax(0,1fr) minmax(0,92px);
-    padding:16px 6px;
-    gap:12px 8px
+  .original-card {
+    grid-template-columns:minmax(0,1fr) minmax(0,clamp(4.6rem,22vw,6rem)) auto
+  }
+  .work-card {
+    grid-template-columns:minmax(0,1fr) minmax(0,6.5rem)
   }
   .card-heading {
     gap:9px
@@ -1767,18 +1704,6 @@ input {
   .mod-description {
     font-size:12px;
     line-height:1.5
-  }
-  .mod-quantity {
-    font-size:12px
-  }
-  .row-actions,.original-card .row-actions {
-    grid-column:1/-1
-  }
-  .original-card .row-actions {
-    justify-self:end
-  }
-  .work-card .row-actions {
-    width:100%
   }
   .inventory-bottom {
     flex-wrap:wrap;
@@ -1892,13 +1817,6 @@ input {
     padding-left:12px;
     padding-right:12px
   }
-  .page-heading h1 {
-    font-size:28px
-  }
-  .page-heading>.add-main {
-    font-size:11px;
-    padding:9px
-  }
   .tabs {
     gap:6px;
     padding:0 12px
@@ -1960,8 +1878,6 @@ input {
 .batch-preview summary { min-height: 44px; cursor: pointer; padding: 12px 0; }
 .batch-total { color: var(--lime); font-size: 20px; font-weight: 700; }
 .mod-crit { color: var(--muted); font-size: 12px; margin: 6px 0 0; overflow-wrap: anywhere; }
-.crit-stat { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
-.crit-stat strong { display: block; margin: 8px 0; }
 @media(max-width:600px) { .batch-fuse { padding: 18px; } .batch-pick { display: block; } .batch-pool { padding-left: 16px; } .batch-pool li { padding: 12px; } .batch-fuse .fields { grid-template-columns: 1fr; } }
 
 /* TASK-006: original reference pixels, distinct from the health flower. */
