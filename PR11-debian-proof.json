@@ -1,0 +1,56 @@
+{
+  "source_sha": "ed8503c77c684cb8d1b2a7163bfbb56958b62b9a",
+  "delivery_commit": "1946771ac1379fb743912b2d3f6dfaad991289e1",
+  "archive_sha256": "d5f9f075dd6fedcfc0d21c3fdae37b175eadd3506e0acaa23fa79d9f0f50369a",
+  "operator_sha256": "c720d3b96c04a6c88dac09e5753a550f9b03a6a5b0a19deacf196b99efddeb0e",
+  "platform": "isolated Debian13/linux-amd64; managed Docker29.9.2/rootless/vfs",
+  "private_GitHub_download_and_reassembly": "passed",
+  "real_HTTPS_CA_IP_SAN": "passed",
+  "unknown_version_bad_credential_low_space_refuse_before_download_stop_or_backup": "passed",
+  "canonical_predecessor_to_PR11_via_owner_helper": "passed",
+  "predecessor_sha": "eb655846db16f3dbc6afdb8ca9f9ad4d710848b0",
+  "published_bootstrap_and_compact_assets_via_HTTPS": "passed",
+  "complete_seeded_original_work_history_equipment_spent_level_baseline_preserved": "passed",
+  "all_seven_game_tables_SQL_rows_and_hashes_equal_after_update_and_both_rollbacks": {
+    "players": {
+      "rows": 8,
+      "sha256": "09a5d6f738cd4fd5bc745fc3a32cee09a6f63446c8aaecfef75acd5a9274e965"
+    },
+    "groups": {
+      "rows": 31,
+      "sha256": "2b2f99768aa7e194173cb803b14cf4865c9075ef31e40eff2ac82dc977f508b1"
+    },
+    "history": {
+      "rows": 11,
+      "sha256": "6c3a15c8dd54573495053fa9e1afa1bf811a4cdbb0e7293ba0d49f7773f3850a"
+    },
+    "commands": {
+      "rows": 46,
+      "sha256": "76fb4ff2c40c472342e2dd4dbf0421150e11cc2f34eb273b762e838702579189"
+    },
+    "work_lots": {
+      "rows": 22,
+      "sha256": "067a8b1036524de9e38be7a3109690f9dc83417353d9d0f2e3dd542704ffb9df"
+    },
+    "baselines": {
+      "rows": 1,
+      "sha256": "81389b77896748b5116ff2011a0b709987f597c4ff8a4abd65aca7971e13abe3"
+    },
+    "baseline_groups": {
+      "rows": 3,
+      "sha256": "b3f3f8d11fedaf7dd0876fadebb92d7fd2b6e35cbc1e52ee6b4cb3afa13830b2"
+    }
+  },
+  "backup_before_update_and_separate_volume": "passed",
+  "already_installed_repeat_refused": "passed",
+  "green_recipes_and_undo": {
+    "bothRecipes": "passed",
+    "undo": "passed",
+    "snapshotAndOriginal": "passed"
+  },
+  "paired_rollback_exact_state": "passed",
+  "injected_postcheck_failure_auto_rollback_exact_state": "passed",
+  "config_separate_b008_helper_and_proxy_ID_image_mounts_unchanged": "passed",
+  "test_data": "synthetic isolated account/secret/CA; no owner data or server access",
+  "independent_review": "not performed by developer"
+}
